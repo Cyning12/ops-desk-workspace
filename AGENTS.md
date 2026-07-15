@@ -38,6 +38,57 @@
 
 ---
 
+## 跨仓任务如何分工
+
+当一项改动涉及多个仓库时，**不要在一个子仓里直接改另一个子仓的代码**。正确流程：
+
+```
+workspace 定义跨仓契约
+  ├── api task：实现后端接口
+  ├── web task：实现前端消费
+  └── ios task：实现移动端消费
+```
+
+### workspace 的职责
+
+1. **定义契约**：接口路径、请求/响应字段、SSE 事件类型、数据库表结构。
+2. **出总任务单**：`docs/tasks/active/task_<主题>.md`，明确哪些子仓需要改动。
+3. **维护总图谱**：`docs/_tech_graph/00_main.graph.yaml` 描述跨仓数据流。
+4. **更新部署配置**：`docker-compose.yml`、Nginx、CI 编排。
+
+### 子仓的职责
+
+- **api**：按契约实现后端；可读取 workspace 契约，但不写前端/iOS 代码。
+- **web**：按契约调用后端；不写后端接口。
+- **ios**：按契约调用后端；不写后端接口。
+
+### 示例：新增 Chat SSE
+
+```text
+workspace task: chat-sse-contract
+  → 定义 POST /api/ops/chat/stream
+  → 定义 SseEvent schema
+  → HG-AUDIT-R1 approved
+
+api task: chat-sse-backend
+  → FastAPI 路由 + LangGraph + SSE emitter
+  → 更新 api/docs/_tech_graph/
+
+web task: chat-sse-frontend
+  → useOpsChatSse composable + ChatView
+  → 更新 web/docs/_tech_graph/
+
+ios task: chat-sse-ios
+  → ChatService SSE parser + ChatView
+  → 更新 ios/docs/_tech_graph/
+
+workspace close
+  → 更新 docker-compose.yml
+  → 验证三端联调
+```
+
+---
+
 ## 工作流
 
 1. 需求/变更先在 workspace 起草 task：`docs/tasks/active/task_<主题>.md`
@@ -53,3 +104,4 @@
 - 废弃 `graph.json`，由 harness 生成 `_manifest.json`
 - 人工闸轻量版：保留 `HG-GRAPH-MODULES` + `HG-AUDIT-R1`
 - 每次代码/接口变更必须同步更新图谱
+- **禁止跨仓直接改代码**：后端 Agent 不改 web/ios 文件，反之亦然
