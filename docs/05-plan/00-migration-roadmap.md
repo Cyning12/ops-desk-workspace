@@ -275,6 +275,8 @@ volumes:
 | `ops-desk-api` | `ruff check` → `pytest tests` → `docker build` |
 | `ops-desk-ios` | `xcodebuild` / SwiftLint（可选） |
 
+**触发约束（四仓统一）：** 每个 workflow 的 `on` 必须同时包含 `pull_request` 与 `push.branches: [main]`，防止直推 `main` 漏跑。详见 `docs/04-infrastructure/01-environment-setup.md` §10.3。
+
 部署方式：
 - GitHub Actions 构建 Docker 镜像/静态文件。
 - 通过 `scp`/`rsync` 或 Docker Hub 推送到服务器。

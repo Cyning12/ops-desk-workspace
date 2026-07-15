@@ -107,3 +107,4 @@ workspace close
 - 人工闸轻量版：保留 `HG-GRAPH-MODULES` + `HG-AUDIT-R1`
 - 每次代码/接口变更必须同步更新图谱
 - **禁止跨仓直接改代码**：后端 Agent 不改 web/ios 文件，反之亦然
+- **GitHub Actions 触发**：四仓 workflow 的 `on` 必须同时包含 `pull_request` 与 `push.branches: [main]`（Free 私有仓无分支硬保护，防直推漏跑）。见 `docs/04-infrastructure/01-environment-setup.md` §10.3

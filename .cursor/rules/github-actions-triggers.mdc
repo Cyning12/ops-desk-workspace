@@ -1,0 +1,25 @@
+---
+description: 四仓 GitHub Actions 必须同时触发 PR 与 push main
+globs: "**/.github/workflows/*.{yml,yaml}"
+alwaysApply: false
+---
+
+# GitHub Actions 触发约束
+
+编写或修改任何 `.github/workflows/*` 时：
+
+1. `on` **必须同时包含**：
+   - `pull_request`（合入前可见）
+   - `push.branches: [main]`（直推 / merge 进 main 后仍跑）
+2. **禁止**只写 `pull_request` 或只写 `push`，以免偶尔直推 `main` 漏跑检查。
+3. 最小模板：
+
+```yaml
+on:
+  pull_request:
+  push:
+    branches: [main]
+```
+
+4. Free 私有仓无法用 Rulesets 强制「CI 通过才能合」；本规则只保证**会跑**，不替代服务端门禁。
+5. 权威说明：`docs/04-infrastructure/01-environment-setup.md` §10.3。

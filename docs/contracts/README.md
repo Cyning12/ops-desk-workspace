@@ -10,6 +10,9 @@
 | Data | `data-v1.md` | Overview/Issues/PRs/Graph/Models | web、ios、api |
 | Chat SSE | `chat-stream-v1.md` | SSE 流式对话 | web、ios、api |
 | Admin Sync | `admin-sync-v1.md` | GHA sync 数据接入 | api、GHA workflow |
+| GitHub main Ruleset | `github-main-ruleset-v1.json` | 导入 Rulesets：main 仅允许 PR（需 Pro/Team） | 四仓 Settings → Rules |
+
+另：CI workflow 触发约束（`pull_request` + `push` → `main`）见 `docs/04-infrastructure/01-environment-setup.md` §10.3，不在本目录契约内。
 
 ## 使用方式
 

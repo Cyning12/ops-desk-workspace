@@ -323,6 +323,30 @@ VITE_API_BASE_URL=/api
 
 在服务器 `~/.ssh/authorized_keys` 中添加 GitHub Actions 用的 deploy key。
 
+### 10.3 Workflow 触发约束（强制）
+
+个人 Free + **私有仓**无法启用 Branch Protection / Rulesets（服务端拦不住直推 `main`）。因此四仓所有 GitHub Actions **必须同时覆盖 PR 与 main**，避免只配 `pull_request` 时直推漏跑、只配 `push` 时 PR 看不到结果。
+
+**新建或修改 `.github/workflows/*.yml` 时，`on` 至少包含：**
+
+```yaml
+on:
+  pull_request:
+  push:
+    branches: [main]
+```
+
+| 触发 | 作用 |
+|---|---|
+| `pull_request` | 合入前在 PR 上看到检查结果 |
+| `push` → `main` | 直推或 merge 进 main 后仍会跑，防遗漏 |
+
+说明：
+
+- 不要求当前就配置「Required status checks」（同上，Free 私有仓不可强制）。
+- Ruleset 模板见 `docs/contracts/github-main-ruleset-v1.json`；升级 Pro / Team 后可导入并再开门禁。
+- 约定：日常仍走 `feat/*` → PR → Merge；不要依赖直推。
+
 ---
 
 ## 11. 备份策略
