@@ -23,8 +23,9 @@
 1. **`docs/README.md`** — 文档索引与状态
 2. **`docs/01-scope/00-project-brief.md`** — 项目范围、目标、已确认决策
 3. **`docs/01-scope/01-harness-tech-graph-strategy.md`** — Harness 接入与技术图谱策略
-4. **`docs/05-plan/00-migration-roadmap.md`** — 迁移路线图
-5. **`docker-compose.yml`** — 总部署编排
+4. **`docs/01-scope/02-cross-repo-communication.md`** — 跨仓任务流转与信息沟通
+5. **`docs/05-plan/00-migration-roadmap.md`** — 迁移路线图
+6. **`docker-compose.yml`** — 总部署编排
 
 ---
 

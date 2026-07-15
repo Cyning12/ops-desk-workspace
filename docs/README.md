@@ -8,7 +8,8 @@
 docs/
 ├── 01-scope/                 # 项目范围与目标
 │   ├── 00-project-brief.md
-│   └── 01-harness-tech-graph-strategy.md
+│   ├── 01-harness-tech-graph-strategy.md
+│   └── 02-cross-repo-communication.md
 ├── 02-backend-analysis/      # 后端现状与改造方向
 │   ├── 00-current-state.md
 │   └── 01-sse-chat-design.md
