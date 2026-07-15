@@ -24,8 +24,9 @@
 2. **`docs/01-scope/00-project-brief.md`** — 项目范围、目标、已确认决策
 3. **`docs/01-scope/01-harness-tech-graph-strategy.md`** — Harness 接入与技术图谱策略
 4. **`docs/01-scope/02-cross-repo-communication.md`** — 跨仓任务流转与信息沟通
-5. **`docs/05-plan/00-migration-roadmap.md`** — 迁移路线图
-6. **`docker-compose.yml`** — 总部署编排
+5. **`docs/contracts/README.md`** — 跨仓接口契约索引
+6. **`docs/05-plan/00-migration-roadmap.md`** — 迁移路线图
+7. **`docker-compose.yml`** — 总部署编排
 
 ---
 

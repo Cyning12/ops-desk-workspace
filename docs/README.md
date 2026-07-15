@@ -18,8 +18,14 @@ docs/
 ├── 04-infrastructure/        # 服务器、域名、备案、预算
 │   ├── 00-server-recommendation.md
 │   └── 01-environment-setup.md
-└── 05-plan/                  # 迁移路线图
-    └── 00-migration-roadmap.md
+├── 05-plan/                  # 迁移路线图
+│   └── 00-migration-roadmap.md
+└── contracts/                # 跨仓接口契约
+    ├── README.md
+    ├── auth-v1.md
+    ├── data-v1.md
+    ├── chat-stream-v1.md
+    └── admin-sync-v1.md
 ```
 
 ## 快速链接
@@ -38,6 +44,7 @@ docs/
 - [x] 人确认：四仓库结构、Element Plus、SSE 流式方案
 - [x] 人确认：Chat 历史保存、数据同步、鉴权模式、默认 LLM、iOS 范围、部署编排
 - [x] 人确认：废弃 graph.json、轻量版人工闸
+- [x] 完成核心跨仓契约：auth / data / chat-stream / admin-sync
 - [ ] AI 下一步：后端数据库 DDL + LangGraph 节点详细设计
 
 ## 仓库地址
