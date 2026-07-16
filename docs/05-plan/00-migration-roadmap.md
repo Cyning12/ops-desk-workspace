@@ -16,6 +16,8 @@ Week 9:   iOS 骨架 + 部署脚本
 Week 10:  ICP 收尾 + 域名切换 + 公测
 ```
 
+> **Epic 级任务清单**已拆分到 [`01-epic-task-backlog.md`](./01-epic-task-backlog.md)，包含每个 Epic 下的具体任务、验收标准、当前状态与依赖。本 Roadmap 各 Phase 末尾会引用对应 Epic 编号。
+
 ---
 
 ## Phase 0：项目初始化（Week 1）
@@ -128,6 +130,8 @@ ops-desk-workspace/
 | LangGraph 最小 graph 跑通 | `POST /api/ops/chat/stream` 返回 SSE 流 |
 | LLM Provider 工厂接入 LangGraph | SiliconFlow / Bailian 可切换 |
 
+**本阶段对应 Epic**：Epic 1、Epic 2、Epic 6（任务 6.1–6.9）、Epic 7（任务 7.1–7.4）。详细清单见 [`01-epic-task-backlog.md`](./01-epic-task-backlog.md)。
+
 ---
 
 ## Phase 3：后端业务接口（Week 5–6）
@@ -141,6 +145,8 @@ ops-desk-workspace/
 | Graph | `GET /api/ops/graph` | snapshot + module matrix |
 | Chat | `POST /api/ops/chat/stream` | **SSE 流式对话，展示思考过程** |
 | Chat | `GET /api/ops/chat/models` | 模型列表 |
+
+**本阶段对应 Epic**：Epic 3、Epic 4（任务 4.4–4.5）、Epic 5、Epic 7（任务 7.5）。详细清单见 [`01-epic-task-backlog.md`](./01-epic-task-backlog.md)。
 
 **Chat v1 的 LangGraph + SSE 设计**：
 
@@ -290,6 +296,8 @@ volumes:
 - [ ] 数据库备份脚本运行正常
 - [ ] 登录/Overview/Issues/PRs/Graph/Chat 全部可用
 - [ ] 30 天内完成公安备案
+
+**本阶段对应 Epic**：Epic 8。详细清单见 [`01-epic-task-backlog.md`](./01-epic-task-backlog.md)。
 
 ---
 
