@@ -316,9 +316,9 @@ volumes:
 
 ## 下一步行动
 
-1. **人确认**：Chat 历史是否保存并展示多轮？
-2. **人确认**：GitHub 数据同步方式（复用 GHA sync / Python 定时任务 / 手动导入）？
-3. **人确认**：鉴权模式（`hmac` / `db`）？
-4. **人确认**：默认 LLM Provider（SiliconFlow / 百炼）？
-5. **人确认**：iOS v1 是否只做 Chat？
-6. **AI 下一步**：输出后端数据库 DDL + LangGraph 节点详细设计。
+1. ✅ **Chat 历史**：保存并展示多轮。
+2. ✅ **GitHub 数据同步方式**：复用现有 GHA sync 工作流。
+3. ✅ **鉴权模式**：继续使用 DB session 表。
+4. ✅ **默认 LLM Provider**：SiliconFlow。
+5. ✅ **iOS v1**：只做 Chat；每次获取最新的聊天，若没有再新建。
+6. **AI 下一步**：创建新 task 推进 Epic 3 认证鉴权 → Epic 4 Admin 数据同步。

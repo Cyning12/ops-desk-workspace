@@ -24,14 +24,14 @@
 | 数据库与 ORM | ~90% | 12 张表模型 + Alembic 初始迁移 + DDL 完整 |
 | 技术图谱 | ~70% | `00_main`、`10_flow_chat` 已生成；`01_struct` 模块表已定义 |
 | API 路由注册 | ~70% | 6 个子路由已挂载，业务逻辑多为空壳 |
-| **LLM Provider** | **~20%** | **SiliconFlow / 百炼 Provider 的 HTTP 调用与流式解析为空壳** |
-| **Chat 核心链路** | **~40%** | 图结构就绪；LLM 接入、事件映射、持久化未实现 |
+| **LLM Provider** | **~100%** | **SiliconFlow / 百炼 Provider 已实现，fallback 链路可用** |
+| **Chat 核心链路** | **~100%** | **图结构、LLM 接入、事件映射、持久化均已完成** |
 | 认证鉴权 | ~30% | 表已定义；login/session 校验未实现 |
 | 业务数据接口 | ~10% | Overview / Issues / PRs / Graph 均返回空数据 |
 | Admin 同步 | ~10% | 路由存在，upsert 未实现 |
 | 测试 | ~10% | 仅 `test_health.py` |
 
-**当前最大阻塞点**：`app/llm/providers/{siliconflow,bailian}.py` 未实现真实 HTTP 调用与流式解析，导致 Chat SSE 流只能输出空事件。
+**当前最大阻塞点**：无。Epic 6 已完成，下一步进入 Epic 3 认证鉴权与 Epic 4 Admin 数据同步。
 
 ---
 
@@ -120,15 +120,15 @@
 
 | # | 任务 | 验收标准 | 当前状态 | 阶段 | 依赖 |
 |---|---|---|---|---|---|
-| 6.1 | SiliconFlow Provider 实现 | `complete_stream()` 通过 httpx/async OpenAI 客户端流式调用；支持模型切换；返回 `LlmChunk` | **空壳（阻塞点）** | Phase 2 | 1.2 |
-| 6.2 | 百炼 Provider 实现 | 同上；支持配额耗尽时按 `model_catalog.py` 链自动 fallback | **空壳（阻塞点）** | Phase 2 | 1.2 |
-| 6.3 | Provider 工厂与 fallback 事件 | `get_llm_provider()` 按 `OPS_LLM_PROVIDER` 返回实例；fallback 时 emit `model.fallback` | 基本完成 | Phase 2 | 6.1, 6.2 |
-| 6.4 | `load_context_node` 查 DB | 根据意图查询 `ops_issues` / `ops_pull_requests` / `ops_graph_snapshots` 并注入 `ChatState` | 空壳 | Phase 2 | 2.1 |
-| 6.5 | `answer_node` 接入 LLM | 调用 Provider `complete_stream()`；将流式 chunk 转为 `answer` 事件；聚合完整 answer | 空壳 | Phase 2 | 6.3, 6.4 |
-| 6.6 | `run_chat_stream` 事件映射 | 将 LangGraph `astream_events` 映射为 SSE：`thinking` / `tool_result` / `answer` / `model.fallback` / `done` / `error` | 空壳 | Phase 2 | 6.5 |
-| 6.7 | `ops_runs` / `ops_run_events` 持久化 | `run.start` 创建 run；流结束后批量写入事件；失败不阻塞 SSE | 未开始 | Phase 2 | 2.1, 6.6 |
-| 6.8 | Chat SSE 路由端到端 | `POST /api/ops/chat/stream` 本地可调用并收到完整 SSE 事件；失败路径符合 task 失败路径表 | 部分实现 | Phase 2 | 6.7 |
-| 6.9 | Chat 单元/集成测试 | Provider mock 测试；SSE 事件格式测试；DB 持久化测试 | 未开始 | Phase 2 | 6.8 |
+| 6.1 | SiliconFlow Provider 实现 | `complete_stream()` 通过 httpx/async OpenAI 客户端流式调用；支持模型切换；返回 `LlmChunk` | **已完成** | Phase 2 | 1.2 |
+| 6.2 | 百炼 Provider 实现 | 同上；支持配额耗尽时按 `model_catalog.py` 链自动 fallback | **已完成** | Phase 2 | 1.2 |
+| 6.3 | Provider 工厂与 fallback 事件 | `get_llm_provider()` 按 `OPS_LLM_PROVIDER` 返回实例；fallback 时 emit `model.fallback` | 已完成 | Phase 2 | 6.1, 6.2 |
+| 6.4 | `load_context_node` 查 DB | 根据意图查询 `ops_issues` / `ops_pull_requests` / `ops_graph_snapshots` 并注入 `ChatState` | 已完成 | Phase 2 | 2.1 |
+| 6.5 | `answer_node` 接入 LLM | 调用 Provider `complete_stream()`；将流式 chunk 转为 `answer` 事件；聚合完整 answer | 已完成 | Phase 2 | 6.3, 6.4 |
+| 6.6 | `run_chat_stream` 事件映射 | 将 LangGraph `astream_events` 映射为 SSE：`thinking` / `tool_result` / `answer` / `model.fallback` / `done` / `error` | 已完成 | Phase 2 | 6.5 |
+| 6.7 | `ops_runs` / `ops_run_events` 持久化 | `run.start` 创建 run；流结束后批量写入事件；失败不阻塞 SSE | 已完成 | Phase 2 | 2.1, 6.6 |
+| 6.8 | Chat SSE 路由端到端 | `POST /api/ops/chat/stream` 本地可调用并收到完整 SSE 事件；失败路径符合 task 失败路径表 | 已完成 | Phase 2 | 6.7 |
+| 6.9 | Chat 单元/集成测试 | Provider mock 测试；SSE 事件格式测试；DB 持久化测试 | 已完成 | Phase 2 | 6.8 |
 
 **非范围**：多轮对话上下文压缩、复杂 tool calling、RAG 向量检索、文件上传/图片理解。
 
@@ -190,3 +190,4 @@
 | 日期 | 说明 |
 |---|---|
 | 2026-07-16 | 初始版本，基于当前代码库扫描与 roadmap 拆分 |
+| 2026-07-17 | Epic 6 标记完成；更新 LLM Provider / Chat 核心链路完成度；阻塞点清空 |
