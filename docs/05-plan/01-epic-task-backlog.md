@@ -26,10 +26,10 @@
 | API 路由注册 | ~70% | 6 个子路由已挂载，业务逻辑多为空壳 |
 | **LLM Provider** | **~100%** | **SiliconFlow / 百炼 Provider 已实现，fallback 链路可用** |
 | **Chat 核心链路** | **~100%** | **图结构、LLM 接入、事件映射、持久化均已完成** |
-| 认证鉴权 | ~30% | 表已定义；login/session 校验未实现 |
+| 认证鉴权 | ~100% | DB session + HttpOnly Cookie + invite token + maintainer 保护已实现 |
 | 业务数据接口 | ~10% | Overview / Issues / PRs / Graph 均返回空数据 |
 | Admin 同步 | ~10% | 路由存在，upsert 未实现 |
-| 测试 | ~10% | 仅 `test_health.py` |
+| 测试 | ~30% | `test_health.py` + chat/auth 测试；业务接口测试待补齐 |
 
 **当前最大阻塞点**：无。Epic 6 已完成，下一步进入 Epic 3 认证鉴权与 Epic 4 Admin 数据同步。
 
@@ -72,11 +72,11 @@
 
 | # | 任务 | 验收标准 | 当前状态 | 阶段 | 依赖 |
 |---|---|---|---|---|---|
-| 3.1 | `ops_users` / `ops_invite_tokens` 初始化 | 可执行脚本创建首个 maintainer 用户与邀请密钥 | 未开始 | Phase 2 | 2.1 |
-| 3.2 | 登录接口 `POST /api/ops/login` | 校验 username + invite token；签发 `ops_session` HttpOnly Cookie | 空壳 | Phase 2 | 3.1 |
-| 3.3 | Session 校验依赖 | `get_current_user` 校验 cookie 中 token_hash；过期拒绝 | 空壳 | Phase 2 | 3.2 |
-| 3.4 | 登出与 me 接口 | `POST /api/ops/logout` 使 session 过期；`GET /api/ops/me` 返回当前用户 | 空壳 | Phase 2 | 3.2 |
-| 3.5 | 角色权限中间件 | `require_maintainer` 仅允许 maintainer 访问 admin/sync | 空壳 | Phase 2 | 3.3 |
+| 3.1 | `ops_users` / `ops_invite_tokens` 初始化 | 可执行脚本创建首个 maintainer 用户与邀请密钥 | 已完成 | Phase 2 | 2.1 |
+| 3.2 | 登录接口 `POST /api/ops/login` | 校验 username + invite token；签发 `ops_session` HttpOnly Cookie | 已完成 | Phase 2 | 3.1 |
+| 3.3 | Session 校验依赖 | `get_current_user` 校验 cookie 中 token_hash；过期拒绝 | 已完成 | Phase 2 | 3.2 |
+| 3.4 | 登出与 me 接口 | `POST /api/ops/logout` 使 session 过期；`GET /api/ops/me` 返回当前用户 | 已完成 | Phase 2 | 3.2 |
+| 3.5 | 角色权限中间件 | `require_maintainer` 仅允许 maintainer 访问 admin/sync | 已完成 | Phase 2 | 3.3 |
 
 **非范围**：用户注册、OAuth、JWT、RBAC 细粒度权限。
 
