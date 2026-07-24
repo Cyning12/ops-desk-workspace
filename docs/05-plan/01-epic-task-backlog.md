@@ -23,15 +23,15 @@
 | 配置管理 | ~90% | `app/config.py`、`.env.example` 完整 |
 | 数据库与 ORM | ~90% | 12 张表模型 + Alembic 初始迁移 + DDL 完整 |
 | 技术图谱 | ~70% | `00_main`、`10_flow_chat` 已生成；`01_struct` 模块表已定义 |
-| API 路由注册 | ~70% | 6 个子路由已挂载，业务逻辑多为空壳 |
+| API 路由注册 | ~85% | 6 个子路由已挂载；issues/pulls/graph 已实现 |
 | **LLM Provider** | **~100%** | **SiliconFlow / 百炼 Provider 已实现，fallback 链路可用** |
 | **Chat 核心链路** | **~100%** | **图结构、LLM 接入、事件映射、持久化均已完成** |
 | 认证鉴权 | ~100% | DB session + HttpOnly Cookie + invite token + maintainer 保护已实现 |
-| 业务数据接口 | ~10% | Overview / Issues / PRs / Graph 均返回空数据 |
-| Admin 同步 | ~10% | 路由存在，upsert 未实现 |
-| 测试 | ~30% | `test_health.py` + chat/auth 测试；业务接口测试待补齐 |
+| 业务数据接口 | ~60% | Issues / PRs / Graph 只读接口已实现；Overview 仍为空壳 |
+| Admin 同步 | ~80% | GHA sync payload upsert 已实现；初始数据导入脚本未开始 |
+| 测试 | ~55% | auth/chat/admin sync/issues/pulls/graph 测试已补齐；Provider/Chat 节点独立测试待补 |
 
-**当前最大阻塞点**：无。Epic 6 已完成，下一步进入 Epic 3 认证鉴权与 Epic 4 Admin 数据同步。
+**当前最大阻塞点**：无。Epic 3、Epic 4.1~4.4、Epic 5.2~5.4 已完成；下一步可进入 Epic 5.1 Overview、Epic 4.5 初始数据导入脚本，或继续 iOS 登录+chat 联调。
 
 ---
 
@@ -88,11 +88,11 @@
 
 | # | 任务 | 验收标准 | 当前状态 | 阶段 | 依赖 |
 |---|---|---|---|---|---|
-| 4.1 | Sync payload Schema | 定义 `SyncPayload` Pydantic 模型，覆盖 repo/issues/PRs/sync_run/scan/graph | 未开始 | Phase 2 | — |
-| 4.2 | Admin sync endpoint | `POST /api/ops/admin/sync` 接收 payload，按 repo upsert 全部数据 | 空壳 | Phase 2 | 3.5, 4.1 |
-| 4.3 | Upsert 业务逻辑 | issue/PR 按 `(repo_id, number)` 唯一键更新；保留 `raw_payload` | 未开始 | Phase 2 | 4.2 |
-| 4.4 | Sync 幂等与状态记录 | `ops_sync_runs` 记录每次 sync 状态与 summary | 未开始 | Phase 2 | 4.2 |
-| 4.5 | 初始数据导入脚本 | 从 Supabase 导出 CSV/psql 导入本地 PG 的脚本 | 未开始 | Phase 2 | 4.3 |
+| 4.1 | Sync payload Schema | 定义 `SyncPayload` Pydantic 模型，覆盖 repo/issues/PRs/sync_run/scan/graph | 已完成 | Phase 2 | — |
+| 4.2 | Admin sync endpoint | `POST /api/ops/admin/sync` 接收 payload，按 repo upsert 全部数据 | 已完成 | Phase 2 | 3.5, 4.1 |
+| 4.3 | Upsert 业务逻辑 | issue/PR 按 `(repo_id, number)` 唯一键更新；保留 `raw_payload` | 已完成 | Phase 2 | 4.2 |
+| 4.4 | Sync 幂等与状态记录 | `ops_sync_runs` 记录每次 sync 状态与 summary | 已完成 | Phase 2 | 4.2 |
+| 4.5 | 初始数据导入脚本 | 从 Supabase 导出 CSV/psql 导入本地 PG 的脚本 | 已完成（直连 DB 导入脚本 + 指引；真实数据导入待维护者执行） | Phase 2 | 4.3 |
 
 **非范围**：定时任务、增量同步 diff 算法、同步失败自动重试策略。
 
@@ -105,10 +105,10 @@
 | # | 任务 | 验收标准 | 当前状态 | 阶段 | 依赖 |
 |---|---|---|---|---|---|
 | 5.1 | Overview 指标 | `GET /api/ops/overview` 返回 PR Cycle Time、Review Time、Issue Throughput、Sync 状态、Scan 摘要、Trend | 空壳 | Phase 3 | 4.3 |
-| 5.2 | Issues 列表与筛选 | `GET /api/ops/issues` 支持 state/labels/scan_status/module_tag 筛选 + 分页 | 空壳 | Phase 3 | 4.3 |
-| 5.3 | Pull Requests 列表与筛选 | `GET /api/ops/pulls` 支持 state/ci_status/draft 筛选 + 分页 | 空壳 | Phase 3 | 4.3 |
-| 5.4 | Graph 快照 | `GET /api/ops/graph` 返回最新 graph snapshot + module matrix | 空壳 | Phase 3 | 4.3 |
-| 5.5 | 模型列表 | `GET /api/ops/chat/models` 返回可用模型与 fallback 链 | 空壳 | Phase 3 | 6.1 |
+| 5.2 | Issues 列表与筛选 | `GET /api/ops/issues` 支持 state/labels/scan_status/module_tag 筛选 + 分页 | 已完成 | Phase 3 | 4.3 |
+| 5.3 | Pull Requests 列表与筛选 | `GET /api/ops/pulls` 支持 state/ci_status/draft 筛选 + 分页 | 已完成 | Phase 3 | 4.3 |
+| 5.4 | Graph 快照 | `GET /api/ops/graph` 返回最新 graph snapshot + module matrix | 已完成 | Phase 3 | 4.3 |
+| 5.5 | 模型列表 | `GET /api/ops/chat/models` 返回可用模型与 fallback 链 | 已完成（Epic 3 任务中实现） | Phase 3 | 6.1 |
 
 **非范围**：复杂聚合报表、实时 WebSocket 推送、Graph 可视化渲染。
 
@@ -146,7 +146,7 @@
 | 7.2 | Provider 单元测试 | SiliconFlow / 百炼 mock HTTP 测试；fallback 链测试 | 未开始 | Phase 2 | 6.1, 6.2 |
 | 7.3 | Chat 节点测试 | `intent_node`、`load_context_node`、`answer_node` 独立单元测试 | 未开始 | Phase 2 | 6.4, 6.5 |
 | 7.4 | Chat SSE 集成测试 | 调用 `/api/ops/chat/stream` 验证事件序列与持久化 | 未开始 | Phase 2 | 6.8 |
-| 7.5 | 业务接口测试 | Overview / Issues / PRs / Graph 接口返回预期结构 | 未开始 | Phase 3 | 5.1~5.4 |
+| 7.5 | 业务接口测试 | Overview / Issues / PRs / Graph 接口返回预期结构 | Issues/PRs/Graph 已完成；Overview 待补 | Phase 3 | 5.1~5.4 |
 | 7.6 | Lint 与类型检查 | `ruff check app tests` 通过；必要时启用 `pyright`/`mypy` | 部分完成 | Phase 1 | 1.4 |
 
 **非范围**：100% 覆盖率、负载测试、安全渗透测试。
@@ -191,3 +191,5 @@
 |---|---|
 | 2026-07-16 | 初始版本，基于当前代码库扫描与 roadmap 拆分 |
 | 2026-07-17 | Epic 6 标记完成；更新 LLM Provider / Chat 核心链路完成度；阻塞点清空 |
+| 2026-07-17 | Epic 3 完成；Epic 4.1~4.4、Epic 5.2~5.4 标记完成；更新完成度与下一步说明 |
+| 2026-07-24 | Epic 4.5 完成（Supabase 直连导入脚本 + 指引，PR #5）；Epic 5.5 勾掉（Epic 3 已实现）；PR #2~#5 全部合入 master |
