@@ -27,11 +27,11 @@
 | **LLM Provider** | **~100%** | **SiliconFlow / 百炼 Provider 已实现，fallback 链路可用** |
 | **Chat 核心链路** | **~100%** | **图结构、LLM 接入、事件映射、持久化均已完成** |
 | 认证鉴权 | ~100% | DB session + HttpOnly Cookie + invite token + maintainer 保护已实现 |
-| 业务数据接口 | ~60% | Issues / PRs / Graph 只读接口已实现；Overview 仍为空壳 |
-| Admin 同步 | ~80% | GHA sync payload upsert 已实现；初始数据导入脚本未开始 |
+| 业务数据接口 | ~100% | Overview / Issues / PRs / Graph / Chat Models 全部实现 |
+| Admin 同步 | ~95% | GHA sync upsert + Supabase 初始导入脚本已实现；真实数据回填进行中 |
 | 测试 | ~55% | auth/chat/admin sync/issues/pulls/graph 测试已补齐；Provider/Chat 节点独立测试待补 |
 
-**当前最大阻塞点**：无。Epic 3、Epic 4.1~4.4、Epic 5.2~5.4 已完成；下一步可进入 Epic 5.1 Overview、Epic 4.5 初始数据导入脚本，或继续 iOS 登录+chat 联调。
+**当前最大阻塞点**：无。Epic 3/4/5/6 全部完成；剩余：真实数据回填（导入脚本重跑）、Epic 7 测试补齐、Epic 8 部署轨、Chat 优化（逐 token 流式 / WS 鉴权）。
 
 ---
 
@@ -104,7 +104,7 @@
 
 | # | 任务 | 验收标准 | 当前状态 | 阶段 | 依赖 |
 |---|---|---|---|---|---|
-| 5.1 | Overview 指标 | `GET /api/ops/overview` 返回 PR Cycle Time、Review Time、Issue Throughput、Sync 状态、Scan 摘要、Trend | 空壳 | Phase 3 | 4.3 |
+| 5.1 | Overview 指标 | `GET /api/ops/overview` 返回 PR Cycle Time、Review Time、Issue Throughput、Sync 状态、Scan 摘要、Trend | 已完成（PR #7） | Phase 3 | 4.3 |
 | 5.2 | Issues 列表与筛选 | `GET /api/ops/issues` 支持 state/labels/scan_status/module_tag 筛选 + 分页 | 已完成 | Phase 3 | 4.3 |
 | 5.3 | Pull Requests 列表与筛选 | `GET /api/ops/pulls` 支持 state/ci_status/draft 筛选 + 分页 | 已完成 | Phase 3 | 4.3 |
 | 5.4 | Graph 快照 | `GET /api/ops/graph` 返回最新 graph snapshot + module matrix | 已完成 | Phase 3 | 4.3 |
@@ -193,3 +193,4 @@
 | 2026-07-17 | Epic 6 标记完成；更新 LLM Provider / Chat 核心链路完成度；阻塞点清空 |
 | 2026-07-17 | Epic 3 完成；Epic 4.1~4.4、Epic 5.2~5.4 标记完成；更新完成度与下一步说明 |
 | 2026-07-24 | Epic 4.5 完成（Supabase 直连导入脚本 + 指引，PR #5）；Epic 5.5 勾掉（Epic 3 已实现）；PR #2~#5 全部合入 master |
+| 2026-07-24 | Epic 5.1 完成（PR #7，Overview 指标 + first_review_at 补列 + 测试隔离 opsdesk_test）；Epic 5 全部完成 |
