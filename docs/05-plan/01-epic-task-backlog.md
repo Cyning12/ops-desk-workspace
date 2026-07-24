@@ -31,7 +31,7 @@
 | Admin 同步 | ~95% | GHA sync upsert + Supabase 初始导入脚本已实现；真实数据回填进行中 |
 | 测试 | ~55% | auth/chat/admin sync/issues/pulls/graph 测试已补齐；Provider/Chat 节点独立测试待补 |
 
-**当前最大阻塞点**：无。Epic 3/4/5/6 全部完成；剩余：真实数据回填（导入脚本重跑）、Epic 7 测试补齐、Epic 8 部署轨、Chat 优化（逐 token 流式 / WS 鉴权）。
+**当前关键路径**：Web 前端 Epic（W0–W8，母单在 ops-desk-web/docs/tasks/active/TASK_epic_web_frontend_v1.md）→ 完成后启动 Epic 8 部署（API+PG+Web 一起，用户 2026-07-24 拍板）。Epic 3/4/5/6 已全部完成。
 
 ---
 
@@ -179,7 +179,7 @@
 | Phase 1 | Week 1–2 | 可本地运行的 API + PG | Epic 1.3~1.4, Epic 7.6, Epic 8.1~8.2 |
 | Phase 2 | Week 3–4 | LLM Provider + Chat SSE 端到端跑通 | Epic 3, Epic 4.1~4.3, Epic 6, Epic 7.1~7.4 |
 | Phase 3 | Week 5–6 | 后端业务接口完整 | Epic 4.4~4.5, Epic 5, Epic 7.5 |
-| Phase 4 | Week 7–8 | 前端 Vue3 联调 | （前端仓库） |
+| Phase 4 | Week 7–8 | 前端 Vue3 联调 | （前端仓库 · W0–W8 已拆解） |
 | Phase 5 | Week 9 | iOS 骨架 | （iOS 仓库） |
 | Phase 6 | Week 9–10 | 部署上线 | Epic 8.3~8.7 |
 
@@ -194,3 +194,4 @@
 | 2026-07-17 | Epic 3 完成；Epic 4.1~4.4、Epic 5.2~5.4 标记完成；更新完成度与下一步说明 |
 | 2026-07-24 | Epic 4.5 完成（Supabase 直连导入脚本 + 指引，PR #5）；Epic 5.5 勾掉（Epic 3 已实现）；PR #2~#5 全部合入 master |
 | 2026-07-24 | Epic 5.1 完成（PR #7，Overview 指标 + first_review_at 补列 + 测试隔离 opsdesk_test）；Epic 5 全部完成 |
+| 2026-07-24 | 域名 ICP 通过；用户拍板等 Web 一起部署；Web 前端 Epic 拆解 W0–W8（含 harness 2.2.1 导入）落盘 ops-desk-web |
