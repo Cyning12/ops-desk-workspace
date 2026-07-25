@@ -27,7 +27,6 @@ services:
       OPS_DESK_SECRET: ${OPS_DESK_SECRET:?OPS_DESK_SECRET required}
       OPS_DESK_AUTH_MODE: db
       OPS_LLM_PROVIDER: ${OPS_LLM_PROVIDER:-siliconflow}
-      OPS_LLM_MODEL: ${OPS_LLM_MODEL:-}
       SILICONFLOW_API_KEY: ${SILICONFLOW_API_KEY}
       BAILIAN_API_KEY: ${BAILIAN_API_KEY}
       BAILIAN_BASE_URL: ${BAILIAN_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}
