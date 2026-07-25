@@ -1,0 +1,52 @@
+# Production compose: db + api (web is static files served by Nginx).
+# Usage on server: docker compose -f /opt/ops-desk/deploy/docker-compose.prod.yml --env-file /opt/ops-desk/.env up -d --build
+services:
+  db:
+    image: pgvector/pgvector:pg15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ops
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD required}
+      POSTGRES_DB: opsdesk
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # No host port: reachable only inside the compose network.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ops -d opsdesk"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  api:
+    build: ../api
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"  # loopback only; Nginx proxies /api here
+    environment:
+      DATABASE_URL: postgresql+asyncpg://ops:${DB_PASSWORD}@db:5432/opsdesk
+      OPS_DESK_SECRET: ${OPS_DESK_SECRET:?OPS_DESK_SECRET required}
+      OPS_DESK_AUTH_MODE: db
+      OPS_LLM_PROVIDER: ${OPS_LLM_PROVIDER:-siliconflow}
+      OPS_LLM_MODEL: ${OPS_LLM_MODEL:-}
+      SILICONFLOW_API_KEY: ${SILICONFLOW_API_KEY}
+      BAILIAN_API_KEY: ${BAILIAN_API_KEY}
+      BAILIAN_BASE_URL: ${BAILIAN_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}
+      BAILIAN_MODEL: ${BAILIAN_MODEL:-qwen-plus}
+      OPS_CHAT_WS_ENABLED: ${OPS_CHAT_WS_ENABLED:-false}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-true}
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://www.cynaya.cn}
+      SUPABASE_DATABASE_URL: ${SUPABASE_DATABASE_URL:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://localhost:8000/health',timeout=3)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+volumes:
+  pgdata:
