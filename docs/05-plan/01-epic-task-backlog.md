@@ -31,7 +31,7 @@
 | Admin 同步 | ~95% | GHA sync upsert + Supabase 初始导入脚本已实现；真实数据回填进行中 |
 | 测试 | ~55% | auth/chat/admin sync/issues/pulls/graph 测试已补齐；Provider/Chat 节点独立测试待补 |
 
-**当前关键路径**：Web 前端 Epic（W0–W8，母单在 ops-desk-web/docs/tasks/active/TASK_epic_web_frontend_v1.md）→ 完成后启动 Epic 8 部署（API+PG+Web 一起，用户 2026-07-24 拍板）。Epic 3/4/5/6 已全部完成。
+**当前状态**：🚀 **已上线** https://www.cynaya.cn（2026-07-25）。Epic 1~6 + 8.1~8.5/8.7 完成。剩余：8.6 备份策略、GHA CI 推送、Chat 优化（逐 token / WS 鉴权）、契约对齐、first_review_at 供数。
 
 ---
 
@@ -159,13 +159,13 @@
 
 | # | 任务 | 验收标准 | 当前状态 | 阶段 | 依赖 |
 |---|---|---|---|---|---|
-| 8.1 | 腾讯云服务器初始化 | Docker、Docker Compose、Nginx、PG 安装完成 | 未开始 | Phase 1 | — |
-| 8.2 | 域名购买与 ICP 备案 | 域名实名 + ICP 提交；备案号下发 | 未开始 | Phase 1 | — |
-| 8.3 | SSL 证书配置 | Nginx HTTPS 配置正确；自动续期 | 未开始 | Phase 6 | 8.2 |
-| 8.4 | workspace 统一编排 | `ops-desk-workspace/docker-compose.yml` 拉起 db/api/web | 未开始 | Phase 6 | 1.3 |
-| 8.5 | 部署脚本与 CI 推送 | GitHub Actions 构建产物 → 服务器；`docker compose up -d` | 未开始 | Phase 6 | 8.4 |
+| 8.1 | 腾讯云服务器初始化 | Docker、Docker Compose、Nginx、PG 安装完成 | 已完成 | Phase 1 | — |
+| 8.2 | 域名购买与 ICP 备案 | 域名实名 + ICP 提交；备案号下发 | 已完成（cynaya.cn） | Phase 1 | — |
+| 8.3 | SSL 证书配置 | Nginx HTTPS 配置正确；自动续期 | 已完成（控制台证书已部署；续期后续） | Phase 6 | 8.2 |
+| 8.4 | workspace 统一编排 | `deploy/docker-compose.prod.yml` 拉起 db/api；web 静态 Nginx 托管 | 已完成 | Phase 6 | 1.3 |
+| 8.5 | 部署脚本与 CI 推送 | `deploy/deploy.sh` 手动部署（rsync+compose）；GHA 推送留后续 | 已完成（手动路径） | Phase 6 | 8.4 |
 | 8.6 | 数据库备份策略 | 每日 `pg_dump` + 腾讯云 COS；每周服务器快照 | 未开始 | Phase 6 | 2.1 |
-| 8.7 | 上线前 E2E 检查 | 登录 / Overview / Issues / PRs / Graph / Chat 全部可用 | 未开始 | Phase 6 | 全部前置 |
+| 8.7 | 上线前 E2E 检查 | 登录 / Overview / Issues / PRs / Graph / Chat 全部可用 | 已完成（HTTPS 全绿） | Phase 6 | 全部前置 |
 
 **非范围**：多云容灾、自动扩缩容、SLA 监控告警体系。
 
@@ -195,3 +195,4 @@
 | 2026-07-24 | Epic 4.5 完成（Supabase 直连导入脚本 + 指引，PR #5）；Epic 5.5 勾掉（Epic 3 已实现）；PR #2~#5 全部合入 master |
 | 2026-07-24 | Epic 5.1 完成（PR #7，Overview 指标 + first_review_at 补列 + 测试隔离 opsdesk_test）；Epic 5 全部完成 |
 | 2026-07-24 | 域名 ICP 通过；用户拍板等 Web 一起部署；Web 前端 Epic 拆解 W0–W8（含 harness 2.2.1 导入）落盘 ops-desk-web |
+| 2026-07-25 | Web 前端 W0–W8 完成；Epic 8 部署上线 https://www.cynaya.cn（PR #8）；8.6 备份与 GHA CI 留后续 |
