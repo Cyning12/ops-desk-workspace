@@ -1,6 +1,6 @@
 # Task：workspace 默认分支归一到 main
 
-> **状态**：in_progress（HG-PUSH-CONFIRM 已批准：维护者 2026-07-28「进行收尾…棒 C」）  
+> **状态**：completed  
 > **类型**：Git / GitHub 仓库卫生  
 > **关联**：00 统筹 `docs/05-plan/03-post-go-live-hygiene-orchestration.md` 棒 C
 
@@ -11,8 +11,10 @@
 | 字段 | 值 |
 |---|---|
 | **task_slug** | `normalize-default-branch` |
-| **git_branch** | `task/epic-backlog-and-roadmap`（现有）→ 收尾后以 `main` 为默认 |
+| **git_branch** | `main`（已自 `task/epic-backlog-and-roadmap` tip 归一） |
 | **graph_change_layer** | `none` |
+| **graph_delta** | `none` |
+| **graph_delta_note** | 仅 Git 默认分支归一；无业务图谱改动 |
 | **review_hat** | `20` |
 | **thinking_profile** | `shortest` |
 | **invoke_retention_profile** | `minimal` |
@@ -40,12 +42,12 @@
 **完成态（顺序）**：
 
 1. [x] 维护者将 **HG-PUSH-CONFIRM** → approved（本会话口头即可，执行者回填表）
-2. [ ] `git push -u origin task/epic-backlog-and-roadmap`（推送 ahead 8；禁止 `--force`）
-3. [ ] 以该 tip 创建/更新远程 `main`：`git branch main <tip> && git push -u origin main`（若 remote 无 main）
-4. [ ] `gh repo edit --default-branch main`
-5. [ ] 本地 checkout `main` 跟踪 origin；确认 `origin/HEAD` → main
-6. [ ] 删除远程 `task/epic-backlog-and-roadmap`（default 已切后）；删本地同名分支（可选）
-7. [ ] 将本统筹文档与本 task 提交到 `main`（若尚未包含）
+2. [x] `git push -u origin task/epic-backlog-and-roadmap`（推送 ahead 8+docs；禁止 `--force`）
+3. [x] 以该 tip 创建/更新远程 `main`：`git branch -f main <tip> && git push -u origin main`
+4. [x] `gh repo edit --default-branch main`
+5. [x] 本地 checkout `main` 跟踪 origin；确认 `origin/HEAD` → main
+6. [x] 删除远程 `task/epic-backlog-and-roadmap`（default 已切后）；本地同名分支待删
+7. [x] 将本统筹文档与本 task 提交到 `main`
 
 **不做**：`--force` / 改写已推送历史；删其他仓分支；部署动作
 
@@ -63,6 +65,39 @@
 
 ## 验收标准
 
-- [ ] `gh repo view --json defaultBranchRef -q .defaultBranchRef.name` → `main`
-- [ ] `git ls-remote --heads origin` 含 `main`；任务分支已删或仅本地留档
-- [ ] 本地当前分支 `main` 与 `origin/main` 对齐（允许文档卫生 commit）
+- [x] `gh repo view --json defaultBranchRef -q .defaultBranchRef.name` → `main`
+- [x] `git ls-remote --heads origin` 含 `main`；任务分支已删或仅本地留档
+- [x] 本地当前分支 `main` 与 `origin/main` 对齐（允许文档卫生 commit）
+
+---
+
+## 执行记录（2026-07-28）
+
+| 项 | 结果 |
+|---|---|
+| tip | `098b5e4` |
+| defaultBranchRef | `main` |
+| remote heads | 仅 `refs/heads/main` |
+| origin/HEAD | `refs/remotes/origin/main` |
+
+### 自检结论
+
+| 项 | 内容 |
+|---|---|
+| **日期** | 2026-07-28 |
+| **default** | `gh … defaultBranchRef` → `main` |
+| **remote** | 仅 `refs/heads/main`；任务分支已删 |
+| **本地** | 在 `main`，跟踪 `origin/main` |
+| **force** | 未使用 |
+| **下一棒** | 可选删本地 `task/epic-backlog-and-roadmap`；A/B 各仓已关账则本波收尾完成 |
+
+### KPI
+
+| 维度 | 分（1–5） | 说明 |
+|---|---|---|
+| 质量 | 5 | default=`main`；ls-remote 仅 main；无 force |
+| 过程 | 5 | push → main → default → 删任务分支顺序正确 |
+| 可观测 | 5 | invoke + gh/ls-remote 断言落盘 |
+| 回馈 | 5 | 统筹文档验收项已勾 |
+
+**Task_KPI%**：100

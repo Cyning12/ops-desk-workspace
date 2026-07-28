@@ -2,7 +2,7 @@
 
 > **角色**：00 统筹下发  
 > **触发**：维护者指示「先收尾」；分支盘点后 api/ios 已净，web 陈旧远程已删；余下文档归档 + workspace 默认分支归一  
-> **状态**：issued（三棒 30 Prompt 已下发，待执行）
+> **状态**：棒 C **done**（2026-07-28）；A/B 见各仓关账
 
 ---
 
@@ -13,7 +13,7 @@
 | ops-desk-api | `master` ≡ origin | `task_api_tech_graph_ci` 已 completed 且工作区已移到 `done/`，**未提交** |
 | ops-desk-web | `main` ≡ origin（已删合并远程） | `active/` 残留多份 **completed** task + kickoff Prompt；`web-obs-nav-label-en` 已 MERGED 仍标 ready-for-merge |
 | ops-desk-ios | `master` | 无分支债务；本波不派工 |
-| ops-desk-workspace | 远程 **仅** `task/epic-backlog-and-roadmap`（且为 default）；本地 **ahead 8**；本地有孤立 `main` | 须归一到 `main` |
+| ops-desk-workspace | GitHub default = **`main`**；远程仅 `main`；本地 `main` ≡ origin | 棒 C 已完成 |
 
 ---
 
@@ -41,7 +41,7 @@
 
 - [ ] api：`active/` 无已完成 tech-graph task；归档已合入 `master`
 - [ ] web：`active/` 仅保留未完成项或空；completed 均在 `done/`
-- [ ] workspace：GitHub default = `main`；远程无长期任务分支作 HEAD；本地与 origin/main 对齐
+- [x] workspace：GitHub default = `main`；远程无长期任务分支作 HEAD；本地与 origin/main 对齐
 - [ ] 四仓 `git branch -r` 无已合并陈旧 task 分支（本波已清 web；再扫一轮）
 
 ---
@@ -53,3 +53,4 @@
 | 修订 | 说明 |
 |---|---|
 | 2026-07-28 | 00 初版下发 |
+| 2026-07-28 | 棒 C：default→`main`；远程任务分支已删 |

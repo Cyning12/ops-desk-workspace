@@ -18,4 +18,14 @@
 
 ## 结果
 
-（执行后回填）
+| 步骤 | 结果 |
+|---|---|
+| push 任务分支 | `ee9ee38..098b5e4` → `origin/task/epic-backlog-and-roadmap` |
+| tip → main | 新建 `origin/main` @ `098b5e4` |
+| default-branch | `main` |
+| 删远程任务分支 | 已删 |
+| origin/HEAD | `refs/remotes/origin/main` |
+| ls-remote | 仅 `refs/heads/main` |
+| 本地 | 在 `main`，与 `origin/main` 对齐 |
+
+**结论**：棒 C 验收通过。
