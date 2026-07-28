@@ -32,6 +32,7 @@
 | HG-TASK-DRAFT | approved | 22-R1 | 维护者 2026-07-28：先收尾 |
 | **HG-AUDIT-R1** | approved | **30** | 00 代签内容；**HG-PUSH-CONFIRM** 另见下 |
 | **HG-PUSH-CONFIRM** | approved | **30** | 维护者 2026-07-28 明示执行棒 C（允许 push + 改 GitHub default） |
+| **HG-CLOSE** | approved | — | 维护者 2026-07-28「签收」 |
 
 ---
 
@@ -46,7 +47,7 @@
 3. [x] 以该 tip 创建/更新远程 `main`：`git branch -f main <tip> && git push -u origin main`
 4. [x] `gh repo edit --default-branch main`
 5. [x] 本地 checkout `main` 跟踪 origin；确认 `origin/HEAD` → main
-6. [x] 删除远程 `task/epic-backlog-and-roadmap`（default 已切后）；本地同名分支待删
+6. [x] 删除远程 `task/epic-backlog-and-roadmap`（default 已切后）；本地同名分支已删
 7. [x] 将本统筹文档与本 task 提交到 `main`
 
 **不做**：`--force` / 改写已推送历史；删其他仓分支；部署动作
@@ -89,7 +90,7 @@
 | **remote** | 仅 `refs/heads/main`；任务分支已删 |
 | **本地** | 在 `main`，跟踪 `origin/main` |
 | **force** | 未使用 |
-| **下一棒** | 可选删本地 `task/epic-backlog-and-roadmap`；A/B 各仓已关账则本波收尾完成 |
+| **下一棒** | 维护者已签收；A/B 各仓关账后本波收尾完成 |
 
 ### KPI
 

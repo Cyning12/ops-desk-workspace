@@ -28,4 +28,4 @@
 | ls-remote | 仅 `refs/heads/main` |
 | 本地 | 在 `main`，与 `origin/main` 对齐 |
 
-**结论**：棒 C 验收通过。
+**结论**：棒 C 验收通过。维护者 2026-07-28「签收」→ HG-CLOSE approved。
