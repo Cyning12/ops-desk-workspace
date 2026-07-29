@@ -18,8 +18,10 @@ docs/
 ├── 04-infrastructure/        # 服务器、域名、备案、预算
 │   ├── 00-server-recommendation.md
 │   └── 01-environment-setup.md
-├── 05-plan/                  # 迁移路线图
-│   └── 00-migration-roadmap.md
+├── 05-plan/                  # 迁移路线图 · Agent 完善
+│   ├── 00-migration-roadmap.md
+│   ├── 03-post-go-live-hygiene-orchestration.md
+│   └── 04-agent-completion-roadmap_v1_zh.md   # 线 A · 应用 Agent（总册见 Desktop/cyning-ai-program）
 └── contracts/                # 跨仓接口契约
     ├── README.md
     ├── auth-v1.md
@@ -34,6 +36,8 @@ docs/
 - 后端现有代码：`/Users/cyning/Desktop/Projects/ai-ink-brain-api-python/api/ops/`
 - 后端 LLM Provider：`/Users/cyning/Desktop/Projects/ai-ink-brain-api-python/api/ops/llm/`
 - 父工作区：`/Users/cyning/Desktop/Projects/AGENTS.md`
+- **三线总册（转行/HE 分仓）**：`/Users/cyning/Desktop/cyning-ai-program/PLAN_dual_track_v1_zh.md`
+- **本仓 Agent 完善**：[`05-plan/04-agent-completion-roadmap_v1_zh.md`](./05-plan/04-agent-completion-roadmap_v1_zh.md)
 
 ## 状态
 
@@ -46,6 +50,7 @@ docs/
 - [x] 人确认：废弃 graph.json、轻量版人工闸
 - [x] 完成核心跨仓契约：auth / data / chat-stream / admin-sync
 - [ ] AI 下一步：后端数据库 DDL + LangGraph 节点详细设计
+- [ ] 线 A：按 `04-agent-completion-roadmap` 推进 Tool + 仿真 scenario（总册 cyning-ai-program）
 
 ## 仓库地址
 

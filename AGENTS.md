@@ -26,7 +26,9 @@
 4. **`docs/01-scope/02-cross-repo-communication.md`** — 跨仓任务流转与信息沟通
 5. **`docs/contracts/README.md`** — 跨仓接口契约索引
 6. **`docs/05-plan/00-migration-roadmap.md`** — 迁移路线图
-7. **`docker-compose.yml`** — 总部署编排
+7. **`docs/05-plan/04-agent-completion-roadmap_v1_zh.md`** — 应用 Agent 完善（线 A）
+8. **三线总册（只读 POINTER）**：`/Users/cyning/Desktop/cyning-ai-program/PLAN_dual_track_v1_zh.md`
+9. **`docker-compose.yml`** — 总部署编排
 
 ---
 
