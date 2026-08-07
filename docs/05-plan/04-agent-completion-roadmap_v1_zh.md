@@ -61,8 +61,36 @@
 | ID | 项 | 验收 |
 |----|-----|------|
 | A-P1-1 | SSE 停止 · error · fallback | 生产笔记 + 演示 |
-| A-P1-2 | **Ops 仓内 RAG**（非 Ink） | 检索增强可演示 |
-| A-P1-3 | 观测字段手填模板 | 对齐 SPEC-evaluation-observation |
+| A-P1-2 | **Ops 仓内 RAG**（非 Ink）· 细化见 §P1-RAG | 检索增强可演示 |
+| A-P1-3 | 观测字段手填模板 | 对齐 SPEC-evaluation-observation（已签 2026-08-07） |
+| A-P1-4 | kind 本地 k8s 实操 · 细化见 §P1-K8S | kind 集群内服务跑通 |
+
+### P1-RAG · Ops 仓内 RAG 细化（2026-08-07 增）
+
+**语料**（v1 范围 · 已知组成 ≠ 已清洗）：英文 Issue/PR（多数）+ 中文 docs（05-plan / contracts / runbook）。v1 轻清洗（去 bot 评论、模板噪声）；chunk 粒度在 R-P0 契约页定。
+
+**基础设施现状**：pgvector 扩展已预埋（docker-compose `pgvector/pgvector:pg15` · DDL/migration 带 `CREATE EXTENSION`）；**无向量表、无入库管线、无向量数据**。
+
+| ID | 步骤 | 关键决策 / 产出 | 人节点 |
+|----|------|----------------|--------|
+| R-P0 | **契约页**（先于一切） | chunk 策略 + 元数据 schema + 引用约束/拒答条件 + **embedding 选型**（语料英文为主 + 中文提问 → 必须多语言：bge-m3 / multilingual-e5 / text-embedding-3） | `human-node:` 全项 |
+| R-1 | 向量表 migration | `ops_knowledge_chunks`：`vector(N)` 的 N 由 R-P0 选型定；`metadata jsonb`；`content_zh_summary` 列备选（首轮评测数据决定是否启用跨语言增强） | 表结构人审 |
+| R-2 | 入库管线 | 清洗 → chunk → embed → upsert；issue 变更增量重嵌 | — |
+| R-3 | 检索节点入 LangGraph | 混合召回：pgvector 语义 + PG `tsvector` 关键词（口径：tsvector 替代 ES BM25 角色，方案同构）→ 融合排序 → 强制引用 + 拒答；**汇入现有 chat graph，不做旁路脚本** | 拒答条件人定 |
+| R-4 | golden scenario 评测 | 四类：EN问→EN文档 基线 / **ZH问→EN文档 跨语言 ≥1/3** / ZH问→ZH文档 / 负样本拒答；recall@k 断言到文档 ID + 引用 ∈ 命中集 + 拒答正确率；报告对齐观测 SPEC（小样本老实标 confidence） | 首条 golden 人写 |
+| R-5 | Demo 证据表 | 版本/输入/结果/错误（生产候选增强口径） | 人口述 |
+
+**顺序纪律**：R-P0 契约未定不动 R-1（向量维度 / 元数据字段 / 中文摘要列全部由选型与 chunk 策略决定）。
+
+### P1-K8S · kind 本地实操（2026-08-07 增）
+
+| 项 | 内容 |
+|----|------|
+| 定位 | 面试防身术，非技能栈主线；时间盒 ≤2–3h/周；**RAG 上线后启动** |
+| 载体 | **本机 kind 集群**（k8s in Docker）；**禁止**动生产 Lighthouse（保持 docker-compose 单机 · Demo 资产） |
+| 对象清单 | Deployment / Service / liveness&readiness 探针 / resources limits / HPA / ConfigMap&Secret + 排查三板斧（`get/describe/logs`） |
+| 实操作业 | ops-desk-api 部署进 kind → 集群内访问通 → 滚动更新一次 → 故意 OOM 一次读事件 |
+| 简历纪律 | 完成前一字不写；完成后仅「熟悉 k8s 基础对象，kind 本地集群完成服务部署实操」；**永不写**生产 k8s 经验 |
 
 ### P2 · 受控扩展
 
@@ -102,4 +130,5 @@
 
 | 日期 | 说明 |
 |------|------|
+| 2026-08-07 | P1 细化：§P1-RAG（契约先行 R-P0→R-5 · 多语言 embedding · 四类 golden）+ §P1-K8S（kind 实操 · 时间盒 · 简历纪律） |
 | 2026-07-29 | 首版 · 对齐 cyning-ai-program |
