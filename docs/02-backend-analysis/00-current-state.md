@@ -229,3 +229,19 @@ v1 直接采用 **LangGraph + SSE 流式**，不再保留现有轮询架构：
 - `ops_sync_runs`
 - `ops_scan_snapshots`
 - `ops_graph_snapshots`
+
+### 8.1 现状修正（2026-08-08 实测 · 数据链断尾）
+
+上节「迁移调整」只落地了**接收端**。截至今日真实数据链：
+
+| 环节 | 现状 |
+|------|------|
+| 日更 GHA `ops-sync-kimi-code` | 仍在**旧仓** `Cyning12/ai-ink-brain-api-python` 运行（cron 每日 UTC 02:00 + 手动触发）；`api/ops/sync/store.py` 用 service role key **直写 Supabase**，不经过新 API |
+| 新仓 `ops-desk-api` | 只有接收端 `POST /api/ops/admin/sync`（2026-07-17 实现并测试）；**无任何发送方**（仓内无 sync workflow / 推送脚本） |
+| 新 PG（本地 / 生产） | 数据来自一次性快照 `scripts/import_from_supabase.py`（Supabase → 新 PG，幂等可重跑）；水位定格在导入时刻 |
+
+**后果**：新库不会自动变新。实例：2026-08-08 本地 `ops_issues` 最大 number = 2041，Supabase 已同步到 2738；#2720 缺口直接阻塞 RAG 金样 G01（见 `docs/contracts/rag-knowledge-contract-v1.md` 验收栏）。
+
+**刷新口径（路 1 · 现行）**：重跑 `import_from_supabase.py`（步骤见 `ops-desk-api/docs/ops/supabase-import-guide.md`），本地与生产同法。
+
+**根治（路 2 · 技术债）**：sender 迁移——GHA 改 POST `/api/ops/admin/sync` 而非直写 Supabase，脱离旧仓 / Supabase 依赖。task 卡：`ops-desk-api/docs/tasks/active/task_ops_sync_sender_migration.md`。

@@ -82,6 +82,8 @@
 
 **顺序纪律**：R-P0 契约未定不动 R-1（向量维度 / 元数据字段 / 中文摘要列全部由选型与 chunk 策略决定）。
 
+**数据前置（2026-08-08 查证）**：新 PG 无持续 sender（旧 GHA 直写 Supabase，新 API 只收不喂，见 `02-backend-analysis/00-current-state.md` §8.1）。G01 前置 = 重跑 `import_from_supabase.py`（路 1 · Supabase 已到 2738）；sender 迁移为独立技术债 task（路 2 · `ops-desk-api/docs/tasks/active/task_ops_sync_sender_migration.md`），不阻塞 RAG。
+
 ### P1-K8S · kind 本地实操（2026-08-07 增）
 
 | 项 | 内容 |
@@ -131,4 +133,5 @@
 | 日期 | 说明 |
 |------|------|
 | 2026-08-07 | P1 细化：§P1-RAG（契约先行 R-P0→R-5 · 多语言 embedding · 四类 golden）+ §P1-K8S（kind 实操 · 时间盒 · 简历纪律） |
+| 2026-08-08 | §P1-RAG 补数据前置：断尾查证（00-current-state §8.1）· 路 1 重跑 Supabase 导入解锁 G01 · 路 2 sender 迁移独立 task |
 | 2026-07-29 | 首版 · 对齐 cyning-ai-program |
