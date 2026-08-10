@@ -155,6 +155,88 @@ rag_ingest.py（CLI 薄壳：参数/引擎/装配）
 
 `Relevance` 四档枚举 + `_RANK` 排序表 · `_GRADER_SYSTEM` 判死定义 prompt · `decide` 纯函数闸（最高评级定三分支行为，空评级→拒答）· `parse_grades` 容错解析（非 JSON/未知枚举/越界 id 丢弃，宁缺毋滥）· `grade_chunks` top-5 批量一次调用（每 query +1 次便宜模型调用，契约 4b）。
 
+## 5. 阶段总结（2026-08-10 · 人总结 + AI 补全）
+
+> 第一性原理：**RAG 搭建第一步不是研究技术，是先看数据类型。**
+
+### 5.1 语料决定选型
+
+**语言构成 → embedding 模型**：
+
+| 语料 | 候选 | 备注 |
+|------|------|------|
+| 纯英文 | text-embedding-3-small/large · voyage-3 · bge-large-en-v1.5 · e5-large-en | 英文强，中文弱或无 |
+| 中英混合 | **bge-m3**（选定）· multilingual-e5-large · text-embedding-v3/v4（百炼）· Qwen3-Embedding（0.6B/4B/8B）· jina-embeddings-v3 | e5 系强制 `query:`/`passage:` 前缀 |
+
+选型纪律：① 维度选定即锁表（`vector(N)` 变更 = 重建 + 全量重灌）；② 最终裁决靠自家金样 recall@k，不靠公开榜单。
+
+**语料复杂度 → chunk 规则**：纯文本（小说/纯文档）用固定块/滑窗/段落即可；本语料是 md（表格/图片/代码/引用混合），代码块必须保原子性（方法级甚至程序级完整）。规则由语料实测驱动（881 issue 统计：103 img HTML / 110 视频 / 655 fence / 最大单块 4,019 字符 → E1–E9）。
+
+### 5.2 框架黑盒环节 ↔ 自建代码对照
+
+| 环节 | 框架黑盒 | 自建 |
+|------|----------|------|
+| 标题树解析 | `MarkdownNodeParser` 内部标题栈 | `chunker.parse_blocks` / `split_sections` |
+| 尺寸切分 | `SentenceSplitter`（分隔符优先级/句子正则/合并逻辑不可见；默认 tiktoken 计数，与被嵌模型不同源） | `_to_units` / `_pack` + bge-m3 tokenizer（E5） |
+| 嵌入封装 | `HuggingFaceEmbedding`（batch/设备/归一化默认值） | `embedder.py`（显式归一化 · 懒加载） |
+| 存储/查询 SQL | `PGVectorStore` 表结构与查询不可控 | R-1 自建 DDL + `retrieve.py` 明 SQL |
+| 增量 | `RecordManager` / `refresh_ref_docs` hash 语义 | 水位 + 整组替换 + 墓碑对账 |
+| 检索分数 | distance→score 变换不透明 | 显式 cosine + ts_rank + RRF |
+
+结论：定制规则占比高时，框架扩展点投入 ≈ 自建（AI 辅助下尤甚），且框架留有黑盒环节。
+### 5.3 Metadata 设计亮点
+
+- **身份 + 不可变快照入 chunk；易变字段（state/labels）查询时 join 活表**——不拷必过期的快照，一条 sync 管线管到底
+- **组合键 `(repo, source_type, source_id, chunk_index)`**：issue/PR 共享 number 序列，单 number 必撞
+- **fingerprint 戳**（`embedding_model`）：不是召回过滤器，是**防混库校验锚**——换模型必须全量重嵌（维度变还须重建表），戳让「忘了重嵌」当场报错而非静默腐烂（Ink rag_embedding_guard 实证；v1 已写戳，校验待补）
+- **分工原则**：用户会念的（标题/编号）进前缀参与向量；过滤展示字段留 metadata——两边都放 = 浪费 token + 稀释向量
+- `chunk_index` 兼任 golden 断言锚；`content_hash` 兼任重嵌水位；`images` 数组兼任多模态升级接口
+
+### 5.4 多模态升级路径（原位替换 · 可行性已论证）
+
+文本 chunk 的锚点（`[IMAGE#n]`）保位置、metadata 存 URL → VLM 生成描述 → **原位替换锚点重嵌**：位置语义完整、单向量空间、无需改表。适配性：本语料 103 条带图 issue 多为报错/UI 截图，OCR 级描述转化率即高。边界：高密度图（架构图）描述有损，终极路径是 ColPali 类视觉向量（独立列 + 检索期融合，v3 再议）——锚点设计不挡这条路。
+
+### 5.5 增量工程三件套（ingest.py）
+
+1. **水位**：`content_hash = sha1(title + 正文)`，切分前算，同单元全 chunk 共享
+2. **整组替换**：指纹变 → 单元级 DELETE + 重切重嵌 INSERT，逐单元 commit（崩溃可续）
+3. **墓碑对账**：源消失（文件删/issue 移除）的单元，chunk 整组 DELETE
+
+水位省的是**跨文档**的钱（未变单元零嵌入成本）；文档内不做 chunk 级差量（chunk_index 会漂移，无稳定身份）。
+
+### 5.6 评测体系
+
+**检索技术全景**：稠密语义（bge-m3 ✓）· 稀疏关键词（ts_rank 版，替代 BM25 角色 ✓）· RRF 融合（✓）· 精排 cross-encoder（备选未上）· **枚举评级闸（差异化 ✓）**。
+
+**金样断言**：recall@k（锚 `source_id#chunk_index`）· grader 评级 vs 人预判 `expect_relevance` · 引用 ∈ 命中集 · 负样本拒答正确率 · 评级稳定性（同输入评 3 次一致率）。
+
+**评测卫生——自引用污染**：金样 query 原文混入被测语料 → 指标虚高。污染源不是「docs 不该入库」，是「金样原文不该在被测语料里」。可观察信号：top 命中含 query 原文、双路命中、RRF 分数异常领先（实测：契约#13 以约第二名两倍分数登顶）。对策：评测断言前过滤含金样原文的文档。
+
+**坑：测试计数器分层**——单测用假计数器（确定性锁算法规则，秒级零模型）；真 tokenizer 的验收断言**不变量**（≤800 / fence 成对 / 8192 余量）不断言块数；假计数器对中文夹具失效（无空格按 1 词算），中文尺寸断言必须走真 tokenizer 集成测试。
+
+### 5.7 跨语言策略（Q6 先后手）
+
+已实现：**底座**（bge-m3 多语言嵌入，中文问英文语料语义路实测可中）。
+未实现：**先手** query 侧扩展（glossary：压缩→compaction…，落点 `retrieve.py` 关键词路之前；启动时机看 R-4 跨语言子集 recall@5）；**后手** `content_zh_summary` 列（recall <70% 才启用）。
+
+### 5.8 评级闸的两层演进（不是替代关系）
+
+```text
+在线枚举闸（grader · 便宜模型 · 请求路径内）   ← 第一线，实时挡垃圾，判死定义可复现
+        ↕ 被校准
+离线 LLM judge（大模型 · 异步抽评生产 trace）   ← 校准器，评估答案质量/引用忠实度
+```
+
+grader 本身就是 LLM-as-judge 的一种（CRAG 式）；「升级」的正确形态是**加离线 judge 层**（Langfuse evaluator 按 observation 名锚定 `answer_llm`），其评分与在线评级对照，分歧案例回喂金样库。反向警告：大模型 judge 不进在线路径（延迟/成本直接打在用户体感上）；判死定义的可复现性 > 判断的聪明度。
+
+### 5.9 考点地图（人未列到的重点/难点）
+
+1. 枚举闸：四档判死、五收四的决策（评级一致性 > 粒度）、分数不进闸的纪律、fail-closed
+2. 混合召回必要性证明：语义漏字面（函数名/issue 号）、关键词中文哑火——两方向失败均有实测
+3. 一词三义分工：工具节点查「这一条」（#n 精确）vs 检索节点答「哪条相关」（模糊语义）——路由裁决的基础
+4. 生产工程账：2C4G 内存（懒加载/空闲卸载/API 兜底）、HF 离线部署、驱动层坑族（CAST / unknown 类型 / psql≠驱动）
+5. 观测闭环：埋点设计（retriever/generation/闸 metadata）+ 官方基线自审
+
 ---
 
 ## 修订
@@ -162,3 +244,4 @@ rag_ingest.py（CLI 薄壳：参数/引擎/装配）
 | 日期 | 说明 |
 |------|------|
 | 2026-08-10 | 首版：能力对照 + 框架补法 + 面试叙事 + 全模块导读 |
+| 2026-08-10 | §5 阶段总结（人总结 + AI 补全）：选型/黑盒对照/metadata/多模态/增量/评测/跨语言/闸演进/考点地图 |

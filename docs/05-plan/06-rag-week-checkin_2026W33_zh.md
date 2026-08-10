@@ -104,6 +104,13 @@ A: 云免费版。自建栈 6 服务（ClickHouse/MinIO/Redis…）2C4G 生产�
   - [ ] sources 引用集合入 answer 输出
 - [ ] 复跑 smoke 出完整 RAG trace → langfuse-cli 自审 → 链接记入本节
 
+**坑关注点（R-3）**：
+
+- SQL 必须在真实驱动路径下验证（tsquery 坑族：psql 能过 ≠ psycopg 能过；`CAST()` 优于 `::`）
+- 补真 tokenizer 集成测试：断言**不变量**（content ≤800 / fence 成对 / 前缀+content <8192），**不断言块数**；假计数器中文边界写进测试头注释
+- 闸 fail-closed 落地时，日志必须区分「闸故障」与「真空命中」（否则拒答率指标失真）
+- retrieve 启动校验 `embedding_model` 戳（防混库当场报错）
+
 ### 完成记录 / 问答摘要 / 知识点 / 面试亮点
 
 > 待填
@@ -118,6 +125,13 @@ A: 云免费版。自建栈 6 服务（ClickHouse/MinIO/Redis…）2C4G 生产�
 - [ ] G06+ 金样人写（负样本拒答优先级最高）
 - [ ] 首跑评测 + 判读 + 修复
 
+**坑关注点（R-4）**：
+
+- **自引用污染**：断言前过滤含金样原文的文档（实测契约#13 双路命中登顶）
+- 小样本老实标 `confidence: low`；首跑 `comparability: not_comparable`（观测 SPEC 纪律）
+- grader 稳定性抽查：同输入评 3 次一致率入报告
+- 跨语言子集 recall@5 < 70% → 触发 Q6 先手（glossary query 扩展）
+
 > 待填
 
 ---
@@ -131,6 +145,13 @@ A: 云免费版。自建栈 6 服务（ClickHouse/MinIO/Redis…）2C4G 生产�
 - [ ] 拍板：生产 embedder 自部署 vs API 兜底（降级预案已备）
 - [ ] 生产库灌库 + 同验（契约验收栏 checkbox 在此勾掉）
 
+**坑关注点（生产部署）**：
+
+- **先 `alembic current` 再 upgrade**（孤儿 revision 教训；migration 未 commit 不碰 DB）
+- 生产 pgvector 扩展存在性验证（`SELECT extname FROM pg_extension WHERE extname='vector'`）
+- 2C4G 内存实测：bge-m3 常驻 +1~2GB 与 FastAPI/PG/Nginx 共存；OOM 即切 ApiEmbedder（一行构造）
+- 镜像构建期烘模型 + `HF_HUB_OFFLINE=1`（双 revision 快照教训）；镜像 +2.3GB
+
 > 待填
 
 ---
@@ -142,6 +163,12 @@ A: 云免费版。自建栈 6 服务（ClickHouse/MinIO/Redis…）2C4G 生产�
 - [ ] 上线验收（生产候选增强口径）
 - [ ] Demo 证据表（版本/输入/结果/错误）
 - [ ] 3 分钟口述自检（检索链路 + 枚举闸 + 评测闭环）
+
+**坑关注点（上线）**：
+
+- 口径纪律：「生产候选增强」≠「全能力已生产」；证据表四要素齐全才算数
+- 负样本现场问一遍：拒答话术必须是契约原文「未查询到相关内容，无法针对此问题进行回答」
+- 抽查新 trace：RAG 段（retrieve/grade/gate metadata）在 Langfuse 里齐全才算观测闭环
 
 > 待填
 
