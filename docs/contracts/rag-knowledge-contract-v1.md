@@ -97,6 +97,7 @@ Content: <切分后的正文(含 [IMAGE#n] 锚点)>
 | E5 | **token 计数口径** | 800 只管 content(不含前缀);计数用 bge-m3 真实 tokenizer(sentencepiece),不用字符近似——混合语料字符/token 比波动大(英文 ~4、代码 ~1.5–2、中文 ~1) | embed 输入 = 前缀 + content,E1 断言含前缀 |
 | E6 | **引用块 `>`** | v1 不处理;近重复 chunk 风险记录,评论入库时再议 | issue 正文引用他人内容产生重复向量 |
 | E7 | **空正文单元**(2026-08-10 增补) | body 为空(实测 9/2748:issue 4 + PR 5)→ 仅标题 chunk 入库,保证可按标题检索;空标题才跳过 | 全量灌库对账发现 9 单元零 chunk |
+| E9 | **嵌套/非平衡 fence**(2026-08-10 增补 · 预填待确认) | 按 CommonMark 语义解析(内层 ``` 视为闭合),chunk 边界可能落在逻辑代码块中段;**无内容丢失**;全库实测 5/881(0.6%),不修;CommonMark 长度配对版参考实现已落码未调用(`chunker.parse_blocks_commonmark` / `clean._fence_segments_commonmark`) | LI 对照实验 #1089 解剖发现 |
 
 
 
