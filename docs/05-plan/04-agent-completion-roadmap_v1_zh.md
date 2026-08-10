@@ -76,7 +76,7 @@
 | R-P0 | **契约页**（先于一切） | chunk 策略 + 元数据 schema + 引用约束/拒答条件 + **embedding 选型**（语料英文为主 + 中文提问 → 必须多语言：bge-m3 / multilingual-e5 / text-embedding-3） | `human-node:` 全项 |
 | R-1 | 向量表 migration | `ops_knowledge_chunks`：`vector(N)` 的 N 由 R-P0 选型定；`metadata jsonb`；`content_zh_summary` 列备选（首轮评测数据决定是否启用跨语言增强） | 表结构人审 |
 | R-2 | 入库管线 | 清洗 → chunk → embed → upsert；issue 变更增量重嵌 | — |
-| R-3 | 检索节点入 LangGraph | 混合召回：pgvector 语义 + PG `tsvector` 关键词（口径：tsvector 替代 ES BM25 角色，方案同构）→ 融合排序 → 强制引用 + 拒答；**汇入现有 chat graph，不做旁路脚本** | 拒答条件人定 |
+| R-3 | 检索节点入 LangGraph | 混合召回：pgvector 语义 + PG `tsvector` 关键词（口径：tsvector 替代 ES BM25 角色，方案同构）→ 融合排序 → 强制引用 + 拒答；**汇入现有 chat graph，不做旁路脚本**；观测：retrieve(retriever)/grade(generation)/闸 metadata 埋点入 Langfuse trace（2026-08-10 增补） | 拒答条件人定 |
 | R-4 | golden scenario 评测 | 四类：EN问→EN文档 基线 / **ZH问→EN文档 跨语言 ≥1/3** / ZH问→ZH文档 / 负样本拒答；recall@k 断言到文档 ID + 引用 ∈ 命中集 + 拒答正确率；报告对齐观测 SPEC（小样本老实标 confidence） | 首条 golden 人写 |
 | R-5 | Demo 证据表 | 版本/输入/结果/错误（生产候选增强口径） | 人口述 |
 
