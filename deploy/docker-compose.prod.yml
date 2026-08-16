@@ -23,7 +23,7 @@ services:
   # 稠密向量副本；不映射公网端口（仅 compose 内网 http://qdrant:6333）
   # 2C4G 整机：qdrant 建议 ≤2g，给 db+api 留余量（本地开发可用更高 mem_limit）
   qdrant:
-    image: qdrant/qdrant:v1.13.6
+    image: qdrant/qdrant:v1.19.0
     restart: unless-stopped
     volumes:
       - qdrant_data:/qdrant/storage
