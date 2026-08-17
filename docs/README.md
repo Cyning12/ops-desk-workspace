@@ -21,7 +21,8 @@ docs/
 │   ├── 00-local-postgresql-setup.md
 │   ├── 01-environment-setup.md
 │   ├── 02-prod-env-reload.md  # 生产改 .env 如何真正进容器
-│   └── 03-ops-desk-secret-incident.md
+│   ├── 03-ops-desk-secret-incident.md  # 2026-08-17：密钥丢失 / 重发邀请码
+│   └── 04-rag-embed-cold-start_note_20260817.md  # 记录：本地 bge-m3 冷启动 → retrieve 分钟级
 ├── 05-plan/                  # 迁移路线图 · Agent 完善 · RAG
 │   ├── 00-migration-roadmap.md
 │   ├── 01-epic-task-backlog.md
