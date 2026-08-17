@@ -46,6 +46,8 @@ services:
       OPS_DESK_SECRET: ${OPS_DESK_SECRET:?OPS_DESK_SECRET required}
       OPS_DESK_AUTH_MODE: db
       OPS_LLM_PROVIDER: ${OPS_LLM_PROVIDER:-siliconflow}
+      OPS_LLM_MODEL: ${OPS_LLM_MODEL:-}
+      SILICONFLOW_BASE_URL: ${SILICONFLOW_BASE_URL:-https://api.siliconflow.cn/v1}
       SILICONFLOW_API_KEY: ${SILICONFLOW_API_KEY}
       BAILIAN_API_KEY: ${BAILIAN_API_KEY}
       BAILIAN_BASE_URL: ${BAILIAN_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}
@@ -60,10 +62,22 @@ services:
       QDRANT_URL: ${QDRANT_URL:-http://qdrant:6333}
       QDRANT_COLLECTION: ${QDRANT_COLLECTION:-ops_knowledge}
       RAG_FTS_CONFIG: ${RAG_FTS_CONFIG:-simple}
+      RAG_KW_EXPAND: ${RAG_KW_EXPAND:-false}
       RAG_RERANK_ENABLED: ${RAG_RERANK_ENABLED:-true}
       RAG_RERANK_MIN_SCORE: ${RAG_RERANK_MIN_SCORE:-0.4}
       RAG_RERANK_SCORE_RATIO: ${RAG_RERANK_SCORE_RATIO:-0.75}
       RAG_GRADER_PROMPT: ${RAG_GRADER_PROMPT:-v1}
+      RAG_GRADER_PROVIDER: ${RAG_GRADER_PROVIDER:-bailian}
+      RAG_GRADER_MODEL: ${RAG_GRADER_MODEL:-qwen3.7-flash}
+      RAG_LC_ANSWER_PROVIDER: ${RAG_LC_ANSWER_PROVIDER:-}
+      RAG_LC_ANSWER_MODEL: ${RAG_LC_ANSWER_MODEL:-}
+      OPS_CHAT_TRACER: ${OPS_CHAT_TRACER:-}
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY:-}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY:-}
+      LANGFUSE_BASE_URL: ${LANGFUSE_BASE_URL:-}
+      # 生产访问不了 huggingface.co；须与 /opt/ops-desk/.env 同名键一起改
+      HF_ENDPOINT: ${HF_ENDPOINT:-}
+      HF_HUB_OFFLINE: ${HF_HUB_OFFLINE:-0}
     depends_on:
       db:
         condition: service_healthy
