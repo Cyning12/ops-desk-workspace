@@ -17,7 +17,8 @@ docs/
 │   └── 00-current-state.md
 ├── 04-infrastructure/        # 服务器、域名、备案、预算
 │   ├── 00-server-recommendation.md
-│   └── 01-environment-setup.md
+│   ├── 01-environment-setup.md
+│   └── 02-prod-env-reload.md  # 生产改 .env 如何真正进容器
 ├── 05-plan/                  # 迁移路线图 · Agent 完善
 │   ├── 00-migration-roadmap.md
 │   ├── 03-post-go-live-hygiene-orchestration.md
