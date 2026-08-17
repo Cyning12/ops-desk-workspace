@@ -71,6 +71,7 @@ ssh ops-desk 'sudo docker compose -f /opt/ops-desk/deploy/docker-compose.prod.ym
 | 前端更新（先 `pnpm build`） | `./deploy.sh --skip-api` |
 | 全量 | `./deploy.sh` |
 | 只改 Nginx | `./deploy.sh --nginx-only` |
+| **只改** `/opt/ops-desk/.env` | **不要** `restart`。见 [`docs/04-infrastructure/02-prod-env-reload.md`](../docs/04-infrastructure/02-prod-env-reload.md)：`up -d --no-deps api` 后 `printenv` 核对 |
 
 ## 回滚
 
