@@ -61,6 +61,8 @@ services:
       RAG_QDRANT_SHADOW_WRITE: ${RAG_QDRANT_SHADOW_WRITE:-false}
       QDRANT_URL: ${QDRANT_URL:-http://qdrant:6333}
       QDRANT_COLLECTION: ${QDRANT_COLLECTION:-ops_knowledge}
+      # 查询期 HNSW ef；未写 .env 时默认 30（与 api backend 默认一致）
+      QDRANT_HNSW_EF: ${QDRANT_HNSW_EF:-30}
       RAG_FTS_CONFIG: ${RAG_FTS_CONFIG:-simple}
       RAG_KW_EXPAND: ${RAG_KW_EXPAND:-false}
       RAG_RERANK_ENABLED: ${RAG_RERANK_ENABLED:-true}
