@@ -41,6 +41,10 @@ cd ops-desk-workspace/deploy
 
 ### 4. 首次初始化数据
 
+再次生成邀请码（密钥轮换后、邀请用尽时同一条；每次运行都是**新 token**）：
+
+脚本在 api 仓 `scripts/create_initial_user.py`。必须在 **当前容器已加载的 `OPS_DESK_SECRET`** 下执行。丢失密钥的查询与轮换见 [`docs/04-infrastructure/03-ops-desk-secret-incident.md`](../docs/04-infrastructure/03-ops-desk-secret-incident.md)。
+
 ```bash
 # 初始 maintainer + 邀请密钥（记录输出的 invite_token）
 ssh ops-desk 'sudo docker compose -f /opt/ops-desk/deploy/docker-compose.prod.yml \
