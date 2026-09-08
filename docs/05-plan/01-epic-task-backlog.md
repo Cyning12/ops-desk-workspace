@@ -1,7 +1,8 @@
 # Ops Desk Kimi Code v1 · Epic 任务清单
 
-> 创建日期：2026-07-16  
-> 关联：[`00-migration-roadmap.md`](./00-migration-roadmap.md) · `ops-desk-api/docs/tasks/active/task_llm_provider_v1.md`
+> 创建日期：2026-07-16 · **现状注记更新日期：2026-09**  
+> 关联：[`00-migration-roadmap.md`](./00-migration-roadmap.md) · [`04-agent-completion-roadmap_v1_zh.md`](./04-agent-completion-roadmap_v1_zh.md) · 前端快照 `docs/03-frontend-analysis/00-current-state.md` §0  
+> ~~`ops-desk-api/docs/tasks/active/task_llm_provider_v1.md`~~ → LLM Provider / Epic 6 **已完成**（勿再当作 active 暗示）
 
 ---
 
@@ -15,23 +16,26 @@
 
 ---
 
-## 当前现状速览
+## 当前现状速览（2026-09）
 
 | 维度 | 完成度 | 说明 |
 |---|---|---|
-| 工程骨架 | ~85% | FastAPI 入口、路由挂载、Docker Compose、Makefile 就绪 |
+| 工程骨架 | ~85%+ | FastAPI 入口、路由挂载、Docker Compose、Makefile 就绪；**迁移主线已上线** |
 | 配置管理 | ~90% | `app/config.py`、`.env.example` 完整 |
-| 数据库与 ORM | ~90% | 12 张表模型 + Alembic 初始迁移 + DDL 完整 |
-| 技术图谱 | ~70% | `00_main`、`10_flow_chat` 已生成；`01_struct` 模块表已定义 |
-| API 路由注册 | ~85% | 6 个子路由已挂载；issues/pulls/graph 已实现 |
-| **LLM Provider** | **~100%** | **SiliconFlow / 百炼 Provider 已实现，fallback 链路可用** |
-| **Chat 核心链路** | **~100%** | **图结构、LLM 接入、事件映射、持久化均已完成** |
-| 认证鉴权 | ~100% | DB session + HttpOnly Cookie + invite token + maintainer 保护已实现 |
-| 业务数据接口 | ~100% | Overview / Issues / PRs / Graph / Chat Models 全部实现 |
-| Admin 同步 | ~95% | GHA sync upsert + Supabase 初始导入脚本已实现；真实数据回填进行中 |
-| 测试 | ~55% | auth/chat/admin sync/issues/pulls/graph 测试已补齐；Provider/Chat 节点独立测试待补 |
+| 数据库与 ORM | ~95% | 表模型 + Alembic（含 `ops_knowledge_chunks` / lg-rag threads·events；head 见后端 §0）；评测与生产水位另见 agent 路线 |
+| 技术图谱 | 进行中 | web 图谱 SPEC **P0–P2 CLOSE**；**P3 未做（待确认排期）** |
+| API 路由 | 已扩展 | Overview/Issues/Pulls/Graph + **lg-rag** / LC Evidence 等；旧 chat stream 弃用 |
+| **LLM Provider** | **~100%** | SiliconFlow / 百炼 + fallback；**已完成**（非 active） |
+| **Chat 主路径** | **lg-rag** | `POST /api/ops/lg-rag/stream`（+ replay）；旧 `/ops/chat/stream` → **410**；web T2–T6 **完成**（含 T6 删旧 SSE） |
+| **RAG / Qdrant** | 已推进 | 生产 compose 含 qdrant；切流/对账细节见 api deployment 文档（本表不重核） |
+| **§10.7 running 起步帧** | **待 CLOSE** | 代码已合；联调勾选 / task CLOSE → **待确认** |
+| 认证鉴权 | ~100% | DB session + HttpOnly Cookie + invite + maintainer |
+| 业务数据接口 | ~100% | Overview / Issues / PRs / Graph / Chat Models |
+| Admin 同步 | ~95% | GHA sync upsert；无独立 Admin 页（Overview 可见 sync） |
+| 前端 Web | 已上线 | Vue3 + Vite + Pinia + Element Plus + 水墨 CSS；无仓内 Dockerfile；`deploy-web` rsync `dist` |
+| 测试 | 提升中 | auth/chat/admin/issues 等基线；lg-rag / Vitest 守卫另见各仓 |
 
-**当前状态**：🚀 **已上线** https://www.cynaya.cn（2026-07-25）。Epic 1~6 + 8.1~8.5/8.7 完成。剩余：8.6 备份策略、GHA CI 推送、Chat 优化（逐 token / WS 鉴权）、契约对齐、first_review_at 供数。
+**当前状态**：🚀 **迁移主线已上线** https://www.cynaya.cn（2026-07-25 起）。Epic 1~6 + 8.1~8.5/8.7 完成。Chat 已切 **lg-rag**。剩余/后续：8.6 备份、GHA CI 推送、Agent 完善路线、**§10.7 CLOSE（待确认）**、图谱 **P3（待确认）**、生产 nginx 是否已改（**待确认**）。
 
 ---
 
@@ -116,7 +120,9 @@
 
 ## Epic 6：LLM Provider 与 Chat 流式回答
 
-**目标**：实现 `POST /api/ops/chat/stream`，SSE 实时返回 thinking/answer/tool_result/done/error，并持久化完整事件流。
+**目标（历史）**：实现 `POST /api/ops/chat/stream`，SSE 实时返回 thinking/answer/tool_result/done/error，并持久化完整事件流。
+
+> **纠偏（2026-09）**：Epic 6 作为 **chat/stream 时代**里程碑 **已完成**。现网 Chat 主路径为 **lg-rag SSE**（`/api/ops/lg-rag/stream` + replay）；旧 stream **410**。web 侧 lg-rag T2–T6 已完成。下表状态保留「已完成」，勿再标「进行中」。
 
 | # | 任务 | 验收标准 | 当前状态 | 阶段 | 依赖 |
 |---|---|---|---|---|---|
@@ -130,9 +136,9 @@
 | 6.8 | Chat SSE 路由端到端 | `POST /api/ops/chat/stream` 本地可调用并收到完整 SSE 事件；失败路径符合 task 失败路径表 | 已完成 | Phase 2 | 6.7 |
 | 6.9 | Chat 单元/集成测试 | Provider mock 测试；SSE 事件格式测试；DB 持久化测试 | 已完成 | Phase 2 | 6.8 |
 
-**非范围**：多轮对话上下文压缩、复杂 tool calling、RAG 向量检索、文件上传/图片理解。
+**非范围（Epic 6 当时）**：多轮对话上下文压缩、复杂 tool calling、RAG 向量检索、文件上传/图片理解。
 
-> **说明**：Epic 6 即 `ops-desk-api/docs/tasks/active/task_llm_provider_v1.md` 的当前执行范围。
+> **说明（纠偏）**：Epic 6 曾对应 `task_llm_provider_v1.md`；该 task **已完成**，**不是** active。RAG / lg-rag / §10.7 等后续见 agent 完善路线与各仓 active task（CLOSE 待确认项见文首速览）。
 
 ---
 
@@ -145,7 +151,7 @@
 | 7.1 | 测试基础设施 | `conftest.py` 提供 async client、DB session fixture、LLM mock | 骨架 | Phase 2 | 2.1 |
 | 7.2 | Provider 单元测试 | SiliconFlow / 百炼 mock HTTP 测试；fallback 链测试 | 未开始 | Phase 2 | 6.1, 6.2 |
 | 7.3 | Chat 节点测试 | `intent_node`、`load_context_node`、`answer_node` 独立单元测试 | 未开始 | Phase 2 | 6.4, 6.5 |
-| 7.4 | Chat SSE 集成测试 | 调用 `/api/ops/chat/stream` 验证事件序列与持久化 | 未开始 | Phase 2 | 6.8 |
+| 7.4 | Chat SSE 集成测试 | 调用 `/api/ops/chat/stream` 验证事件序列与持久化（**历史路径**；现网主测 lg-rag） | 历史路径曾规划；以各仓现测为准（勿当「进行中 chat/stream」） | Phase 2 | 6.8 |
 | 7.5 | 业务接口测试 | Overview / Issues / PRs / Graph 接口返回预期结构 | Issues/PRs/Graph 已完成；Overview 待补 | Phase 3 | 5.1~5.4 |
 | 7.6 | Lint 与类型检查 | `ruff check app tests` 通过；必要时启用 `pyright`/`mypy` | 部分完成 | Phase 1 | 1.4 |
 
@@ -196,3 +202,4 @@
 | 2026-07-24 | Epic 5.1 完成（PR #7，Overview 指标 + first_review_at 补列 + 测试隔离 opsdesk_test）；Epic 5 全部完成 |
 | 2026-07-24 | 域名 ICP 通过；用户拍板等 Web 一起部署；Web 前端 Epic 拆解 W0–W8（含 harness 2.2.1 导入）落盘 ops-desk-web |
 | 2026-07-25 | Web 前端 W0–W8 完成；Epic 8 部署上线 https://www.cynaya.cn（PR #8）；8.6 备份与 GHA CI 留后续 |
+| 2026-09 | 现状速览对齐 lg-rag 主路径、RAG/Qdrant、web T2–T6、§10.7 / 图谱 P3 待确认；去掉 `task_llm_provider_v1` active 暗示 |
