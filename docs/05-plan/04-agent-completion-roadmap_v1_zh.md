@@ -11,7 +11,7 @@
 
 > **边界**：本文件只规划 **线 A（应用 Agent）**。完整 HE Runtime → 程序总册线 B2，**不**在本 API 仓实现 coding agent 外壳。  
 > **研发模式（H6）**：关键节点人主导（契约 / 首测 / 停条件）；AI 辅助样板与扩展。真值：`cyning-ai-program/docs/DEV_MODE_guided_human_v1_zh.md`。  
-> **进度（2026-09）**：迁移主线已上线；Chat 主路径 lg-rag SSE；RAG 表/入库/Qdrant 默认读、Capability/supervisor 已大幅推进。下文计划表 **保留**；仅纠偏「现状」陈述与已完成项标注。未结案：§10.7 `task_lg_rag_sse_subtask_live` **待 CLOSE**；生产向量水位 **待人工**。
+> **进度（2026-09）**：迁移主线已上线；Chat 主路径 lg-rag SSE；RAG 表/入库/Qdrant 默认读、Capability/supervisor 已大幅推进。下文计划表 **保留**；仅纠偏「现状」陈述与已完成项标注。§10.7 subtask 过程可见（running/step/message + web reveal）**已全链 CLOSE**（2026-09-08 · 详见 `../README.md`  checklist）；未结案：生产向量水位 **待人工**。
 
 ---
 
