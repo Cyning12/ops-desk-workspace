@@ -66,7 +66,7 @@ docs/
 - [x] 完成核心跨仓契约：auth / data / chat-stream / admin-sync（另有 RAG / tool-context 契约）
 - [x] **迁移主线已上线**：生产域名 [cynaya.cn](https://www.cynaya.cn)；Chat 产品主路径为 **lg-rag SSE**（`POST /api/ops/lg-rag/stream`）；旧 `POST /api/ops/chat/stream` → **410**（T6）
 - [x] 线 A / RAG / Capability：**已大幅推进**（supervisor + SO Gateway + Capability Gateway；`ops_knowledge_chunks`；默认 Qdrant 可降级 pgvector）
-- [ ] **§10.7 subtask-live**：api [#125](https://github.com/Cyning12/ops-desk-api/pull/125) + web [#38](https://github.com/Cyning12/ops-desk-web/pull/38) **代码已合入**；task `task_lg_rag_sse_subtask_live` **待 CLOSE**（勿当已结案）
+- [x] **§10.7 subtask 过程可见全链闭环**（2026-09-08）：running 起步帧 api [#125](https://github.com/Cyning12/ops-desk-api/pull/125)+web [#38](https://github.com/Cyning12/ops-desk-web/pull/38) · step 里程碑 api [#127](https://github.com/Cyning12/ops-desk-api/pull/127) · 客户端 reveal 队列 web [#39](https://github.com/Cyning12/ops-desk-web/pull/39) · 可读 `message` api [#130](https://github.com/Cyning12/ops-desk-api/pull/130)+web [#41](https://github.com/Cyning12/ops-desk-web/pull/41) · 实流响应式修复 web [#43](https://github.com/Cyning12/ops-desk-web/pull/43)；相关 task 全部 CLOSE 归档
 - [ ] 线 A 剩余：按 `04-agent-completion-roadmap` 补齐评测 / Demo 证据 / 仍开放的 P1–P2 项（总册 cyning-ai-program）
 
 > ~~AI 下一步：后端数据库 DDL + LangGraph 节点详细设计~~ — **已过时**（迁移主线与 lg-rag 编排已上线；DDL/Alembic 与节点设计随 api 仓演进）。
