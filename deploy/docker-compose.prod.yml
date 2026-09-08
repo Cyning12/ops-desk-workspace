@@ -83,6 +83,7 @@ services:
       # 生产访问不了 huggingface.co；须与 /opt/ops-desk/.env 同名键一起改
       HF_ENDPOINT: ${HF_ENDPOINT:-}
       HF_HUB_OFFLINE: ${HF_HUB_OFFLINE:-0}
+      OPS_ADMIN_SYNC_TOKEN: ${OPS_ADMIN_SYNC_TOKEN:-}
     depends_on:
       db:
         condition: service_healthy
