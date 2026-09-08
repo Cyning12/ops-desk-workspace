@@ -317,7 +317,7 @@ VITE_API_BASE_URL=/api
 | `DB_PASSWORD` | PostgreSQL 密码 |
 | `SILICONFLOW_API_KEY` | SiliconFlow API Key |
 | `BAILIAN_API_KEY` | 百炼 API Key |
-| `OPS_DESK_SECRET` | 鉴权 Secret |
+| `OPS_DESK_SECRET` | 登录 HMAC 胡椒（Cookie/邀请码 hash）；丢失与重发邀请见 [`03-ops-desk-secret-incident.md`](./03-ops-desk-secret-incident.md) |
 | `SYNC_ADMIN_SECRET` | Sync 鉴权 Secret |
 
 ### 10.2 部署密钥

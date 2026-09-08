@@ -1,7 +1,26 @@
 # 前端现状分析：ai-ink-brain/app/ops/kimi-code/
 
-> 分析日期：2026-07-15  
-> 技术栈：Next.js 15 App Router + TypeScript + Tailwind CSS
+> 分析日期：2026-07-15（正文）· **2026-09 快照见 §0**  
+> 技术栈（正文历史）：Next.js 15 App Router + TypeScript + Tailwind CSS  
+> **现网真值（2026-09）**：以 §0 为准；**勿把下方 2026-07 Next.js 迁移前分析当作现网真值**。
+
+---
+
+## 0. 2026-09 现状快照（真值优先）
+
+> 本节约束：只写已落地或文档可证事实；联调勾选 / CLOSE / 图谱 P3 / 生产 nginx 是否已改 → **标待确认**，不编造。
+
+| 维度 | 真值（2026-09） |
+|---|---|
+| **技术栈** | Vue3 + Vite + Pinia + Element Plus + 水墨 CSS。**非** Next.js；**不引** Tailwind；**无** `@microsoft/fetch-event-source` |
+| **路由 / 页面** | Login / Overview / Obs / Issues / Pulls / Graph / Chat / LC Evidence / LG RAG；**无独立 Admin 页**（sync 状态可在 Overview） |
+| **Chat 主线** | `useLgRagSse` + Pinia chat → `POST /api/ops/lg-rag/stream`（+ replay）。能力：`thread_id`、断联续看、delta 打字机、idle 120s、编排/子任务分区、§10.7 running 起步帧（web PR #38 已合 main） |
+| **旧 chat SSE** | `useOpsChatSse` / `/ops/chat/stream` 已 **T6 删除**；Vitest 守卫防回退；旧 stream 侧为 410（以 api 弃用 task 为准） |
+| **图谱** | SPEC **P0–P2 已 CLOSE**；**P3 未做**（双写收敛 + CI 强化 · **待确认**维护者拍板与排期） |
+| **部署** | 仓内**无** Dockerfile；GHA `deploy-web` rsync `dist`；前端相对路径 `/api`。生产 nginx 是否已为 lg-rag / 新页改过 → **待确认** |
+| **Active task** | `web-lg-rag-sse-subtask-live` 文档仍 **active**；代码已合 main；**§10.7 联调勾选 / CLOSE → 待确认** |
+
+**正文定位**：自「## 1. 页面结构」起为 **2026-07 Next.js 迁移前**分析与当时迁移建议（含 Tailwind / `fetch-event-source` / `POST /chat/stream` 等），仅作历史对照。
 
 ---
 

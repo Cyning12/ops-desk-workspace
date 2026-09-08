@@ -43,6 +43,8 @@ docker compose -f docker-compose.prod.yml --env-file /opt/ops-desk/.env \
 
 重建 `api` 会丢掉容器可写层里的 HuggingFace 缓存（现网未挂 `HF_HOME` volume）。关精排后仍要加载嵌入模型 `BAAI/bge-m3`，**必须先预热再点前端**，否则第一次 LC Evidence 会在下载 ~2.2GB 时被 Nginx/浏览器 120s 掐掉：
 
+> **问题记录（2026-08-17）**：查询路径硬编码本地 ST → retrieve 可到分钟级。只记不改码见 [`04-rag-embed-cold-start_note_20260817.md`](./04-rag-embed-cold-start_note_20260817.md)；迁移到 SiliconFlow `ApiEmbedder` 见 [`../tasks/active/task_rag_embed_api_backend.md`](../tasks/active/task_rag_embed_api_backend.md)。
+
 ```bash
 docker compose -f docker-compose.prod.yml --env-file /opt/ops-desk/.env \
   exec -T api python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('BAAI/bge-m3'); print('bge-m3 loaded ok')"
@@ -212,6 +214,7 @@ SPEC 曾锁生产默认关精排，但现网 compose 默认是 **开**。所以�
 | 切读 Qdrant / PG | `RAG_VECTOR_BACKEND=qdrant` 或 `pgvector` | 同上 | `printenv RAG_VECTOR_BACKEND` |
 | HuggingFace 镜像站 | `HF_ENDPOINT=https://hf-mirror.com` | 同上；**compose 必须有该键** | `printenv HF_ENDPOINT` |
 | LLM / SiliconFlow key | 改对应 `*_API_KEY` | 同上 | **不要**把 key 打进聊天或日志；只确认 `printenv` 非空 |
+| 鉴权 HMAC | `OPS_DESK_SECRET`（丢失见 [`03-ops-desk-secret-incident.md`](./03-ops-desk-secret-incident.md)） | 同上；**禁止**只 `restart` | 只确认 `printenv` 非空；轮换后须重发邀请码 |
 
 ---
 
@@ -269,3 +272,4 @@ SPEC 曾锁生产默认关精排，但现网 compose 默认是 **开**。所以�
 |---|---|
 | 2026-08-17 | 首稿。起因：`.env` 已 `RAG_RERANK_ENABLED=false`，容器 `printenv` 仍为 `true`（`restart` 不够） |
 | 2026-08-17 | 现网已 `printenv='false'`；补日志对照：`IncompleteRead`≠OOM；recreate 丢 HF 缓存导致前端仍红 |
+| 2026-08-17 | 手改 `.env` 丢掉 `OPS_DESK_SECRET` → GHA compose 插值失败；查询/轮换/重发邀请见 `03-ops-desk-secret-incident.md` |

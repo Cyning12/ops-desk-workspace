@@ -1,11 +1,35 @@
 # 后端现状分析：ai-ink-brain-api-python/api/ops/
 
-> 分析日期：2026-07-15  
-> 范围：Ops Desk 后端，不含 unified_chat / text2sql / RAG ingest 等通用模块
+> 分析日期：2026-07-15（§1 起）  
+> 范围（历史）：Ops Desk 后端，不含 unified_chat / text2sql / RAG ingest 等通用模块  
+> **现网真值**：见下方 **§0 · 2026-09 现状快照**；实现仓为 `ops-desk-api` / `ops-desk-web`
+
+---
+
+## 0. 2026-09 现状快照（真值优先）
+
+> **读法**：本节能覆盖「现在线上/仓内是什么」；**§1 起全文是 2026-07 迁移前分析**，其中目录名、轮询 events、`rag_*`「v1 不迁移」、旧 Chat 入口等 **勿当现网真值**。  
+> **未实测水位**：生产向量库条数 / 对账水位标为 **待人工**；§10.7 task 结案标为 **待 CLOSE**。
+
+| 维度 | 现网 / 仓内真值（2026-09） |
+|------|---------------------------|
+| **Chat 主路径** | `POST /api/ops/lg-rag/stream`（freeze `lg-rag-sse-v1`，默认 `mode=supervisor`）；另有 `/invoke`、`/replay`。旧 `POST /api/ops/chat/stream` → **410 Gone**（T6） |
+| **SSE 能力** | `updates`；顶层 `cursor` + `POST /api/ops/lg-rag/replay`；终答 `answer` delta（T5.1）；idle keepalive（§10.6）；`subtask.progress` `running`\|`done`（§10.7：api [#125](https://github.com/Cyning12/ops-desk-api/pull/125) 已合入，**task 待 CLOSE**） |
+| **RAG** | 表 `ops_knowledge_chunks`；默认 `RAG_VECTOR_BACKEND=qdrant`（失败可降级 `pgvector`）；影子写 / DLQ；ingest 管线已有；compose Qdrant **v1.19**。生产向量水位：**待人工** |
+| **编排** | `lg_rag` supervisor + SO Gateway + Capability Gateway |
+| **Auth / 数据面** | DB session 鉴权；Issues / PRs / Overview / Graph 已落地；Admin sync 接收端 + **GHA sender 已迁**（api [#88](https://github.com/Cyning12/ops-desk-api/pull/88)）——旧「断链 / 无发送方」叙述过时 |
+| **LLM** | SiliconFlow 默认首项 **DeepSeek-V4-Flash**；百炼 fallback 链保留 |
+| **Alembic head** | `20260831_lg_rag_run_events` |
+| **部署** | GHA `deploy-api` 已合入 `master`（push 触发） |
+| **Active** | `task_lg_rag_sse_subtask_live` **待 CLOSE**（代码已合入 ≠ task 结案） |
+
+交叉索引：线 A / RAG 计划纠偏见 [`../05-plan/04-agent-completion-roadmap_v1_zh.md`](../05-plan/04-agent-completion-roadmap_v1_zh.md)；传输 Spec 见 api 仓 `docs/spec/agent-infra/05_lg_rag_transport_and_session_plan_v0.md`。
 
 ---
 
 ## 1. 目录结构
+
+> **历史（2026-07）**：下列树与路径指迁移源仓 `ai-ink-brain-api-python`，**不是**现网 `ops-desk-api` 目录真值。
 
 ```
 api/ops/
@@ -48,6 +72,8 @@ api/ops/
 
 > v1 的 Chat 不依赖向量检索，直接把 issue 的 title/body 作为文本上下文注入 LLM。
 
+> **〔2026-09 引用注〕** 上表「RAG v1 不迁移」为 **迁移前决策**，现已过时。现网有 `ops_knowledge_chunks`、默认 Qdrant、ingest；Chat 主路径走 lg-rag SSE。见 **§0**。
+
 ---
 
 ## 3. 模型调用与切换逻辑
@@ -73,6 +99,8 @@ _PROVIDERS = {
 |---|---|---|
 | SiliconFlow | `deepseek-ai/DeepSeek-V4-Pro` | ❌ 不自动换模 |
 | Bailian | `deepseek-v4-pro` | ✅ 配额耗尽时按链降级 |
+
+> **〔2026-09 引用注〕** SiliconFlow 现网默认首项为 **DeepSeek-V4-Flash**（见 §0）；上表为迁移前目录快照，勿当现默认。
 
 **Bailian fallback 链**（按顺序）：
 1. `kimi/kimi-k2.7-code`（test_only）
@@ -109,6 +137,8 @@ BAILIAN_MODEL=qwen-plus
 - `POST /api/ops/chat/messages` — 发起对话
 - `GET  /api/ops/runs/{id}` — 查询 run 状态
 - `GET  /api/ops/runs/{id}/events?after_seq=...` — 增量事件轮询
+
+> **〔2026-09 引用注〕** 产品主路径已是 `POST /api/ops/lg-rag/stream`；旧 `POST /api/ops/chat/stream` → **410**。轮询 events **勿当现网真值**。见 §0。
 
 ### 4.2 当前流程
 
@@ -232,7 +262,9 @@ v1 直接采用 **LangGraph + SSE 流式**，不再保留现有轮询架构：
 
 ### 8.1 现状修正（2026-08-08 实测 · 数据链断尾）
 
-上节「迁移调整」只落地了**接收端**。截至今日真实数据链：
+> **〔2026-09 引用注〕** 本节描述的「无发送方 / 断尾」已由 **GHA sender 迁移（api #88 · done）** 根治；勿再把本节当现网同步链路真值。生产 sync 水位仍可能需运维核对，标 **待人工**。见 §0。
+
+上节「迁移调整」只落地了**接收端**。截至 **2026-08-08** 真实数据链：
 
 | 环节 | 现状 |
 |------|------|
@@ -244,4 +276,6 @@ v1 直接采用 **LangGraph + SSE 流式**，不再保留现有轮询架构：
 
 **刷新口径（路 1 · 现行）**：重跑 `import_from_supabase.py`（步骤见 `ops-desk-api/docs/ops/supabase-import-guide.md`），本地与生产同法。
 
-**根治（路 2 · 技术债）**：sender 迁移——GHA 改 POST `/api/ops/admin/sync` 而非直写 Supabase，脱离旧仓 / Supabase 依赖。task 卡：`ops-desk-api/docs/tasks/active/task_ops_sync_sender_migration.md`。
+**根治（路 2 · 技术债）**：sender 迁移——GHA 改 POST `/api/ops/admin/sync` 而非直写 Supabase，脱离旧仓 / Supabase 依赖。task 卡（当时）：`ops-desk-api/docs/tasks/active/task_ops_sync_sender_migration.md`。
+
+> **〔2026-09〕路 2 已完成**：task 已归档 `ops-desk-api/docs/tasks/done/task_ops_sync_sender_migration.md`（PR #88）。

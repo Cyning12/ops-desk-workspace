@@ -65,6 +65,8 @@ services:
       QDRANT_HNSW_EF: ${QDRANT_HNSW_EF:-30}
       RAG_FTS_CONFIG: ${RAG_FTS_CONFIG:-simple}
       RAG_KW_EXPAND: ${RAG_KW_EXPAND:-false}
+      RAG_EMBED_BACKEND: ${RAG_EMBED_BACKEND:-siliconflow}
+      RAG_EMBED_MODEL: ${RAG_EMBED_MODEL:-BAAI/bge-m3}
       RAG_RERANK_ENABLED: ${RAG_RERANK_ENABLED:-true}
       RAG_RERANK_BACKEND: ${RAG_RERANK_BACKEND:-siliconflow}
       RAG_RERANK_MIN_SCORE: ${RAG_RERANK_MIN_SCORE:-0.4}
@@ -83,6 +85,7 @@ services:
       # 生产访问不了 huggingface.co；须与 /opt/ops-desk/.env 同名键一起改
       HF_ENDPOINT: ${HF_ENDPOINT:-}
       HF_HUB_OFFLINE: ${HF_HUB_OFFLINE:-0}
+      OPS_ADMIN_SYNC_TOKEN: ${OPS_ADMIN_SYNC_TOKEN:-}
     depends_on:
       db:
         condition: service_healthy
