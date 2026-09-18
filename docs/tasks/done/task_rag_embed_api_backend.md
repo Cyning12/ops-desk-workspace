@@ -1,7 +1,9 @@
 # Task：查询路径嵌入改为 SiliconFlow API（默认 ApiEmbedder）
 
-> **状态**：draft（闸 pending · 禁 30）  
+> **状态**：`done`（workspace 总单归档 · **实现已在 api 完成**）  
 > **类型**：feature / RAG 嵌入层 · 运维减负  
+> **归档说明**：2026-09-18 核验 — api 仓 `docs/tasks/done/task_rag_embed_api_backend.md` 已 CLOSE（2026-08-17）；`get_query_embedder` + Chat/LC 两入口已接线；`.env.example` / `deploy/docker-compose.prod.yml` 已透传 `RAG_EMBED_BACKEND`。本文件为过期 active 副本，**勿再开工**。  
+> **实现真值**：`ops-desk-api/docs/tasks/done/task_rag_embed_api_backend.md`  
 > **上游记录**：`docs/04-infrastructure/04-rag-embed-cold-start_note_20260817.md`（workspace · 冷启动只记）  
 > **契约对照**：`docs/contracts/rag-knowledge-contract-v1.md` Q3（bge-m3@1024；ApiEmbedder 为已备降级路径）  
 > **先例**：`ops-desk-api` · `task_siliconflow_rerank_api`（精排已 HTTP）；`app/ops/rag/embedder.py` · `ApiEmbedder` 已存在  
@@ -36,9 +38,9 @@
 
 | human_gate_id | status | blocks_hats | 说明 |
 |---|---|---|---|
-| HG-TASK-DRAFT | pending | 22-R1 | workspace 起草；维护者签或 api 00 代签后再审 |
-| HG-AUDIT-R1 | pending | 30 | 须 api 仓落盘 `docs/harness/reviews/task_rag_embed_api_backend_audit_R1_*.md`；未签禁 30 |
-| HG-GRAPH-MODULES | approved | 30 | api 真值 `docs/_tech_graph/l1/01_modules.md`；本 task 不新增一级模块 |
+| HG-TASK-DRAFT | approved | 22-R1 | 实现已在 api CLOSE；本总单 2026-09-18 归档，不再待签 |
+| HG-AUDIT-R1 | approved | 30 | 见 api `task_rag_embed_api_backend_audit_R1_20260817.md`；workspace 总单不再开工 |
+| HG-GRAPH-MODULES | approved | 30 | api 真值 `docs/_tech_graph/l1/01_modules.md`；已含 SiliconFlow 默认查询 embed |
 
 ---
 
@@ -190,3 +192,4 @@ mock embeddings + 断言不加载 ST；人工小机无预热抽检。
 | 日期 | 说明 |
 |---|---|
 | 2026-08-17 | workspace 首稿：查询默认 ApiEmbedder；冷启动记录仅指针 |
+| 2026-09-18 | 核验：api 已 CLOSE 且代码/compose 已接线 → workspace active 副本归档至 done（勿再开工） |
