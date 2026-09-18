@@ -1,2 +1,13 @@
 # Local deploy secrets (never commit)
 docs/04-infrastructure/deploy-info.local.md
+
+# Node（仅钉 spec-wave）
+node_modules/
+
+# SpecWave / coding-kit local state
+.coding-kit/backups/
+.coding-kit/local.json
+.dsh/skills/
+
+# SpecWave audit event trail (local)
+docs/harness/audit/

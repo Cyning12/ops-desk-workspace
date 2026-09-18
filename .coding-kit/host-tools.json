@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "host_ids": [
+    "cursor",
+    "claude",
+    "agents"
+  ],
+  "profile": "core",
+  "updated_at": "2026-09-18T02:20:59.578Z",
+  "kit_semver": "3.0.0"
+}

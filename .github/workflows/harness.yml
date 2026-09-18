@@ -1,0 +1,22 @@
+name: harness
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  harness-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: SpecWave check
+        run: npx --yes spec-wave@3.0.0 check --target .
+      - name: Graph compile test
+        run: ./scripts/graph-compile.sh
