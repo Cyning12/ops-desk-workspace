@@ -32,7 +32,7 @@
 | **invoke_retention_profile** | `minimal` |
 | **required_invoke_hats** | `10,30` |
 | **close_pr_policy** | `required` |
-| **related_pr** | （30 开 PR 后回填） |
+| **related_pr** | [#7](https://github.com/Cyning12/ops-desk-workspace/pull/7) |
 | **review_hat** | `20` |
 
 ### 人工闸
@@ -238,4 +238,4 @@ version/manifest/活文档字面/verify/compile 双锚落定。
 - [x] 无 hooks 入库
 - [x] graph-compile · 活文档旧字面零命中 · 策略改各仓自钉
 - [x] verify PASS · FEEDBACK 落盘 · S2 既有 task/invokes 仍在
-- [ ] PR 开出（commit 后回填 related_pr）
+- [x] PR 开出 · [#7](https://github.com/Cyning12/ops-desk-workspace/pull/7)
