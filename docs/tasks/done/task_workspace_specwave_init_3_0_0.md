@@ -1,6 +1,6 @@
 # Task：workspace 引入 SpecWave 3.0.0（greenfield · harness-only）
 
-> **状态**：`in_progress`  
+> **状态**：`done`  
 > **类型**：基础设施 / harness 过程轨 **首次接入**（非升级）  
 > **对照**：`ops-desk-api` / `ops-desk-web` 均已钉 **`spec-wave@3.0.0`**（api：`task_specwave_upgrade_3_0_0` done · web：PR #47）  
 > **钉版裁定**：本仓 **直接钉 `3.0.0`**（三仓过程面齐钉；ios 除外）  
@@ -32,7 +32,7 @@
 | **invoke_retention_profile** | `minimal` |
 | **required_invoke_hats** | `10,30` |
 | **close_pr_policy** | `required` |
-| **related_pr** | [#7](https://github.com/Cyning12/ops-desk-workspace/pull/7) |
+| **related_pr** | `#7` |
 | **review_hat** | `20` |
 
 ### 人工闸
@@ -135,19 +135,19 @@
 
 ## 验收标准
 
-- [ ] 根 `package.json` `"spec-wave": "3.0.0"`（exact）；lock 对齐 3.0.0  
-- [ ] `.coding-kit/manifest.json` `version`=3.0.0 · `preset`=harness-only  
-- [ ] `npx --yes spec-wave@3.0.0 --version`（或 `node_modules/.bin/spec-wave --version`）= 3.0.0  
-- [ ] `npx spec-wave check --target .` exit 0 ·「已是最新」  
-- [ ] 存在 `docs/harness/prompts/` Starter 白名单（含 `FRAGMENT_30_gate_verify_v1_zh.md` 等）  
-- [ ] `AGENTS.md` 含 `npx spec-wave verify` 字面；`cyning-harness-local`（若有）保留跨仓边界纪律  
-- [ ] **无**入库 `.cursor/hooks.json`；Claude settings **无新增** hook-guard PreToolUse（或与 main 一致）  
-- [ ] `grep -n 'KIT_CLI=.*spec-wave@3.0.0' scripts/graph-compile.sh` 命中；`./scripts/graph-compile.sh` exit 0  
-- [ ] 活文档：`grep -n '@cyning/harness' docs/01-scope/01-harness-tech-graph-strategy.md docs/01-scope/00-project-brief.md docs/01-scope/02-cross-repo-communication.md` **零命中**（历史 done 档不扫）  
-- [ ] 策略文不再把「workspace 统一分发」列为现行推荐（改为各仓自钉 + workspace harness-only）  
-- [ ] `npx spec-wave verify --target . --task docs/tasks/active/task_workspace_specwave_init_3_0_0.md` PASS  
-- [ ] FEEDBACK 落盘；既有 active `task_rag_embed_api_backend.md` 与 post-h invokes **仍在**  
-- [ ] PR 开出且本地上列命令可核验（本仓无 CI workflow 则不挡）
+- [x] 根 `package.json` `"spec-wave": "3.0.0"`（exact）；lock 对齐 3.0.0  
+- [x] `.coding-kit/manifest.json` `version`=3.0.0 · `preset`=harness-only  
+- [x] `npx --yes spec-wave@3.0.0 --version`（或 `node_modules/.bin/spec-wave --version`）= 3.0.0  
+- [x] `npx spec-wave check --target .` exit 0 ·「已是最新」  
+- [x] 存在 `docs/harness/prompts/` Starter 白名单（含 `FRAGMENT_30_gate_verify_v1_zh.md` 等）  
+- [x] `AGENTS.md` 含 `npx spec-wave verify` 字面；`cyning-harness-local`（若有）保留跨仓边界纪律  
+- [x] **无**入库 `.cursor/hooks.json`；Claude settings **无新增** hook-guard PreToolUse（或与 main 一致）  
+- [x] `grep -n 'KIT_CLI=.*spec-wave@3.0.0' scripts/graph-compile.sh` 命中；`./scripts/graph-compile.sh` exit 0  
+- [x] 活文档：`grep -n '@cyning/harness' docs/01-scope/01-harness-tech-graph-strategy.md docs/01-scope/00-project-brief.md docs/01-scope/02-cross-repo-communication.md` **零命中**（历史 done 档不扫）  
+- [x] 策略文不再把「workspace 统一分发」列为现行推荐（改为各仓自钉 + workspace harness-only）  
+- [x] `npx spec-wave verify --target . --task docs/tasks/active/task_workspace_specwave_init_3_0_0.md` PASS  
+- [x] FEEDBACK 落盘；既有 active `task_rag_embed_api_backend.md` 与 post-h invokes **仍在**  
+- [x] PR `#7` MERGED · CI harness-check 绿
 
 ---
 
@@ -238,4 +238,8 @@ version/manifest/活文档字面/verify/compile 双锚落定。
 - [x] 无 hooks 入库
 - [x] graph-compile · 活文档旧字面零命中 · 策略改各仓自钉
 - [x] verify PASS · FEEDBACK 落盘 · S2 既有 task/invokes 仍在
-- [x] PR 开出 · [#7](https://github.com/Cyning12/ops-desk-workspace/pull/7)
+- [x] PR `#7` MERGED（2026-09-18）
+
+### KPI
+
+Task_KPI%: 100 · 钉 3.0.0 harness-only ✓ · 策略纠偏 ✓ · hooks 不入库 ✓ · verify/compile/CI 绿 ✓ · PR #7 MERGED
