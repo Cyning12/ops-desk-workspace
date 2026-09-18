@@ -207,7 +207,7 @@ Claude Code 的 skills、hooks、MCP 都是**单会话 / 单 workspace** 的。�
 | workspace 总 task + 子 task | 人工/AI 按流程 spawn | 低 |
 | GitHub PR 模板 | 强制填写"影响面""前端/iOS 是否需要跟进" | 低 |
 | CI contract check | 校验 api 实现与 workspace 契约是否一致 | 中 |
-| `@cyning/harness verify` | 30 前检查 task 是否读取了最新契约 | 低 |
+| `npx spec-wave verify` | 30 前检查 task 闸表 / 契约纪律（各仓自钉 CLI） | 低 |
 | GitHub webhook + 脚本 | 后端 PR merged 后自动创建 web/ios follow-up task | 高 |
 
 **v1 推荐**：用 workspace 总 task + 子 task + PR 模板，不追求 webhook 自动化。

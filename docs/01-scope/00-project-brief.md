@@ -77,9 +77,9 @@ Chat 交互：直接采用 **SSE 流式**，前端实时展示思考过程。
 7. **默认 LLM Provider**：SiliconFlow
 8. **iOS v1 范围**：登录页 + Chat 页
 9. **部署编排**：`ops-desk-workspace` 维护总 `docker-compose.yml`
-10. **研发纪律**：接入 `@cyning/harness`，技术图谱采用 **`.graph.yaml` + `.md` 双轨**，无 `.ai.md`；**废弃 `graph.json`**；人工闸采用轻量版
+10. **研发纪律**：接入 **SpecWave（`spec-wave`）**，技术图谱采用 **`.graph.yaml` + `.md` 双轨**，无 `.ai.md`；**废弃 `graph.json`**；人工闸采用轻量版
 
 ## 6. 下一步待决策
 
 1. **技术图谱接口完整性**：是否将 API endpoint / SSE 事件契约 / 表结构全部纳入 `_tech_graph/` 作为对接文档？（推荐：是）
-2. **harness 落盘细节**：每个子仓单独初始化 `@cyning/harness`，还是 workspace 统一分发后再同步到子仓？（推荐：workspace 统一分发）
+2. **harness 落盘细节**：（已裁定）**各实现仓自钉** `spec-wave`（api/web = 3.0.0；workspace = harness-only 3.0.0）；**不做** workspace 统一分发；ios 用 OpenSpec、不接入 SpecWave

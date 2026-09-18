@@ -1,40 +1,51 @@
 # Harness 接入与技术图谱策略
 
-> 更新日期：2026-07-15  
-> 范围：Ops Desk 四仓库如何接入 `@cyning/harness`，以及技术图谱如何作为接口对接文档
+> 更新日期：2026-09-18（纠偏 SpecWave）  
+> 范围：Ops Desk 四仓库如何接入 **SpecWave（`spec-wave`）**，以及技术图谱如何作为接口对接文档  
+> 包演进：原 cyning harness npm 包 → `dsh-coding-kit` → **`spec-wave`**（现行安装终点）
 
 ---
 
 ## 1. 接入目标
 
-在项目开发中引入 `@cyning/harness` 纪律包，实现：
+在项目开发中引入 **SpecWave** 纪律包，实现：
 
 - 统一 AI Coding 流程：task → spec/task-audit → code → self-check → close
 - 每次代码/接口变更后，同步更新技术图谱
 - 技术图谱同时作为**架构地图**和**接口对接文档**
-- 采用 harness v2 推荐的 **YAML-first 双轨**：`.graph.yaml` 为源，`*.md` 为编译生成物
+- 采用 **YAML-first 双轨**：`.graph.yaml` 为源，`*.md` 为编译生成物
 - **不再使用 `.ai.md`**
 
 ---
 
 ## 2. 接入方式
 
-### 2.1 推荐：workspace 统一分发
+### 2.1 现行裁定：各仓自钉（废弃「workspace 统一分发」）
+
+| 仓 | SpecWave | 说明 |
+|---|---|---|
+| `ops-desk-api` | **钉 `3.0.0`** | fullstack-node-py |
+| `ops-desk-web` | **钉 `3.0.0`** | 前端过程轨 |
+| `ops-desk-workspace` | **钉 `3.0.0` · preset `harness-only`** | 文档/契约/统筹；轻量落盘 |
+| `ops-desk-ios` | **不接入** | OpenSpec |
+
+**废弃**：以 workspace 为中心 `harness-sync` 向子仓推送模板的「统一分发」方案。各仓各自 `package.json` exact 钉版 + `.coding-kit/manifest.json`，自行 `upgrade` / `sync prompts`。
+
+### 2.2 workspace 落盘（现行）
 
 ```
 ops-desk-workspace/
-├── package.json                    # devDependency: @cyning/harness
+├── package.json                    # devDependency: spec-wave@3.0.0
+├── .coding-kit/manifest.json
 ├── scripts/
-│   ├── harness-init.sh             # 初始化四仓库 harness 骨架
-│   ├── harness-sync.sh             # 同步 harness 模板更新到子仓
-│   └── graph-compile.sh            # 编译 .graph.yaml → .md
+│   └── graph-compile.sh            # KIT_CLI=spec-wave@3.0.0
 ├── docker-compose.yml
 └── docs/
-    └── _tech_graph/                # workspace 级总图
-        ├── 00_main.graph.yaml
-        ├── 00_main.md
-        ├── 01_struct.md            # 模块边界表（人签）
-        └── 99_mermaid_protocol.md
+    ├── _tech_graph/                # workspace 级总图（可先最小骨架）
+    │   └── 00_main.graph.yaml
+    ├── tasks/
+    └── harness/
+        └── prompts/
 ```
 
 子仓保留各自的 `docs/_tech_graph/`：
@@ -42,36 +53,40 @@ ops-desk-workspace/
 - `ops-desk-api/docs/_tech_graph/` — 后端路由、LangGraph、数据库表
 - `ops-desk-ios/docs/_tech_graph/` — iOS 页面、URLSession SSE
 
-workspace 总图通过 `::triggers` / `::depends_on` 指向子仓子图。
+workspace 总图通过锚点 / `::triggers` / `::depends_on` 指向子仓子图（满图另 task 充实）。
 
-### 2.2 子仓 harness 初始化命令
-
-在每个子仓根执行：
+### 2.3 子仓 / workspace 初始化命令
 
 ```bash
-npx @cyning/harness@latest init --preset harness-only --ide cursor,agents --yes
+# 文档仓（workspace）
+npx spec-wave@3.0.0 init --preset harness-only --tools cursor,claude,agents --yes
+
+# 实现仓（api/web 示例；preset 按仓）
+npx spec-wave@3.0.0 init --preset harness-only --tools cursor,claude,agents --yes
 ```
 
-生成：
-- `.cyning-harness/manifest.json`
+生成 / 维护：
+- `.coding-kit/manifest.json`（现行落盘根；legacy `.cyning-harness/` 只读若存在）
 - `docs/harness/prompts/`
 - `docs/tasks/active/` / `docs/tasks/done/`
-- `docs/_tech_graph/` 模板
-- `AGENTS.md` / `CLAUDE.md` 入口
+- `AGENTS.md` / `CLAUDE.md` 产品块
 
-### 2.3 CI 验证
+**hooks**：3.0.0 `host apply` 可能物化 Cursor/Claude hooks；Ops Desk **约定不入库 hooks**，门禁以 CLI `verify --task` 为准。
 
-每个子仓 CI 增加：
+### 2.4 CI / 本地验证
+
+各实现仓 CI / 本地：
 
 ```bash
-npx @cyning/harness verify --target . --task docs/tasks/active/task_xxx.md
+npx spec-wave verify --target . --task docs/tasks/active/task_xxx.md
+./scripts/graph-compile.sh
 ```
 
-workspace CI 增加：
+workspace：
 
 ```bash
-npx @cyning/harness gate-check --target ./ops-desk-api --graph
-npx @cyning/harness gate-check --target ./ops-desk-web --graph
+npx spec-wave verify --target . --task docs/tasks/active/task_xxx.md
+./scripts/graph-compile.sh
 ```
 
 ---
@@ -86,7 +101,7 @@ npx @cyning/harness gate-check --target ./ops-desk-web --graph
 | 前端图 | `ops-desk-web/docs/_tech_graph/` | 页面路由、组件、Pinia store、API client、SSE 事件处理 |
 | 后端图 | `ops-desk-api/docs/_tech_graph/` | FastAPI 路由、LangGraph 节点、DB 表、SSE 事件契约 |
 | iOS 图 | `ops-desk-ios/docs/_tech_graph/` | SwiftUI 页面、网络层、SSE 解析 |
-| 数据同步 | `ops-desk-workspace/docs/_tech_graph/10_flow_sync.graph.yaml` | GHA sync → admin endpoint → PG |
+| 数据同步 | `ops-desk-workspace/docs/_tech_graph/10_flow_sync.graph.yaml` | GHA sync → admin endpoint → PG（可后续补） |
 
 ### 3.2 接口契约纳入图谱
 
@@ -126,9 +141,8 @@ nodes:
 修改流程：
 
 1. 改 `.graph.yaml`（唯一编辑源）
-2. 运行 `node scripts/graph_yaml_compile.js` 生成 `.md`
-3. 运行 `npx @cyning/harness graph yaml check --input docs/_tech_graph`
-4. 提交 `.graph.yaml` + `.md` + 生成的 `_manifest.json` / `_contract_manifest.json`
+2. 运行 `./scripts/graph-compile.sh`（默认 `KIT_CLI=spec-wave@3.0.0`）
+3. 提交 `.graph.yaml` + 编译生成的 `.md`（及仓内若有的 `_manifest.json` / `graph.json` 产物）
 
 ---
 
@@ -136,32 +150,28 @@ nodes:
 
 ### 4.1 当前情况
 
-现有子仓使用 `graph.json`（由 `.ai.md` 导出）作为机器轨，schema 见 `ai-ink-brain/docs/_tech_graph/graph_v2_schema.md`。
+历史子仓曾用 `graph.json`（由 `.ai.md` 导出）作为机器轨。
 
-### 4.2 推荐方案：全面切到 harness v2 YAML-first
+### 4.2 推荐方案：YAML-first
 
-**决策：全面切到 harness v2 YAML-first，废弃现有 `graph.json`。**
+**决策：全面切到 YAML-first，废弃以 `.ai.md` 为源的旧轨。**
 
 理由：
-- `@cyning/harness` v2 已明确 YAML-first，`.ai.md` 已弃用。
-- `.graph.yaml` 可以同时表达架构拓扑和接口契约（通过节点 `contract` 字段）。
-- `npx @cyning/harness graph yaml compile|check` 提供机械校验。
-- `_manifest.json` / `_contract_manifest.json` 由 CI 从 YAML 生成，作为运行时 artifact。
-- 新仓库 `ops-desk-*` 从头开始，无需兼容旧 `graph_v2_schema.md`。
+- SpecWave / 原 harness v2 明确 YAML-first，`.ai.md` 已弃用。
+- `.graph.yaml` 可同时表达架构拓扑和接口契约（`contract` 字段）。
+- `npx spec-wave graph yaml compile|check` 提供机械校验。
 
-### 4.3 迁移步骤
+### 4.3 迁移步骤（历史 · 多数已完成于 api/web）
 
-1. 在 `ops-desk-workspace` 初始化 harness，复制 `graph/templates/` 到 `docs/_tech_graph/`。
-2. 按 Ops Desk 业务填写 `01_struct.md` 模块边界表。
-3. 用 `.graph.yaml` 重写总图和各子流程图。
-4. 在关键 endpoint / DB / 事件节点上附加 `contract` 字段。
-5. 废弃 `.ai.md` 和 `graph.json` 机器轨；由 harness 生成 `_manifest.json`。
-6. 后续新增接口时，先改 `.graph.yaml` 再改代码。
+1. 各仓初始化 SpecWave + `docs/_tech_graph/`。
+2. 填写模块边界表（人签 `HG-GRAPH-MODULES`）。
+3. 用 `.graph.yaml` 维护总图与子流程。
+4. 关键 endpoint / DB / 事件节点附加 `contract`。
+5. 新增接口：先改 `.graph.yaml` 再改代码。
 
 ### 4.4 兼容性说明
 
-- 如果某些 IDE 插件或脚本仍依赖 `graph.json`，可临时保留一个转换脚本，但不作为主源。
-- v1 不追求与旧 `graph_v2_schema.md` 的向后兼容；新仓库从头开始。
+- api/web 可保留仓内 `graph.json` 转换脚本作运行时 artifact，**不以**其为编辑源。
 
 ---
 
@@ -171,7 +181,7 @@ nodes:
 
 | 闸 | 触发时机 | 作用 |
 |---|---|---|
-| `HG-GRAPH-MODULES` | 首次填写 `01_struct` 后 | 模块边界人签，未 approved 不 30 |
+| `HG-GRAPH-MODULES` | 首次填写模块边界后 | 未 approved 不 30 |
 | `HG-TASK-DRAFT` | 每个 task 起草后 | task 范围确认 |
 | `HG-AUDIT-R1` | 30 编码前 | task 审核通过 |
 | `HG-CLOSE` | 40 自检后 | 关账确认 |
@@ -181,12 +191,12 @@ nodes:
 **决策：v1 采用轻量版人工闸。**
 
 启用：
-- `HG-GRAPH-MODULES`（模块边界人签，未 approved 不进入 30 编码）。
-- `HG-AUDIT-R1`（30 编码前 task 审核）。
+- `HG-GRAPH-MODULES`
+- `HG-AUDIT-R1`
 
 简化：
 - `HG-TASK-DRAFT` / `HG-CLOSE` 由人与 AI 协作完成，不强制独立闸。
-- 一人项目下，task 起草、自检、关账合并为同一流程，但须落盘 invoke。
+- 一人项目下须落盘 invoke。
 
 ---
 
@@ -198,25 +208,14 @@ nodes:
 ops-desk-workspace/
 ├── AGENTS.md
 ├── CLAUDE.md
-├── package.json
+├── package.json                  # spec-wave@3.0.0
 ├── scripts/
-│   ├── harness-init.sh
-│   ├── harness-sync.sh
 │   └── graph-compile.sh
 ├── docker-compose.yml
-├── nginx.conf
 └── docs/
-    ├── README.md
     ├── _tech_graph/
-    │   ├── 00_main.graph.yaml
-    │   ├── 00_main.md
-    │   ├── 01_struct.md
-    │   ├── 10_flow_sync.graph.yaml
-    │   ├── 10_flow_sync.md
-    │   └── 99_mermaid_protocol.md
+    │   └── 00_main.graph.yaml
     ├── tasks/
-    │   ├── active/
-    │   └── done/
     └── harness/
         └── prompts/
 ```
@@ -226,22 +225,12 @@ ops-desk-workspace/
 ```
 ops-desk-api/
 ├── AGENTS.md
-├── CLAUDE.md
-├── package.json                  # devDependency: @cyning/harness
+├── package.json                  # spec-wave@3.0.0
 ├── scripts/
 │   └── graph-compile.sh
 ├── app/
-├── tests/
 └── docs/
     ├── _tech_graph/
-    │   ├── 00_main.graph.yaml
-    │   ├── 00_main.md
-    │   ├── 01_struct.md
-    │   ├── 10_flow_chat.graph.yaml
-    │   ├── 10_flow_chat.md
-    │   ├── 11_flow_auth.graph.yaml
-    │   ├── 11_flow_auth.md
-    │   └── 99_mermaid_protocol.md
     ├── tasks/
     └── harness/
 ```
@@ -252,18 +241,16 @@ ops-desk-api/
 
 | 风险 | 应对 |
 |---|---|
-| harness 学习成本 | v1 先用轻量版闸；复杂流程后续逐步引入 |
-| 图谱维护 overhead | 每次代码变更后强制更新 `.graph.yaml`；CI 校验不通过则阻断 |
-| 子仓图谱与 workspace 总图不同步 | workspace 总图通过节点 `::triggers` 指向子仓；子仓变更时同步更新锚点 |
-| 现有 `graph.json` 工具链废弃 | 提前评估是否有其他脚本依赖；必要时写临时兼容层 |
+| SpecWave 学习成本 | 轻量版闸；workspace 用 harness-only |
+| 图谱维护 overhead | 变更后强制 `./scripts/graph-compile.sh` |
+| 子仓图与总图不同步 | 总图锚点；子仓变更时更新 workspace 边 |
+| 3.0 hooks 物化 | **不入库**；门禁仅 CLI verify |
 
 ---
 
 ## 8. 下一步
 
-1. **人确认**：是否全面切到 harness v2 YAML-first，废弃现有 `graph.json`？
-2. **人确认**：人工闸启用全集还是轻量版？
-3. **AI 下一步**：
-   - 初始化 `ops-desk-workspace` 的 harness 骨架 + `docs/_tech_graph/`
-   - 输出后端数据库 DDL
-   - 输出 `ops-desk-api` 的 `00_main.graph.yaml` + `01_struct.md` 初稿
+1. ~~YAML-first / 轻量闸~~：**已裁定**  
+2. ~~workspace SpecWave 骨架~~：见 `task_workspace_specwave_init_3_0_0`  
+3. 充实 workspace 总图（契约 / sync 流）— 另 task  
+4. 子仓图谱与契约持续对齐

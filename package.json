@@ -1,0 +1,12 @@
+{
+  "name": "ops-desk-workspace",
+  "private": true,
+  "description": "Harness kit pin only; docs/orchestration workspace (no app runtime)",
+  "scripts": {
+    "check:kit": "spec-wave check --target .",
+    "graph:compile": "bash scripts/graph-compile.sh"
+  },
+  "devDependencies": {
+    "spec-wave": "3.0.0"
+  }
+}

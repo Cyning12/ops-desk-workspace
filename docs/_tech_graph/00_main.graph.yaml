@@ -1,0 +1,55 @@
+schema_version: "inform_graph.v3"
+graph_id: "00_main"
+title: "ops-desk-workspace 跨仓总图（最小骨架）"
+description: "四仓锚点级总图；契约与数据流细节另 task 充实。ios 不接入 SpecWave（OpenSpec）。"
+version: "2026-09-18"
+layer: "G-L0"
+primary_layer: "G-L0"
+depth: "framework"
+direction: "TB"
+
+nodes:
+  - id: "workspace"
+    label: "ops-desk-workspace"
+    kind: struct
+
+  - id: "api"
+    label: "ops-desk-api"
+    kind: struct
+
+  - id: "web"
+    label: "ops-desk-web"
+    kind: struct
+
+  - id: "ios"
+    label: "ops-desk-ios"
+    kind: struct
+
+  - id: "compose"
+    label: "docker-compose"
+    kind: flow
+
+edges:
+  - from: "workspace"
+    to: "api"
+    label: "契约 / 总 task"
+
+  - from: "workspace"
+    to: "web"
+    label: "契约 / 总 task"
+
+  - from: "workspace"
+    to: "ios"
+    label: "契约 / 总 task"
+
+  - from: "workspace"
+    to: "compose"
+    label: "部署编排"
+
+  - from: "web"
+    to: "api"
+    label: "HTTP / SSE"
+
+  - from: "ios"
+    to: "api"
+    label: "HTTP / SSE"
