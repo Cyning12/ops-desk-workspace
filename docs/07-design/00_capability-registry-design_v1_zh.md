@@ -728,9 +728,80 @@ claim(key) ──┬─ 无记录 → 建 in_flight（租约=now+TTL）→ acqui
 
 | 未做 | 后果 |
 |---|---|
-| **DB 版 `IdempotencyStore` / `ReceiptSink` 实现** | 当前是**进程内**存储与 sink——**多实例下每个进程各一份**，跨实例防重无效（表结构已就位，实现是直译） |
-| **启动装配** | 默认是 `NullIdempotencyStore`（**显式不防重并每次告警**，不假装做到了）。上线前必须 `set_idempotency_store(...)` |
-| **租约巡检任务** | 卡住的 `in_flight` 需要运维/定时任务扫出来人工确认下游状态 |
+| ~~DB 版 `IdempotencyStore` / `ReceiptSink` 实现~~ | ✅ **已在 §19 完成** |
+| ~~启动装配~~ | ✅ **已在 §19 完成**（`OPS_CAPABILITY_PERSISTENCE=db\|memory`） |
+| **租约巡检任务** | 卡住的 `in_flight` 需要运维/定时任务扫出来人工确认下游状态（`DbIdempotencyStore.asnapshot()` 已提供查询面） |
 | **`kind: rag`** | 制度问答仍在治理之外 |
 
 > 顺序说明：**先把异步路径钉死，再接 DB**。否则 DB 版会接在一个会让事件循环阻塞的地基上。
+
+---
+
+## 十九、W6 持久化收尾：DB 版 store/sink + 显式装配
+
+> 提交见 `ops-desk-api` 同日 commit。这一步把 §18.7 里"会让机制在生产静默失效"的两条补掉。
+
+### 19.1 DB 版防重存储
+
+`DbIdempotencyStore`：**跨实例防重生效**（进程内版做不到，这正是它存在的理由）。
+`claim` 是原子的，三步全在一个事务里：
+
+1. `INSERT ... ON CONFLICT (tenant_id, idempotency_key) DO NOTHING` —— 无记录则抢到执行权
+2. 已有记录且 `in_flight` 且**租约已过期** → 接管（`RETURNING attempts`）
+3. 否则读回状态：`done` → duplicate；`in_flight` → 拒绝（并累加 attempts）
+
+**租约判定交给数据库时钟（`now()`），不用应用进程时钟**——
+多实例部署下各机器时钟有偏差，用本地时钟判租约必然出错。这是很容易忽略的一点。
+
+### 19.2 异步/同步的边界
+
+- DB 版 store/sink **只提供异步接口**（`aclaim`/`acomplete`/`arelease`、`arecord`）。
+  同步 `claim` 刻意**不暴露**——那会让人在事件循环里同步调 DB。
+- `DbReceiptSink.record()`（同步）**直接抛错**并提示走异步，而不是悄悄阻塞。
+- 适配器与 gateway 都做了"有异步就用异步，否则 `to_thread` 包同步"的分派：
+  `_astore_call` / `arecord_receipt`。
+- 新增 `_aok_result` / `_aerr_result`：异步路径的回执走异步 sink，
+  与同步路径（`_ok_result` / `_err_result`）**共享 `_build_receipt` 的判定逻辑**，
+  避免两套规则漂移。
+
+### 19.3 装配：显式，不自动探测
+
+`OPS_CAPABILITY_PERSISTENCE`：
+
+| 值 | 防重存储 | 回执 sink | 适用 |
+|---|---|---|---|
+| `db` | `DbIdempotencyStore` | `DbReceiptSink` | **生产** |
+| `memory` | `InMemoryIdempotencyStore` | `InMemoryReceiptSink` | 单实例 / 联调（**多实例防重无效**，日志告警） |
+| 不设 | `NullIdempotencyStore` | `NullReceiptSink` | 开发；**不可上生产**（每次写都告警） |
+
+**刻意不做"自动探测数据库可用性"**：悄悄换存储实现正是我们要避免的那类惊喜——
+出问题时会表现为"防重时有时无"，极难排查。要 DB 就显式写 `db`。
+写错值（如 `redis`）→ 按不防重处理**并打 error**，不悄悄退回某个实现。
+
+### 19.4 实施中抓到的 bug（**测试又一次立功**）
+
+改完后跑全量，`test_gateway_completes_key_with_receipt_id` 立刻失败：
+
+> 同步路径的 `complete(key, receipt_id=…)` **没传 `tenant_id`**。
+> 而防重键的作用域是**租户内**（`(tenant_id, idempotency_key)` 唯一），
+> 不传就落到空租户上 → `complete` 找不到那一行 → **状态永远停在 `in_flight`**。
+
+这是"给函数加参数时漏传"的经典形态，而且**失败是静默的**（调用不报错，只是没生效）。
+教训：**给"按复合键定位"的方法加参数时，要专门检查每个调用点**。
+
+### 19.5 测试
+
+`tests/test_capability_persistence_db.py`（真 PostgreSQL · `opsdesk_test`，15 项）：
+
+- **跨实例防重**：两个 store 实例（模拟两个进程）抢同一 key，只有一个拿到执行权 ★
+- 租约接管、release 重试、**租户隔离**、**并发 6 个 claim 只有一个赢**（靠 DB 唯一约束，应用层无锁）
+- 回执 jsonb 往返仍是结构化对象（收据要能被查询，不是一坨文本）
+- **DB 版不暴露同步接口**、同步 `record()` 明确报错
+- 端到端：异步路径真落库 + 键被标 `done` + **键↔回执 id 对得上**
+- 装配四种情形（默认 / memory / db / 写错值）
+
+> ⚠️ 写这类测试必须用 `async def`（`asyncio_mode=auto`）——
+> conftest 的 `_reset_engine` 是按"每测试一个 loop"管理的，
+> 自己在同步测试里 `asyncio.run` 会与连接池绑定冲突（表现为 `coroutine was never awaited`）。
+
+**全量 820 passed / 1 skipped**；桩服务联调 26/26 无回归。
