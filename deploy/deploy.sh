@@ -54,7 +54,10 @@ if [[ "$SKIP_API" == "0" ]]; then
 fi
 
 if [[ "$SKIP_WEB" == "0" ]]; then
-  [[ -d "$WEB_DIST" ]] || { echo "缺少 $WEB_DIST：先执行 pnpm build" >&2; exit 1; }
+  # 注意：变量后紧跟中文时必须用 ${} 包住——bash 3.2 在 UTF-8 locale 下会把
+  # 多字节字符吞进变量名（即使变量已定义也报 unbound variable），
+  # 于是这条"告诉你该干什么"的提示自己会先崩掉。
+  [[ -d "$WEB_DIST" ]] || { echo "缺少 ${WEB_DIST}：先执行 pnpm build" >&2; exit 1; }
   echo "==> 同步前端构建产物 -> $REMOTE_ROOT/web/dist（保留上一份备份）"
   ssh "$SSH_HOST" "mkdir -p $REMOTE_ROOT/web && \
     [[ -d $REMOTE_ROOT/web/dist ]] && mv $REMOTE_ROOT/web/dist $REMOTE_ROOT/web/dist.bak.\$(date +%Y%m%d%H%M%S) || true"
