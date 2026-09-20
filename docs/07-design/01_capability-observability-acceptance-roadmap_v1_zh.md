@@ -199,20 +199,54 @@ runner 支持 `--against-baseline`，给出逐 case diff（新增/消失/字段�
 
 ---
 
-## 5. 走查清单（请你逐条确认）
+## 5. 走查清单（**已确认 2026-09-20**）
 
-| # | 要确认的事 | 我的倾向 |
+| # | 要确认的事 | 结论 |
 |---|---|---|
-| 1 | 观测端点鉴权口径 | 复用 `AdminSyncAuth`（改动最小） |
-| 2 | `/catalog` 是否暴露 `hidden[{id, reason}]` | 倾向暴露——否则"为什么他没看到"答不了；但请确认 `AdminSyncAuth` 持有者都可信 |
-| 3 | 红线 7 条是否够 / 有没有要加的 | 见 3.② 表 |
-| 4 | 题集 `expect` 只允许引用出口字段 | 强烈建议保留（黑盒的落地保证） |
-| 5 | 基线是否进仓 | 倾向进仓（否则 diff 无参照） |
-| 6 | 六步顺序是否调整 | 见 §4 |
+| 1 | 观测端点鉴权口径 | ✅ 复用 `AdminSyncAuth` |
+| 2 | `/catalog` 是否暴露 `hidden[{id, reason}]` | ✅ 暴露 |
+| 3 | 红线 7 条是否够 | ✅ **暂时够**，就这 7 条 |
+| 4 | 题集 `expect` 只允许引用出口字段 | ✅ 保留（黑盒的落地保证） |
+| 5 | 基线是否进仓 | ✅ 进仓（`baseline_v1.json`） |
+| 6 | 六步顺序是否调整 | ✅ 按原顺序六步实施 |
 
 ---
 
-## 6. 一句话回答"如何让人观测并验收"
+## 6. 实施状态（六步全部落地）
+
+| 步 | 产出 | 状态 |
+|---|---|---|
+| ① 观测端点 | `app/ops/admin/capability.py`：`/runtime` `/catalog` `/receipts` `/idempotency` `/metrics` | ✅ |
+| ② 红线 7 条 | `evals/agent/redlines/capability_v1.yaml` + `tests/eval/test_capability_redlines.py`（每条带反向对照） | ✅ |
+| ③ 黑盒题集 | `evals/agent/golden/capability/{cases_v1.yaml,runner.py}`，18 条 | ✅ |
+| ④ 一键脚本 | `scripts/acceptance/capability_acceptance.sh`（五层 + 带证据报告 + 退出码） | ✅ |
+| ⑤ 基线 diff | `baseline_v1.json` + `--against-baseline` / `--update-baseline` | ✅ |
+| ⑥ 剧本 + 指标 | `02_capability-acceptance-playbook_v1_zh.md` + `/metrics`（`write.blocked`） | ✅ |
+
+### 6.1 两个"落地时才看出来的"点
+
+**① 红线必须有反向对照，否则是假通过。**
+只有正向断言时，**"一律拒绝"天然满足"未授权访问被拒绝"**——
+一个坏掉的闸门和一个严到不可用的闸门，在正向断言下长得一模一样。
+所以每条红线都配一个"该放行的放行了"的对照（R0 守"清单与实现一一对应"）。
+
+**② 基线 diff 立刻证明了它自己的价值。**
+加 `side_effect` 到 policy-blocked 的产出后，`expect` **没写这个字段**，
+所以题集全绿；**只有基线 diff 报了 `side_effect: None → 'write'`**。
+—— 这正是 G3 那句话的实例：`expect` 只覆盖你想到的字段。
+
+### 6.2 一个操作事故（记录在案）
+
+写验收脚本时把报告目录设成了 `reports/`，并在脚本里 `rm -rf reports` 清理——
+**但 `reports/` 里已有 31 个 tracked 的基准产物**（qdrant / r4 系列），被一并删掉。
+已 `git checkout -- reports/` 全部恢复，并把报告改写到 `.acceptance-reports/`（独立 gitignore）。
+
+**教训**：**清理动作的路径必须是自己创建、且已验证可丢弃的。**
+"这个目录看起来像产物"不是依据——`git status --porcelain` 一眼就能看出它是不是 tracked。
+
+---
+
+## 7. 一句话回答"如何让人观测并验收"
 
 > **红线管"不能碰"，题集管"不能变"，基线 diff 管"变在哪"，观测端点管"现在活着吗"，一键脚本管"谁来跑"。**
 > 五件事分开做，因为它们回答的是**五个不同的问题**——把它们混成一个"测试通过率"，就等于什么都没保证。
