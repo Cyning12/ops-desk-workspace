@@ -86,6 +86,31 @@ services:
       HF_ENDPOINT: ${HF_ENDPOINT:-}
       HF_HUB_OFFLINE: ${HF_HUB_OFFLINE:-0}
       OPS_ADMIN_SYNC_TOKEN: ${OPS_ADMIN_SYNC_TOKEN:-}
+      # ---- Capability 治理 · HITL 审批 · 图挂起点（2026-09-21 补）----
+      # ⚠️ 纪律：**只改服务器 /opt/ops-desk/.env 而这里没声明 = 容器里根本看不到**。
+      #    加一个键要同时改两处（本文件 + deploy/.env.example）。
+      #
+      # 防重与回执落库。**只有 db 算 production-safe**（空=不落库，不可上生产）
+      OPS_CAPABILITY_PERSISTENCE: ${OPS_CAPABILITY_PERSISTENCE:-db}
+      # 额外能力清单：**必须显式列出**（禁止目录扫描，不列就不加载）。
+      # 容器内 WORKDIR=/app 且 COPY . . ⇒ 清单落在 /app/app/ops/...（用绝对路径，不受 CWD 影响）
+      OPS_CAPABILITY_EXTRA_MANIFESTS: ${OPS_CAPABILITY_EXTRA_MANIFESTS:-/app/app/ops/capability/manifests/oa.readonly.v1.yaml}
+      # 运维停用闸：逗号分隔的**匹配模式列表**（不是布尔）。空=不停用；`*`=全停
+      OPS_CAPABILITY_KILL_SWITCH: ${OPS_CAPABILITY_KILL_SWITCH:-}
+      # 熔断状态后端：memory（单实例）| redis（多实例，须同时给 CB_REDIS_URL）。
+      # ⚠️ 代码默认的 mock-unavailable 是**刻意让存储不可用**的测试模式（逼回落路径被走到），
+      #    生产沿用会让熔断状态在观测里一直是 degraded。
+      OPS_CAPABILITY_CB_BACKEND: ${OPS_CAPABILITY_CB_BACKEND:-memory}
+      OPS_CAPABILITY_CB_REDIS_URL: ${OPS_CAPABILITY_CB_REDIS_URL:-}
+      # OA 网关：清单里只写凭证名，值来自下面这个键；base_url 读的是 OA_BASE
+      OA_BASE: ${OA_BASE:-}
+      OPS_CAP_CRED_OA_GATEWAY_TOKEN: ${OPS_CAP_CRED_OA_GATEWAY_TOKEN:-}
+      # HITL 审批申请落库（db）+ 回调签名密钥。
+      # **密钥为空 = 回调端点拒绝一切请求**（不设密钥=不开放），OA 审批会恒定 401
+      OPS_HITL_PERSISTENCE: ${OPS_HITL_PERSISTENCE:-db}
+      OPS_HITL_CALLBACK_SECRET: ${OPS_HITL_CALLBACK_SECRET:-}
+      # 图挂起点。空 = 内存 saver ⇒ 跨请求恢复**不可能成立**，恢复端点会显式 503
+      LG_RAG_HTTP_CHECKPOINTER: ${LG_RAG_HTTP_CHECKPOINTER:-postgres}
     depends_on:
       db:
         condition: service_healthy
