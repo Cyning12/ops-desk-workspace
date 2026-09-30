@@ -99,7 +99,7 @@
 - [x] `verify --task` PASS
 - [x] FEEDBACK 落盘
 - [x] invoke 落盘 `docs/harness/invokes/by-task/workspace-specwave-upgrade-3-0-2/`
-- [ ] `related_pr` `#11` · CI 全绿后 merge · CLOSE 归档
+- [x] `related_pr` `#11` · CI 全绿后 merge · CLOSE 归档
 
 ### 自检结论
 
