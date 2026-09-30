@@ -17,6 +17,6 @@ jobs:
       - name: Install
         run: npm ci
       - name: SpecWave check
-        run: npx --yes spec-wave@3.0.0 check --target .
+        run: npx --yes spec-wave@3.0.2 check --target .
       - name: Graph compile test
         run: ./scripts/graph-compile.sh

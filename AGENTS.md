@@ -110,7 +110,7 @@ workspace close
 - 每次代码/接口变更必须同步更新图谱
 - **禁止跨仓直接改代码**：后端 Agent 不改 web/ios 文件，反之亦然
 - **GitHub Actions 触发**：四仓 workflow 的 `on` 必须同时包含 `pull_request` 与 `push.branches: [main]`（Free 私有仓无分支硬保护，防直推漏跑）。见 `docs/04-infrastructure/01-environment-setup.md` §10.3
-- **过程纪律**：钉 `spec-wave@3.0.0`（harness-only）；门禁以 CLI `verify --task` 为准（**不入库** Cursor/Claude hooks）
+- **过程纪律**：钉 `spec-wave@3.0.2`（harness-only）；门禁以 CLI `verify --task` 为准（**不入库** Cursor/Claude hooks）
 
 <!-- cyning-harness:begin -->
 # Harness Starter（业务仓 · 通用 Agent）
@@ -152,7 +152,7 @@ workspace close
 ## Ops-desk-workspace · Harness 仓内定制（upgrade 不改写本块）
 
 - **角色**：文档 / 契约 / 跨仓统筹；**不写** web/api/ios 业务代码
-- **钉版**：`spec-wave@3.0.0` · preset `harness-only`；与 api/web 齐钉；**ios 除外**（OpenSpec）
+- **钉版**：`spec-wave@3.0.2` · preset `harness-only`；与 web 齐钉（api 待其波次）；**ios 除外**（OpenSpec）
 - **不做**四仓 SpecWave 统一分发 / `harness-sync` 推子仓
 - **hooks**：不入库；门禁仅 CLI `npx spec-wave verify --task`
 <!-- cyning-harness-local:end -->
