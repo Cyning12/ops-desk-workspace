@@ -31,6 +31,7 @@
 | **kpi_aggregator** | `CLOSE` |
 | **invoke_retention_profile** | `minimal` |
 | **required_invoke_hats** | `00,30` |
+| **related_pr** | `#11` |
 | **close_pr_policy** | `required` |
 | **review_hat** | `20` |
 
@@ -98,6 +99,7 @@
 - [x] `verify --task` PASS
 - [x] FEEDBACK 落盘
 - [x] invoke 落盘 `docs/harness/invokes/by-task/workspace-specwave-upgrade-3-0-2/`
+- [ ] `related_pr` `#11` · CI 全绿后 merge · CLOSE 归档
 
 ### 自检结论
 
