@@ -12,8 +12,8 @@ GRAPH_JSON="${GRAPH_DIR}/shared/graph.json"
 
 cd "${ROOT_DIR}"
 
-# D-PIN：默认 npx 钉 @3.0.0（可 KIT_CLI 覆盖）
-KIT_CLI="${KIT_CLI:-spec-wave@3.0.0}"
+# D-PIN：默认 npx 钉 @3.0.2（可 KIT_CLI 覆盖）
+KIT_CLI="${KIT_CLI:-spec-wave@3.0.2}"
 
 GRAPH_INPUT_DIRS=()
 while IFS= read -r dir; do

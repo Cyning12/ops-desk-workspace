@@ -7,6 +7,6 @@
     "graph:compile": "bash scripts/graph-compile.sh"
   },
   "devDependencies": {
-    "spec-wave": "3.0.0"
+    "spec-wave": "3.0.2"
   }
 }

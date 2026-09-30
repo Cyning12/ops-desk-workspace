@@ -6,6 +6,9 @@
     "agents"
   ],
   "profile": "core",
-  "updated_at": "2026-09-18T02:20:59.578Z",
-  "kit_semver": "3.0.0"
+  "updated_at": "2026-09-30T09:21:59.900Z",
+  "kit_semver": "3.0.2",
+  "table_source": {
+    "kind": "builtin"
+  }
 }

@@ -35,10 +35,10 @@
 
 ```
 ops-desk-workspace/
-├── package.json                    # devDependency: spec-wave@3.0.0
+├── package.json                    # devDependency: spec-wave@3.0.2
 ├── .coding-kit/manifest.json
 ├── scripts/
-│   └── graph-compile.sh            # KIT_CLI=spec-wave@3.0.0
+│   └── graph-compile.sh            # KIT_CLI=spec-wave@3.0.2
 ├── docker-compose.yml
 └── docs/
     ├── _tech_graph/                # workspace 级总图（可先最小骨架）
@@ -59,10 +59,10 @@ workspace 总图通过锚点 / `::triggers` / `::depends_on` 指向子仓子图�
 
 ```bash
 # 文档仓（workspace）
-npx spec-wave@3.0.0 init --preset harness-only --tools cursor,claude,agents --yes
+npx spec-wave@3.0.2 init --preset harness-only --tools cursor,claude,agents --yes
 
 # 实现仓（api/web 示例；preset 按仓）
-npx spec-wave@3.0.0 init --preset harness-only --tools cursor,claude,agents --yes
+npx spec-wave@3.0.2 init --preset harness-only --tools cursor,claude,agents --yes
 ```
 
 生成 / 维护：
@@ -141,7 +141,7 @@ nodes:
 修改流程：
 
 1. 改 `.graph.yaml`（唯一编辑源）
-2. 运行 `./scripts/graph-compile.sh`（默认 `KIT_CLI=spec-wave@3.0.0`）
+2. 运行 `./scripts/graph-compile.sh`（默认 `KIT_CLI=spec-wave@3.0.2`）
 3. 提交 `.graph.yaml` + 编译生成的 `.md`（及仓内若有的 `_manifest.json` / `graph.json` 产物）
 
 ---
@@ -208,7 +208,7 @@ nodes:
 ops-desk-workspace/
 ├── AGENTS.md
 ├── CLAUDE.md
-├── package.json                  # spec-wave@3.0.0
+├── package.json                  # spec-wave@3.0.2
 ├── scripts/
 │   └── graph-compile.sh
 ├── docker-compose.yml
