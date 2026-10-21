@@ -15,8 +15,63 @@
 | 一 | 收窄 | Builder 无 LLM 先把能力菜单收窄成白名单，planner 才上场——**fail-closed 从入口开始** |
 | 二 | 规划 | 首次规划失败默认抛错停图——**绝不静默冒充单 rag 成功** |
 | 三 | 派发 | Send 按依赖并发，join 闸先校验契约再签发——**缺字段不喂坏数据、改历史交人批** |
-| 四 | 聚合 | observe 判「活干完没」，critic 判「答案行不行」——**没有待发步骤 ≠ 满足了问题** |
+| 四 | 聚合 | observe 判「活干完没」，critic 只判「有没有 error」——**没有待发步骤 ≠ 满足了问题，语义验收是已知缺口** |
 | 五 | 落地 | 断连只是退订——**执行与 HTTP 订阅解耦，每帧落盘可 replay 取证** |
+
+---
+
+## §1.5 执行者地图（mermaid · 每阶段谁干活）
+
+```mermaid
+flowchart TD
+    START([用户请求]) --> SB
+    subgraph S1["阶段一 · 收窄"]
+        SB["strategy_builder<br/>纯代码 · 无 LLM"]
+    end
+    subgraph S2["阶段二 · 规划"]
+        SUP["supervisor · 主 agent<br/>LLM 调用 ① · ≤4 子任务 · 2 轮"]
+    end
+    subgraph S3["阶段三 · 派发与执行"]
+        JOIN["subtask_join 三段闸<br/>纯代码"]
+        W1["rag_subtask<br/>内嵌 router 子图 · LLM 调用 ⑤"]
+        W2["info_extract<br/>一次抽取 · LLM 调用 ③"]
+        W3["tool_exec<br/>纯 capability · 无 LLM"]
+        OBS["observe 收口判定<br/>确定性信号为主<br/>模型满足度可选 · 默认关 ②"]
+    end
+    subgraph S4["阶段四 · 聚合与质检"]
+        AGG["aggregator · 独立 LLM 调用 ④<br/>非主 agent · 上下文隔离"]
+        CRI["critic_node · 纯规则 stub<br/>只看有无 error · 不看内容"]
+    end
+    subgraph S5["阶段五 · 落地 · 图外"]
+        SSE["SSE 帧流 + 事件落盘"]
+    end
+    SB --> SUP --> JOIN
+    JOIN -->|Send 并发| W1
+    JOIN -->|Send 并发| W2
+    JOIN -->|Send 并发| W3
+    W1 --> JOIN
+    W2 --> JOIN
+    W3 --> JOIN
+    JOIN -->|无待发步骤| OBS
+    OBS -->|replan ≤2轮| SUP
+    OBS -->|settle| AGG
+    AGG --> CRI
+    CRI -->|pass / end| SSE
+    CRI -->|retry_planner ≤1| SUP
+    CRI -->|rebind ≤1| SB
+    classDef llm fill:#ffe0b2,stroke:#e65100
+    classDef code fill:#dcedc8,stroke:#33691e
+    classDef hybrid fill:#fff9c4,stroke:#f9a825
+    classDef io fill:#bbdefb,stroke:#0d47a1
+    class SUP,AGG,W1,W2 llm
+    class SB,JOIN,W3,CRI code
+    class OBS hybrid
+    class SSE io
+```
+
+**图例**：🟧 LLM 调用｜🟨 确定性为主+可选模型闸（默认关）｜🟩 纯代码｜🟦 图外传输层。
+**LLM 五调用点全部同档**：①supervisor 规划（multi/nodes.py:1192）②observe 模型满足度（:1716，默认关）③info_extract（:1528）④aggregator（:2139）⑤rag_subtask 内嵌 router 子图（同常量源头）——共用 _ROUTER_PROVIDER/_ROUTER_MODEL（lg_rag/nodes.py:35-40，默认 siliconflow / Qwen3.6-27B，「与 grader 同档小模型」DESIGN §4），env LG_RAG_ROUTER_* 整体覆盖，**无 per-node 分档**。
+**设计判断**：把关主力是确定性代码，LLM 只在语义必需处出现；回环全部有硬上限（replan ≤2 轮 / retry_planner ≤1 / rebind ≤1 / 全局 32 步优先）。
 
 ---
 
@@ -76,6 +131,8 @@
 - join 三段闸（nodes.py:893-1029）：①sc.gate 契约校验 → blocked 错误终态级联停（step_contract.py:58-84，原因码 contract_missing_field / prefix_touch_required→HITL）②delegation_issue_hitl_required 拦签发 ③write_replay_guard 孪生步 guard-skip（异 sid 同 canonical 已成功 → 不派发照抄 output + replay_of 台账）。
 - **委派令牌 TTL 600s 墙钟禁续期**（delegation.py:43-46）；**六类拒绝 R-a~R-f**（delegation.py:54-62；⚠️ 口径：6 主类 + R-a 伞下 2 个审计单列 signature_invalid/secret_missing，被追问「篡改归哪类」时答得出）。
 - 工人每次工具调用过**七层闸链**（capability/gateway.py:337-468：委派验签347→lookup351→enabled363→Policy380→熔断405先于配额「先谈别打了再谈打几次」→kill switch+配额422→参数校验444）。
+- **三类工人按 LLM 分**：rag_subtask 内嵌完整 router 子图（fresh messages 隔离不污染父历史，:1420-1497）；info_extract 一次 LLM 抽取 JSON（:1504-1550，parse_only 失败→空结构+structured_output_fallback 标记不中断）；tool_exec **纯 capability 无 LLM**（:1553-1604）。
+- **统一扩展入口**：新能力=manifest 上架，自动继承七层闸链+Policy+配额+熔断；MCP 适配器已在（capability/adapters/mcp.py + mcp_client.py，OPS_CAPABILITY_MCP_ENABLED **默认关**，capability/__init__.py:107-108）；三方 agent 含 LLM 也封装在 capability 内部，编排层只看声明的风险面——「清单只能声明危险，不能豁免危险」。
 
 **这一阶段在哪被观察**：SSE subtask.progress（running/step/done + 可读 message 模板，progress_stream.py:78-134）；span step_contract_blocked(+_by_reason)（nodes.py:1020-1026）、write_replay_guard_skip + replay_of（:974-991）；审计**五动作词表** token_issued / token_issue_hitl_required / token_superseded / token_verified / token_rejected:（delegation.py:65-69）；gateway 侧 span policy_blocked / blocked=circuit|budget|kill_switch / args_schema_invalid。
 
@@ -90,13 +147,16 @@
 
 ### 阶段四 · 聚合（observe → aggregator → critic）
 
-**看点**：两个收口判定分开做——observe 每轮判「活干完没/要不要人」，critic 收尾判「答案行不行/要不要再来」；一个要确定性信号，一个要确定性规则。
+**看点**：两个收口判定分开做——observe 每轮判「活干完没/要不要人」（过程完备性），critic 收尾只判「有没有 error/要不要回环」；都是确定性判定，**语义级「答案对不对」无人判——已知缺口，见追问钩子**。
 
 **机制+数字锚点**：
 
-- observe_node：确定性信号判定，verdict=replan/settle（nodes.py:1984-2050）；**hitl_pending → interrupt() 真挂起**。
-- aggregator_node 独立节点：LLM 综合 subtask_results → 分节 markdown，token 经 answer_stream 桥流式出帧（nodes.py:2129-2147+，answer_stream.py:1-24 contextvar sink 机制——只有终答 token 进 SSE）。
+- observe_node：确定性信号判定（_observe :1656-1689 六桶 planned/done/pending/failed/blocked/hitl_pending，unsatisfied = failed or pending；blocked 单独分桶——被闸拦的可能该 rebind 而非 retry），verdict=replan/settle（nodes.py:1984-2050）；**hitl_pending → interrupt() 真挂起**；可选模型满足度闸 _satisfied_by_model **默认关**（LG_RAG_REACT_SATISFACTION，:1692-1740）——「默认开着等于让模型给自己打分」，开了也只能触发 replan，**不能放行**（放行权永远在确定性信号+轮次上限，:1656-1660）。
+- aggregator_node **独立节点 + 独立 LLM 调用（非主 agent）**：中间结果只在 subtask_results **不进 messages**（:2132 上下文隔离——主 agent 的对话上下文里根本没有工人产出，所以综合必须是一次新的 LLM 调用，拿结构化 payload 去做）；自建 prompt（:2064/:2075）+ complete_answer_streaming（:2147-2152）；空输出回退**确定性拼接**子任务原文（:2153-2163，不是编造兜底），异常上抛（:2132）；计入 32 步预算（:2135）；token 经 answer_stream 桥流式出帧（answer_stream.py:1-24 contextvar sink——只有终答 token 进 SSE）。
+- **A+B list ≠ answer C 正是 aggregator 存在的原因**：list 拼接不是答案，聚合拿原始 query+全量 payload 语义综合。
 - **critic = 规则 stub 纯函数**（app/ops/strategy/critic.py:1 文件头自述「S4 · 无 LLM 主路径」；:47-61 decide_critic_verdict：无 error→pass / error+空 allowlist→rebind / error+非空→retry_planner / 全局预算耗尽→强制 end）。
+  - ⚠️ critic 的**全部**输入是 _has_error（critic.py:36-39：结果字典有无 "error" 键）——不看答案文本、不校验内容质量；observe 注释自证（nodes.py:1993「critic 在 aggregator 之后，而且只看有没有 error」）。
+- **重规划保前缀，不是全量重来**（critic.py:113-135）：回环 keep=已成功前缀+未解决后缀，写 plan_prefix_ids/recoverable_point；未解决后缀**必须跟着走**（:118-122——只留前缀=失败记录被裁成「计划外 id」→结论写成「已覆盖全部子任务」，失败静默抹掉）；已成功的连计划带结果原地锁定不重跑，叠加 supervisor 沿用原 sid（nodes.py:1216-1250）+ 写孪生步 write_replay_guard_skip（:925-967）。
 - **MAX_INNER_RETRIES=1 / MAX_REBINDING=1**（critic.py:27-28）；**全局 32 步/墙钟耗尽优先于局部 1+1 回环额度**（critic.py:54-56, 80-81）。
 
 **这一阶段在哪被观察**：SSE answer delta + 终帧 {content, final:true}（sse_stream.py:361-363, 196-204）；span react_round / react_verdict / react_unsatisfied / react_hitl_pending（nodes.py:2036-2044）、critic_outcome / inner_retry_count / rebinding_count（critic.py:142-149）。
@@ -104,6 +164,7 @@
 **追问钩子**：
 
 - 「critic 为什么不用 LLM？」→ 收尾判定要确定性、可测试、可重现；LLM 评委引入不可重现性，stub 是设计如此（讲现状必须这么说）。
+- 「怎么保证最终答案质量？」→ 照实答三段式：observe 判过程完备（做完没）、aggregator 综合（A+B→C）、critic 只看有没有 error——**C 产出后无语义验收是已知缺口**；what-next=独立 Result agent：只看 query+答案+证据摘要不看规划过程（避免自评——「让模型给自己打分的事默认不干」），**只能否决不能放行**（触发 retry/replan/degraded 标记，路由必须显式）。
 - 「HITL 挂起靠什么？」→ 真靠 checkpointer：interrupt 期间节点 return 不进 checkpoint（nodes.py:2003-2005）——所以 Postgres checkpointer 闸控开启前，跨进程/重启不可恢复是明示边界，不是暗坑。
 
 ---
@@ -159,6 +220,9 @@
 | delegation 委派令牌 | 默认 off（off=整段短路零 diff） | delegation.py:95-100；LG_RAG_DELEGATION_MODE | 「三档灰度 off/observe/enforce，先量后闸」 |
 | Postgres checkpointer | 闸控默认关（InMemorySaver 默认） | checkpointer.py:27-38；LG_RAG_HTTP_CHECKPOINTER | 「恢复入口显式报错，不假装成功」 |
 | critic | 规则 stub 无 LLM | critic.py:1,47-61 | 「设计如此：收尾判定要确定性可重现」 |
+| observe 模型满足度 | 默认关（LG_RAG_REACT_SATISFACTION） | nodes.py:1692-1740 | 「让模型给自己打分的事默认不干；开了也只能触发不能放行」 |
+| MCP 能力注册 | 默认关（OPS_CAPABILITY_MCP_ENABLED） | capability/__init__.py:107-108；adapters/mcp.py | 适配器已在，闸控开启才注册 |
+| 语义级 Result 验收 | **未做**（critic 只看 error） | critic.py:36-39 | what-next：独立 Result agent，只能否决不能放行 |
 | MEMORY_FACTS / memory 注入 | 默认关 + supervisor 主链路零消费 | graph.py:161-162；nodes.py:1193-1199, 2064-2072 | 「机制已证零消费（双方自建 prompt），运行时实证待跑」 |
 | SECURITY_INPUT_ISOLATION | 默认 false | slots.py:27,291-298 | 闸控装配 |
 | Langfuse tracing | env 开关默认关（no-op 零成本） | tracing.py:1-11；OPS_CHAT_TRACER | 「可选装配，不开不影响主链路」 |
@@ -176,6 +240,9 @@
 6. 拓扑白板别漏 **observe 节点**；条件边映射表在 graph.py:52-74（96-104 只是边注册段）。图谱 flow 旧文档仍画 intent_node 是已知滞后，勿照旧讲。
 7. 「事件流/run_id」：resume 后帧接同一 run_id 续 seq 语义属实，但机制是异步受理+replay 追帧，不是同步续跑。
 8. 步数与轮数两个维度：32 步是全局预算，2 轮是 ReAct 收口次数（budget.py:18 vs :33-37）。
+9. ❌「observe 纯确定性」→ ✅ 确定性信号为主 + 可选模型满足度闸**默认关**（nodes.py:1692-1740）。
+10. ❌「critic 判答案行不行」→ ✅ critic 只看有无 error（critic.py:36-39）；「答案对不对」无语义验收=what-next（独立 Result agent）。
+11. ❌「工人都是纯执行」→ ✅ rag_subtask 内嵌 router 子图、info_extract 一次 LLM 抽取，仅 tool_exec 无 LLM；全图 LLM 调用**同档**（_ROUTER_PROVIDER/_ROUTER_MODEL，lg_rag/nodes.py:35-40），无 per-node 分档——被问「聚合用小模型够吗」接「按节点分档」作 what-next。
 
 ## §6 时长压缩锚点
 
@@ -185,5 +252,5 @@
 
 ---
 
-*v1 · 2026-10-20 · 真源：09 篇 + master@31924af 子代理逐锚点抽查（原始 34KB 审核文已失，本表接替其证据链角色）*
+*v1.1 · 2026-10-21 · 增 §1.5 执行者地图 mermaid；四类修正（observe 模型闸默认关/critic 只看 error/工人 LLM 分布/LLM 同档）+ 重规划前缀锁定 + 语义验收缺口（v1 · 2026-10-20 · 真源：09 篇 + master@31924af 子代理逐锚点抽查，原始 34KB 审核文已失，本表接替其证据链角色）*
 
