@@ -300,6 +300,37 @@ flowchart TD
 - event_store 收尾判定函数头：run_is_terminal :94-126 / run_stream_closed :129-149 / list_open_runs :152-（此前锚点 :116-118/:144/:170 指的是 SQL WHERE 行，行号本身没错）。
 - keepalive 发射主路径在 sse_subscribe.py:44-53（sse_stream.py:73-75 为常量+单测保留）；两侧均不落盘，结论不变。
 
+## §8 派发阶段案例集（帧序列级复盘 · 测试佐证）
+
+> 用途：讲阶段三不抽象——四个真实代码路径案例，每个给「计划 → 机制 → 帧序列 → 落盘/观测」。统筹机制一句话：**主 agent 不轮询也不傻等**——Send 是声明式派发（route_next_subtask 一次返回整批 nodes.py:1351-1366），等齐是图屏障语义（三工人各有一条边回 join，graph.py:100-101），进度是工人主动推帧（progress_stream.py:78-158）。
+
+### 案例 A：无依赖混合批 —— 一波并发
+
+- **计划**：s1=rag、s2=rag、s3=extract，均无 depends_on
+- **机制**：join 收齐后 inflight=[s1,s2,s3]（nodes.py:1019）→ 一次 Send×3 → 三工人并发 → 图屏障等整批到齐 → join 写回 subtask_results → inflight 空 → route_next_subtask 返回 observe（:1367-1371「没有待发步骤 ≠ 满足了问题」）
+- **帧序列**：node.progress(supervisor) → subtask.progress{running}×3 → {step} 若干 → {done}×3 → node.progress(observe)
+- **落盘**：全帧 ops_lg_rag_run_events；state subtask_results 三条
+
+### 案例 B：depends_on 两波 —— 依赖驱动波次
+
+- **计划**：t1=tool（如查库存）、s2=rag depends_on=[t1]
+- **机制**：wave1 只 Send t1；t1 终态后 join 重算 ready → wave2 才 Send s2（nodes.py:9「有 depends_on 的等前驱终态再下发」；_resolve_depends :511-536：无法解析/指向自身/指向计划外 → 整项不派；成环检测 :542）
+- **叙事点**：波次 = 依赖分层，不是固定并发窗口；非法依赖宁可整项不派——fail-closed 在调度层的又一样本
+
+### 案例 C：写孪生步 guard-skip —— HITL 批准重规划后的零重发
+
+- **场景**：写步被 HITL 拦截 → 批准 → 重规划产新计划，其中写步换了 sid 但 canonical 调用键与已成功旧步相同
+- **机制**：join 查「已成功写键索引」命中 → 不派发、照抄上次 output，写 write_replay_guard_skip=true + replay_of=旧 sid 台账（nodes.py:960-996；span :985-991；logger :974-984；默认开，LG_RAG_WRITE_REPLAY_GUARD_ENABLED 可关回基线）
+- **佐证**：tests/test_lg_rag_write_replay_guard.py:130,183,237；tests/test_hitl_approved_replan_quality.py:111,272
+- **叙事点**：「批准重规划 ≠ 重新执行」——写零重发是结构护栏，不靠模型自觉
+
+### 案例 D：契约拦截 —— 坏数据不喂下游
+
+- **场景**：工人回包缺 step contract 声明的字段
+- **机制**：join 拦截 → blocked 行写 subtask_results + span step_contract_blocked / step_contract_blocked_by_reason（nodes.py:1020-1026）→ critic 见 error → rebind 换能力重绑
+- **叙事点**：契约校验是机器判字段完整性，LLM 不参与把关
+
 ---
+v1.3 · 2026-10-21 · 增 §8 派发阶段案例集（A 无依赖并发 / B depends_on 两波 / C 写孪生步 guard-skip / D 契约拦截，帧序列+测试佐证）+ 统筹机制一句（声明式 Send+图屏障+工人推帧，主 agent 不轮询）。
 v1.2 · 2026-10-21 · 增 §7 阶段交付物落盘/观测映射（子代理只读核查 master@e952984：载体速记 8 类 + 主表 + 裸奔点 11 条 + 锚点勘误）；resume 锚点修正 :520-615。
 v1.1 · 2026-10-21 · 增 §1.5 执行者地图 mermaid；四类修正（observe 模型闸默认关/critic 只看 error/工人 LLM 分布/LLM 同档）+ 重规划前缀锁定 + 语义验收缺口（v1 · 2026-10-20 · 真源：09 篇 + master@31924af 子代理逐锚点抽查，原始 34KB 审核文已失，本表接替其证据链角色）
