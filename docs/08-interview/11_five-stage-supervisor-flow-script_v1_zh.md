@@ -181,7 +181,7 @@ flowchart TD
 - **孤儿补偿**：无终帧且无活跃 worker → 补 done{status:"disconnected"}，默认陈旧 **300s**（run_worker.py:185-238，env LG_RAG_ORPHAN_STALE_SECONDS）。
 - **replay**：cursor 非法 422 / 跨用户 404 / 在飞 409+Retry-After:2，seq>after_seq 重放（router.py:372-428）——刷新页面 = 断点续看，不重跑 LLM。
 - **30s keepalive comment**：不落盘、不占 seq（sse_stream.py:73-75）。
-- 审批消费 TTL **3600s**（nodes.py:296-310）；resume **异步受理**秒回 200（hitl/router.py:520-560；同步实测 130-310s 超前端 30s 超时——所以必须异步），恢复段帧照常同 run_id 落盘，前端靠 replay.cursor 追帧。
+- 审批消费 TTL **3600s**（nodes.py:296-310）；resume **异步受理**秒回 200（hitl/router.py:520-615；同步实测 130-310s 超前端 30s 超时——所以必须异步），恢复段帧照常同 run_id 落盘，前端靠 replay.cursor 追帧。
 
 **这一阶段在哪被观察**：终帧家族四态——done（正常）/ done{degraded:true}（灾备）/ done{status:"waiting_approval"}（等人批）/ done{status:"disconnected"}（断连/孤儿补偿）全部落表（sse_stream.py:370-500）；结构化日志「lg-rag orphan compensated」「lg-rag event persist failed」「lg-rag run_worker single-flight reuse」。
 
@@ -235,7 +235,7 @@ flowchart TD
 1. ❌「32 次 LLM 调用」→ ✅ supervisor **总步** 32（每节点入口 bump，不含 rag 子图步数，graph.py:21）。
 2. ❌「六类拒绝」被追问「篡改归哪类」→ ✅ 6 主类 + R-a 伞下 2 审计单列 signature_invalid / secret_missing（delegation.py:54-57）。
 3. ❌「每帧必落盘」→ ✅ if user_id 条件 + 后台尽力（persist 失败只 log 不阻断，sse_stream.py:295,318-323）；keepalive 不落不占 seq。
-4. ❌「resume 同步续跑」→ ✅ **异步受理**秒回 200，前端 replay.cursor 追帧（hitl/router.py:520-560）。
+4. ❌「resume 同步续跑」→ ✅ **异步受理**秒回 200，前端 replay.cursor 追帧（hitl/router.py:520-615）。
 5. 6+2 窗口行号：continuity.py:48-87（09 篇写 44-79 是偏移，内容属实）。
 6. 拓扑白板别漏 **observe 节点**；条件边映射表在 graph.py:52-74（96-104 只是边注册段）。图谱 flow 旧文档仍画 intent_node 是已知滞后，勿照旧讲。
 7. 「事件流/run_id」：resume 后帧接同一 run_id 续 seq 语义属实，但机制是异步受理+replay 追帧，不是同步续跑。
@@ -250,7 +250,56 @@ flowchart TD
 - **2 分钟版**：每阶段一句看点 + 一个数字（6+2 / 4 子任务 / 600s / 1+1 回环 / 300s），观察段全砍，只留阶段五一句「断连只是退订」。
 - **10 分钟版**：本稿全量（5min 五阶段 + 前后衔接见 doc 09/10）。
 
+## §7 阶段交付物落盘 / 观测映射（只读核查 · master @ e952984）
+
+> 用途：回答「每个阶段的交付物在哪里能看到 / 落在哪里」——叙事时每个「看点」都能指出证据载体。完整 17 行细表存档 `docs/tmp/stage-artifact-collection-report_e952984_zh.md`。
+
+### 7.1 载体写入点速记（先记这些，后表只引用）
+
+| 载体 | 写入点 | 默认状态 |
+|---|---|---|
+| SSE 帧 → `ops_lg_rag_run_events` | emit() sse_stream.py:278-328 → event_store.py:31-58（唯一键 run_id+seq） | ✅ 有 user_id 即落（后台 task，失败仅 logger） |
+| replay 读路径 | load_events_after event_store.py:225-265 → POST /lg-rag/replay router.py:382-428（在飞 409） | ✅ |
+| capability 回执 → `ops_capability_receipts` | DbReceiptSink receipts.py:195-234；仅 OPS_CAPABILITY_PERSISTENCE=db 装配（persistence.py:31-67） | ❌ 默认 NullReceiptSink 只 logger.warning（:68-74） |
+| HITL 申请 → `ops_hitl_requests` | DbHitlStore hitl/store.py:155-236；仅 OPS_HITL_PERSISTENCE=db | ❌ 默认 NullHitlStore 不落库 |
+| delegation 审计 | audit_delegation delegation.py:132-147（logger.info + span 键，五动作词表 :65-69） | ⚠️ **设计如此不落表**（:64「记动作不记内容 · 不落新表」） |
+| metrics | 进程内 dict metrics.py:24-39；snapshot → GET /admin/capability/metrics（admin/capability.py:271-279） | ⚠️ 进程内，重启归零、多实例各一份 |
+| Langfuse span | trace_span tracing.py:162-210；nodes 统一 _record_span_metadata nodes.py:222-234 | ❌ 默认关（OPS_CHAT_TRACER） |
+| checkpointer | InMemorySaver graph.py:51-53；PG 需 LG_RAG_HTTP_CHECKPOINTER=postgres 且仅 supervisor 模式装配（run_worker.py:138-142） | ❌ 默认内存 |
+
+### 7.2 主表（阶段 × 交付物 → 落盘/观测处）
+
+| 阶段 | 交付物 | 在哪看 / 落在哪 |
+|---|---|---|
+| ① 收窄 | allowlist、预算起计 | SSE `node.progress`（role=strategy_builder，sse_stream.py:205,473；摘要键表 :94-102）→ run_events；state `allowed_capability_ids`（builder.py:150-154）；span `strategy_builder_*`（:142-149）。⚠️ stripped 明细仅 logger.warning（:54-57） |
+| ② 规划 | plan / delegation_scope / 失败路径 | SSE `node.progress`（subtasks ≤800 字符摘要）→ run_events；`error{stage:supervisor_plan}` 恰一帧即终态（sse_stream.py:524-541）；state subtasks/plan_prefix_ids/recoverable_point（:656-708）；span `subtask_count`/`supervisor_fallback`/`replan_*`（:1316-1335）。⚠️ supervisor_raw 全文仅 span |
+| ③ 派发执行 | 令牌签发/拦截、工人进度、subtask_results、契约拦截 | SSE `subtask.progress` running/step/done 全落 run_events（progress_stream.py:78-158）；契约拦截/重放守卫写 subtask_results + span `step_contract_blocked`（:1020-1026）/`write_replay_guard_skip`（:985-991）；capability span 键全（gateway.py:1298-1343）+ metrics record_outcome（gateway.py:193/:208）；写能力回执无论成败落（:522-532/:544-554，需 persistence=db）；HITL 申请落 ops_hitl_requests（需闸；未落库则 hitl.waiting{unpersisted:true} + logger.error nodes.py:1893-1897）。⚠️ delegation 审计不落表；react_observation 全文无持久化载体（不在 SSE 摘要键表 :94-102，span 只有 react_* 计数 :2036-2044） |
+| ④ 聚合质检 | answer、critic_verdict | SSE `answer` delta **每帧一行**落 run_events（:361-363，T5.1 刻意设计，长回答行数多——口径注意）+ final 终帧；critic_verdict → node.progress + state + span（⚠️ inner_retry_count 不在 SSE 摘要键表）；done 后 persist_thread_turns（sse_stream.py:503-507）。⚠️ aggregator span 无附加 metadata 键（nodes.py:2140） |
+| ⑤ 落地 | run.start/done 家族/error、replay、resume | run.start/done/error 全落 run_events；收尾判定 run_is_terminal event_store.py:94-126 / run_stream_closed :129-149；keepalive 不落盘（发射主路径 sse_subscribe.py:44-53）；resume 恢复段帧同 run_id 续 seq（hitl/resume.py:87-156），受理响应含 replay.cursor（hitl/router.py:587-615） |
+
+### 7.3 裸奔点清单（无持久化载体 / 默认配置重启即丢）——what-next 现成素材
+
+1. **delegation 审计五动作**：只 logger+span，明写不落表（delegation.py:64,132-147）；tracing 关 → 只剩进程日志。
+2. **capability metrics**：进程内 dict（metrics.py:24-39），重启归零、多实例各一份（:11-13）。
+3. **delegation nonce registry / issuer seq / supersede 台账**：进程内（delegation.py:395-398），一次性 nonce 消费状态重启即丢（TTL 600s 兜底）。
+4. **LangGraph state 全部键**（subtasks/subtask_results/react_observation/delegation_token/plan_prefix_ids…）：默认 InMemorySaver 重启即丢；PG saver 闸控且仅 supervisor 模式（run_worker.py:138-142）。
+5. **react_observation 全文**：SSE 摘要不含、span 只有计数 → 正文无任何持久化全文。
+6. **supervisor_raw（LLM 原始 plan 文本）**：仅 span 键（nodes.py:1316-1335）；tracing 关即无载体。
+7. **builder stripped 明细 / scope_stripped / scope_truncated**：仅 logger.warning（builder.py:54-57,93-102）。
+8. **capability 回执**：默认不落库；启动告警「不可上生产」（persistence.py:63-66）。
+9. **HITL 申请**：默认不落库；留痕只有 SSE unpersisted 标记 + logger.error（nodes.py:1893-1897）。
+10. **RunEventBus._history / _workers / _RESUME_IN_FLIGHT**：进程内（run_worker.py:30-71、hitl/router.py:467-470）。
+11. **纯 logger 行**：aggregator 空输出回退（nodes.py:2154-2163）、supervisor 非法 tool id（:1203-1206）、hitl_persist_guard_*（:1780-1785,:1873）、orphan 补偿（run_worker.py:237）、resume 各阶段（hitl/router.py:451-458,501,516,574）、auto_resume 审计（auto_resume.py:118-137）。
+
+> 面试用法：被问「可观测性做得怎么样」，先讲 7.1 载体矩阵（哪些默认开、哪些闸控），再主动亮 7.3——**裸奔点全部已知，且每条都有对应开关或设计理由**（delegation 不落表是刻意的最小化审计；回执/HITL 落库是闸控默认关）。「知道哪里裸奔」比「声称全可观测」可信得多。
+
+### 7.4 锚点勘误
+
+- `resume_request` 实际区间 **hitl/router.py:520-615**（异步投递 :579-584）——本稿前文两处已修正。
+- `write_replay_guard_skip` 函数区间实为 **nodes.py:960-996**（结果行字段 :970-971、logger :974-984、span :985-991）。
+- event_store 收尾判定函数头：run_is_terminal :94-126 / run_stream_closed :129-149 / list_open_runs :152-（此前锚点 :116-118/:144/:170 指的是 SQL WHERE 行，行号本身没错）。
+- keepalive 发射主路径在 sse_subscribe.py:44-53（sse_stream.py:73-75 为常量+单测保留）；两侧均不落盘，结论不变。
+
 ---
-
-*v1.1 · 2026-10-21 · 增 §1.5 执行者地图 mermaid；四类修正（observe 模型闸默认关/critic 只看 error/工人 LLM 分布/LLM 同档）+ 重规划前缀锁定 + 语义验收缺口（v1 · 2026-10-20 · 真源：09 篇 + master@31924af 子代理逐锚点抽查，原始 34KB 审核文已失，本表接替其证据链角色）*
-
+v1.2 · 2026-10-21 · 增 §7 阶段交付物落盘/观测映射（子代理只读核查 master@e952984：载体速记 8 类 + 主表 + 裸奔点 11 条 + 锚点勘误）；resume 锚点修正 :520-615。
+v1.1 · 2026-10-21 · 增 §1.5 执行者地图 mermaid；四类修正（observe 模型闸默认关/critic 只看 error/工人 LLM 分布/LLM 同档）+ 重规划前缀锁定 + 语义验收缺口（v1 · 2026-10-20 · 真源：09 篇 + master@31924af 子代理逐锚点抽查，原始 34KB 审核文已失，本表接替其证据链角色）
