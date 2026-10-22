@@ -1,7 +1,7 @@
 {
   "schema_version": "graph_v2",
   "freeze_id": "TECH_GRAPH_S2_FREEZE_20260519_V2_3",
-  "generated_at": "sha256-0cc22ac6e23ec238",
+  "generated_at": "sha256-a84a4320422e180e",
   "nodes": [
     {
       "id": "api",

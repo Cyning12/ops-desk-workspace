@@ -152,7 +152,7 @@ workspace close
 ## Ops-desk-workspace · Harness 仓内定制（upgrade 不改写本块）
 
 - **角色**：文档 / 契约 / 跨仓统筹；**不写** web/api/ios 业务代码
-- **钉版**：`spec-wave@3.0.2` · preset `harness-only`；与 web 齐钉（api 待其波次）；**ios 除外**（OpenSpec）
+- **钉版**：`spec-wave@3.0.2` · preset `harness-only`；与 web 齐钉（api 待其波次）；**ios 已接入** `spec-wave@3.5.0` · `harness-only`（已移除 OpenSpec）
 - **不做**四仓 SpecWave 统一分发 / `harness-sync` 推子仓
 - **hooks**：不入库；门禁仅 CLI `npx spec-wave verify --task`
 <!-- cyning-harness-local:end -->

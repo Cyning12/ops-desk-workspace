@@ -82,4 +82,4 @@ Chat 交互：直接采用 **SSE 流式**，前端实时展示思考过程。
 ## 6. 下一步待决策
 
 1. **技术图谱接口完整性**：是否将 API endpoint / SSE 事件契约 / 表结构全部纳入 `_tech_graph/` 作为对接文档？（推荐：是）
-2. **harness 落盘细节**：（已裁定）**各实现仓自钉** `spec-wave`（api/web = 3.0.0；workspace = harness-only 3.0.0）；**不做** workspace 统一分发；ios 用 OpenSpec、不接入 SpecWave
+2. **harness 落盘细节**：（已裁定）**各实现仓自钉** `spec-wave`（api/web = 3.0.0；workspace = harness-only 3.0.0；ios = harness-only 3.5.0）；**不做** workspace 统一分发；ios 已移除 OpenSpec

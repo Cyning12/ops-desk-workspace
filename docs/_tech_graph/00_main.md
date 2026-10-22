@@ -1,13 +1,13 @@
 ---
 graph_id: 00_main
-version: 2026-09-18
-generated_at: sha256-f5b79835a60e01c4
+version: 2026-10-22
+generated_at: sha256-1ad8b3ee5813a0ae
 source: 00_main.graph.yaml
 ---
 
 # ops-desk-workspace 跨仓总图（最小骨架）
 
-四仓锚点级总图；契约与数据流细节另 task 充实。ios 不接入 SpecWave（OpenSpec）。
+四仓锚点级总图；契约与数据流细节另 task 充实。四仓均接入 SpecWave（各仓自钉）。
 
 ## Mermaid
 

@@ -1,6 +1,6 @@
 # Harness 接入与技术图谱策略
 
-> 更新日期：2026-09-18（纠偏 SpecWave）  
+> 更新日期：2026-10-22（ios 接入 SpecWave）  
 > 范围：Ops Desk 四仓库如何接入 **SpecWave（`spec-wave`）**，以及技术图谱如何作为接口对接文档  
 > 包演进：原 cyning harness npm 包 → `dsh-coding-kit` → **`spec-wave`**（现行安装终点）
 
@@ -27,7 +27,7 @@
 | `ops-desk-api` | **钉 `3.0.0`** | fullstack-node-py |
 | `ops-desk-web` | **钉 `3.0.0`** | 前端过程轨 |
 | `ops-desk-workspace` | **钉 `3.0.0` · preset `harness-only`** | 文档/契约/统筹；轻量落盘 |
-| `ops-desk-ios` | **不接入** | OpenSpec |
+| `ops-desk-ios` | **钉 `3.5.0` · preset `harness-only`** | iOS 过程轨；已移除 OpenSpec |
 
 **废弃**：以 workspace 为中心 `harness-sync` 向子仓推送模板的「统一分发」方案。各仓各自 `package.json` exact 钉版 + `.coding-kit/manifest.json`，自行 `upgrade` / `sync prompts`。
 
