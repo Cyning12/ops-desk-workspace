@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ops-desk Host · 时间×空间交叉矩阵（五层 × 五阶段）</title>
+<style>
+:root{--bd:#d8dee4;--bg:#fff;--mut:#57606a;--head:#f6f8fa;--stick:#fdfdfd;}
+*{box-sizing:border-box;}
+body{font-family:-apple-system,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;margin:24px;color:#1f2328;}
+h1{font-size:20px;margin:0 0 4px;}
+.sub{color:var(--mut);font-size:13px;margin:0 0 14px;}
+.legend{font-size:13px;margin:0 0 12px;display:flex;gap:14px;flex-wrap:wrap;}
+.scroll{overflow:auto;max-height:82vh;border:1px solid var(--bd);border-radius:8px;}
+table{border-collapse:separate;border-spacing:0;font-size:13px;line-height:1.55;}
+th,td{border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);padding:8px 10px;vertical-align:top;text-align:left;background:var(--bg);}
+thead th{position:sticky;top:0;z-index:3;background:var(--head);font-size:13px;white-space:nowrap;}
+td{min-width:230px;max-width:340px;}
+th.layer{position:sticky;left:0;z-index:2;background:var(--stick);min-width:56px;text-align:center;font-size:15px;writing-mode:vertical-lr;letter-spacing:6px;}
+th.aspect{position:sticky;left:56px;z-index:2;background:var(--stick);min-width:104px;white-space:nowrap;color:var(--mut);font-weight:600;}
+thead th:nth-child(1){left:0;z-index:4;}thead th:nth-child(2){left:56px;z-index:4;}
+thead th:nth-child(-n+2){position:sticky;}
+tbody tr:nth-child(4n+1) th.aspect{border-top:2px solid #8c959f;}
+tbody tr:nth-child(4n+1) td{border-top:2px solid #8c959f;}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;background:#eff1f3;border-radius:4px;padding:0 3px;}
+.st{font-size:12px;}
+.st.ok{color:#1a7f37;}.st.off{color:#cf222e;}.st.warn{color:#bf8700;}.st.nil{color:#6e7781;}
+.notes{font-size:13px;color:#1f2328;margin:16px 0 0;max-width:1100px;}
+.notes h2{font-size:15px;margin:14px 0 6px;}
+.notes li{margin:3px 0;}
+.maint{margin-top:18px;padding:10px 12px;border:1px dashed #bf8700;border-radius:8px;background:#fff8e6;font-size:13px;max-width:1100px;}
+</style></head><body>
+<h1>Ops-desk Host · 时间×空间交叉矩阵</h1>
+<p class="sub">纵向五层（空间）× 时序五阶段（一次 run 的流转）｜真值：<code>docs/08-interview/11_five-stage-supervisor-flow-script_v1_zh.md</code> §1.6（v1.4）｜锚点基于 ops-desk-api master</p>
+<div class="legend"><span><span class="st ok">✅</span> 已生效</span><span><span class="st off">🔴</span> 默认关/闸控</span><span><span class="st warn">⚠️</span> stub/已知缺口</span><span><span class="st nil">∅</span> 刻意为空</span></div>
+<div class="scroll"><table>
+<thead><tr><th style='left:0;position:sticky;'>层</th><th style='left:56px;position:sticky;'>子项</th><th>① 收窄</th><th>② 规划</th><th>③ 派发</th><th>④ 聚合</th><th>⑤ 落地</th></tr></thead>
+<tbody><tr><th class="layer" rowspan="4">编排</th><th class="aspect">做什么（锚点）</th><td>strategy_builder 三组求交出菜单，无 LLM；菜单上限 64；预算起计（<code>builder.py:37-58 / MAX_SCOPE_IDS=64 :62 / :127</code>）</td><td>supervisor 出 plan ≤4（<code>nodes.py:86</code>）；32 步+2 轮双预算（<code>budget.py:18/31</code>）；规划失败 raise 不重试（:1252-1279）；重规划沿用原 sid（:1216-1250）</td><td>join 三段闸：契约闸+写孪生步 guard+依赖波次（:893-1029 / :925-967 / :511-542）；整批 Send+逐子任务重签发令牌（:1339-1372 / :1359-1365）</td><td>observe 六桶收口（:1656-1689）；aggregator 独立节点上下文隔离（:2129-2164 / :2132）；critic 规则 stub 双上限 1/1（<code>critic.py:47-61 / :27-28</code>）；重规划前缀锁定（<code>critic.py:113-135</code>）</td><td><span class="st nil">∅</span> 图外——收尾在 run_worker/sse_stream</td></tr>
+<tr><th class="aspect">防什么错</th><td>任务未开始先把权限面收小</td><td>规划失控/无限循环/失败被静默吞</td><td>重复执行/契约不符/依赖错乱/孤儿子任务</td><td>半成品当完成/聚合污染主上下文/重试失控/失败被裁剪</td><td>交付不依赖图还活着</td></tr>
+<tr><th class="aspect">状态</th><td><span class="st ok">✅</span></td><td><span class="st ok">✅</span></td><td><span class="st ok">✅</span></td><td><span class="st ok">✅</span> / <span class="st warn">⚠️</span>critic stub</td><td><span class="st ok">✅</span>（设计即空）</td></tr>
+<tr><th class="aspect">叙事钩子</th><td>「收窄是声明任务域求交，不是预知任务内容」</td><td>「规划失败是一等公民，有专属 error 帧」</td><td>「重试不会变成重复扣款」</td><td>「质检刻意不用 LLM」</td><td>「执行与传输解耦的物理证据就是这个空格」</td></tr>
+<tr><th class="layer" rowspan="4">能力</th><th class="aspect">做什么（锚点）</th><td>baseline_filter 双裁剪 deny_high_risk+deny_write（<code>baseline.py:50-63；判序 :36 永不豁免</code>）</td><td>plan 只能引用收窄后的菜单 id（收窄沿链继承）</td><td><b>七层闸链全链在工人内</b>（<code>gateway.py:337-466</code>）：验签<span class="st off">🔴</span>:347 → lookup:351 → enabled:363（disabled 报「未找到」同款文案）→ <b>Policy 五闸</b>:380（<code>policy.py:87-116；闸序=危险程度→副作用→危险形态→输入完整性：①high_risk 高危拒 ②write_not_confirmed 写闸——与 risk_level 独立，medium+write 也默认拒 ③sandbox 形态 ④cli 形态 ⑤tenant_scope_missing；放行键仅 env 全局/Host ctx 单次，HOST_ONLY :23-33 模型 plan 顶层写不生效</code>）→ 熔断:405（先于配额）→ kill/配额:422（默认 64 调用/8 写）→ schema:444</td><td>HITL 收口统一建单 _persist_hitl（:1810-1899，幂等键 run_id+subtask_id 以 store 为真相 :1825-1838）；decide 条件更新防双花（<code>store.py:187-191</code>）</td><td>防重 store <span class="st off">🔴</span>默认不启用（<code>__init__.py:111-112</code>）；审计走 logger+span 不落表</td></tr>
+<tr><th class="aspect">防什么错</th><td>幻觉 id——「只裁剪防不住幻觉 id，只拦截暴露写能力」（<code>baseline.py:57-59</code>）</td><td>规划越权</td><td>越权/滥用/过载/参数畸形，层层递进各有拒绝码</td><td>并发审批双花/重复建单</td><td>重复提交防护留位待开</td></tr>
+<tr><th class="aspect">状态</th><td><span class="st ok">✅</span></td><td><span class="st ok">✅</span></td><td><span class="st ok">✅</span> / <span class="st off">🔴</span> 委派验签默认 off（三档 :277-334）</td><td><span class="st ok">✅</span></td><td><span class="st off">🔴</span>（doc 13 缺口条目）</td></tr>
+<tr><th class="aspect">叙事钩子</th><td>「高危对模型恒不可见——连幻觉出它的机会都没有」</td><td>收窄不是一次性动作，沿链兑现</td><td>「七层是链路，五条是一层内部」；验签在 lookup 前——先验证身份再告诉你有没有这东西</td><td>「写入单点 + store 为真相」</td><td>—</td></tr>
+<tr><th class="layer" rowspan="4">模型</th><th class="aspect">做什么（锚点）</th><td><span class="st nil">∅</span> 刻意不用 LLM</td><td>调用点① plan（<code>nodes.py:1192</code>）；全图 5 调用点同档 Qwen3.6-27B（<code>lg_rag/nodes.py:35-40</code>）</td><td>调用点② rag 子图 fresh messages 隔离（:1461/:1423）③ info_extract 失败→空结构+标记不中断（:1528-1549）；tool_exec 无 LLM（:1603）</td><td>调用点④ observe 满足度闸<span class="st off">🔴</span>默认关（:1692-1740，只能触发 replan 不能放行 :1656-1660）⑤ aggregator 综合（:2139/:2147-2152）</td><td>usage 末帧落 ops_llm_usage（<code>base.py:177,211-258：无帧不落/不写 0 假账</code>）；degraded 标记跟数据走（<code>gateway.py:1001-1005</code>）；预算检查点<span class="st off">🔴</span>（<code>base.py:44-47 零直通</code>）</td></tr>
+<tr><th class="aspect">防什么错</th><td>收窄必须确定性——不能让被收窄的对象参与收窄</td><td>成本可预期</td><td>工人上下文互染/抽取失败拖垮整批</td><td>A+B≠C；模型自评</td><td>成本无账/降级不可见/假账</td></tr>
+<tr><th class="aspect">状态</th><td><span class="st ok">✅</span></td><td><span class="st ok">✅</span> / <span class="st off">🔴</span> 无 per-node 分档（what-next）</td><td><span class="st ok">✅</span></td><td><span class="st ok">✅</span> / <span class="st off">🔴</span> 模型闸</td><td><span class="st ok">✅</span> / <span class="st off">🔴</span> 预算检查点</td></tr>
+<tr><th class="aspect">叙事钩子</th><td>「把关主力是确定性代码」第一例证</td><td>—</td><td>「工人是隔离的完整 agent，不是共享上下文的函数调用」</td><td>「默认开着等于让模型给自己打分」</td><td>「绝不静默退化，造成任务完成的假象」</td></tr>
+<tr><th class="layer" rowspan="4">传输</th><th class="aspect">做什么（锚点）</th><td>run.start 帧携 run_id（<code>sse_stream.py:334-341</code>）</td><td>plan 帧→用户实时看到计划</td><td>subtask.* 帧工人主动推不轮询（<code>progress_stream.py:78-158</code>）；keepalive 不落盘（<code>sse_stream.py:73-75</code>）</td><td>hitl.waiting 帧（<code>sse_stream.py:445-459</code>）；answer delta（:361-363）</td><td>done 家族（:474-500）；error 帧带 stage（:524-557）；断连=退订；孤儿补偿 300s stale 补 done{disconnected}（<code>run_worker.py:185-238</code>）；resume 幂等 not_interrupted</td></tr>
+<tr><th class="aspect">防什么错</th><td>从此刻起全程有帧可追</td><td>黑盒焦虑</td><td>前端盲等</td><td>用户不知道在等什么</td><td>断连丢任务/错误无定位/重入重复跑</td></tr>
+<tr><th class="aspect">状态</th><td><span class="st ok">✅</span></td><td><span class="st ok">✅</span></td><td><span class="st ok">✅</span></td><td><span class="st ok">✅</span></td><td><span class="st ok">✅</span></td></tr>
+<tr><th class="aspect">叙事钩子</th><td>—</td><td>—</td><td>「并行可以，乱序不行」——工人帧必须桥回主流拿全局 seq</td><td>—</td><td>「断连只是观众离席，戏照演」</td></tr>
+<tr><th class="layer" rowspan="4">数据</th><th class="aspect">做什么（锚点）</th><td>读：turns 历史过 6+2 窗口（<code>continuity.py:48-87</code>）；跨轮只携带 query+最终 answer（<code>sse_stream.py:505</code>）</td><td>帧落 run_events（<code>sse_stream.py:306-317</code>）</td><td>帧逐帧落盘；能力回执 receipt_capture；HITL 挂起→checkpointer interrupt 快照（<span class="st off">🔴</span>PG saver 闸控 run_worker.py:138-142，默认 InMemorySaver 重启全丢）</td><td>HITL 单据表 ops_hitl_requests；resume 异步受理秒回 200（<code>hitl/router.py:520-615</code>）</td><td>三表分工（<code>models.py:294/306/324</code>）；run_id+seq 唯一 replay 不重跑 LLM；persist_thread_turns 在 done 后（<code>sse_stream.py:503-507</code>）；replay 在飞 409+Retry-After:2（<code>router.py:372-428</code>）</td></tr>
+<tr><th class="aspect">防什么错</th><td>上下文不无限膨胀；结论可用、过程不污染</td><td>规划过程可回放取证</td><td>执行留证/挂起可恢复</td><td>审批状态有据可查</td><td>证据链断裂/回放变重放</td></tr>
+<tr><th class="aspect">状态</th><td><span class="st ok">✅</span>（真摘要/query rewrite/memory 注入三件<span class="st off">🔴</span>见 §4）</td><td><span class="st ok">✅</span></td><td><span class="st ok">✅</span> / <span class="st off">🔴</span> PG saver</td><td><span class="st ok">✅</span></td><td><span class="st ok">✅</span></td></tr>
+<tr><th class="aspect">叙事钩子</th><td>「跨轮携带结论不携带过程」</td><td>—</td><td>「状态全在 PG 里，进程只是无状态执行器」（开关开时）</td><td>—</td><td>「replay 是取证不是重跑」</td></tr></tbody>
+</table></div>
+<div class="notes">
+<h2>附注 · 闸链时序（「七层不全在派发」是错觉澄清）</h2>
+<ul>
+<li>七层闸链本体<b>全部在阶段③调用点</b>（工人内 invoke 前）执行</li>
+<li>两处「体外」配合：阶段①的 baseline_filter 可见集裁剪=事实上的<b>第零层</b>（先裁剪后拦截，<code>baseline.py:57-59</code>）；委派令牌的<b>签发</b>在 join 派发前（<code>nodes.py:1339-1372</code> 逐子任务重签发），<b>验签</b>才在七层①——签发与验签分离</li>
+</ul>
+<h2>附注 · 证据链三级关联键（并行工人下不用线性 trace_id）</h2>
+<ul>
+<li><b>run_id 定伞</b>：每帧必带（<code>sse_stream.py:283</code>），llm_usage / HITL 单据 / 能力回执同键可 JOIN</li>
+<li><b>seq 定时序</b>：uq(run_id,seq)（<code>models.py:328</code>）；emit 闭包单点分配（<code>sse_stream.py:279-280</code>），工人帧经 progress_stream 桥回主流共享同一序号轴；cursor=make_cursor(rid,seq)（:293）</li>
+<li><b>subtask_id + agent_role 定并行分支</b>：payload 内 subtask_id（<code>progress_stream.py:95/133</code>）；agent_role 为代码固定字面量（<code>nodes.py:1440/1521/1573</code>），LLM 不参与</li>
+<li>Langfuse 侧同理：contextvars 树形嵌套（<code>tracing.py:171-172 / :187-194</code>），并行工人=根 trace 下兄弟 span</li>
+</ul>
+<h2>读法</h2>
+<ul>
+<li>竖着讲：选一阶段从上往下扫五层显分工（推荐阶段三，信息密度最高）</li>
+<li>横着讲：选数据层从①扫到⑤，一条线讲完「可回放可审计」的物理形态</li>
+<li>空格先行：模型层① ∅ 与编排层⑤ ∅ 是最锋利两句（把关主力是确定性代码 / 交付不依赖图活着）</li>
+<li>状态列防打脸：被问「都在跑吗」直接指 🔴/⚠️ 行主动分层，比被拆穿强十倍</li>
+</ul></div>
+<div class="maint"><b>维护纪律</b>：本表真值在 doc 11 §1.6（锚点与 doc 10 §3 能力层详解联动）。<b>改动 doc 10 / doc 11 相关段落时，必须同步更新本 HTML</b>；反之本文件不单独改。</div>
+</body></html>

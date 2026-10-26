@@ -33,7 +33,7 @@
 
 ⚠️ B 类是最容易被深挖打脸的点：读侧生效+写侧缺失 = 「功能看着在，实际到不了」。面试前必须背熟 #11/#12 的真实状态。
 
-## §3 C 类 · 明确 stub / 未做（功能缺口，4 处）
+## §3 C 类 · 明确 stub / 未做（功能缺口，5 处）
 
 | # | 缺口 | 锚点 |
 |---|---|---|
@@ -41,8 +41,9 @@
 | 15 | Result agent 未做（verdict 路由骨架全接通，只是换判定器） | critic.py:47-61 + app/ops/lg_rag/multi/graph.py:52-74 |
 | 16 | memory ④a 真实构建未做 | continuity.py:5-12 |
 | 17 | 无 per-node 模型分档：全图 5 个 LLM 调用点同档同模型 | app/ops/lg_rag/nodes.py:35-40 _ROUTER_MODEL |
+| 25 | 权限变更通道未工程化：reload_capability_manifest 无 HTTP 暴露、变更不过闸；注册表版本钉扎未做（run 不绑定注册表版本，在飞令牌 600s TTL 内旧菜单仍有效） | app/ops/capability/manifest.py:220-233 + :17-19 禁热加载明文 |
 
-讲法：C 类全部「骨架已留位」——#15 是最典型：verdict 路由（retry_planner/rebind/end）全接通，Result agent 只是把规则判定器换成独立语义验收，且口径已定「只能否决不能放行，放行权永远在确定性信号」。
+讲法：C 类全部「骨架已留位」——#15 是最典型：verdict 路由（retry_planner/rebind/end）全接通，Result agent 只是把规则判定器换成独立语义验收，且口径已定「只能否决不能放行，放行权永远在确定性信号」。#25 讲法：禁热加载是刻意的（manifest.py:17-19「改配置即改权限，review 白做」），OS 化的正解不是拆闸而是把变更通道闸化——reload 做成高危 capability 过七层+HITL；版本钉扎地基已存在（manifest.py:124 version 自声明 + :150-152 get_capability_manifest_metadata），建议内容 hash 做版本、版本写进令牌 payload 验签比对、不一致骑现有 rebind 边（graph.py:52-74）回 builder 重收窄；金句「热加载不是技术问题，是改权限要不要过闸的问题」。
 
 ## §4 D 类 · 取证/观测缺口（4 处）
 

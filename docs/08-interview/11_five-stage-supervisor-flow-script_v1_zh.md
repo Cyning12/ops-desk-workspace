@@ -75,6 +75,43 @@ flowchart TD
 
 ---
 
+## §1.6 时间×空间交叉矩阵（转置详表 · 五层为行 × 五阶段为列）
+
+> 与 §1.5 执行者地图互相对照：一图=谁执行，一表=五层在各阶段各干什么。
+> 可视版：同目录 `11_five-stage-matrix_v1_zh.html`（横向滚动+冻结列；**本节或 doc 10 相关段落改动时必须同步该文件**）。
+> 状态图例：✅已生效 ｜ 🔴默认关/闸控 ｜ ⚠️stub/已知缺口 ｜ ∅刻意为空。
+
+| 层 | 子项 | ①收窄 | ②规划 | ③派发 | ④聚合 | ⑤落地 |
+|---|---|---|---|---|---|---|
+| 编排 | 做什么（锚点） | strategy_builder 三组求交出菜单，**无 LLM**；菜单上限 64；预算起计（builder.py:37-58 / MAX_SCOPE_IDS=64 :62 / :127） | supervisor 出 plan ≤4（nodes.py:86）；32 步+2 轮双预算（budget.py:18/31）；规划失败 raise 不重试（:1252-1279）；重规划沿用原 sid（:1216-1250） | join 三段闸：契约闸+写孪生步 guard+依赖波次（:893-1029 / :925-967 / :511-542）；整批 Send+逐子任务重签发令牌（:1339-1372 / :1359-1365） | observe 六桶收口（:1656-1689）；aggregator 独立节点上下文隔离（:2129-2164 / :2132）；critic 规则 stub 双上限 1/1（critic.py:47-61 / :27-28）；重规划前缀锁定（critic.py:113-135） | **∅ 图外**——收尾在 run_worker/sse_stream |
+| | 防什么错 | 任务未开始先把权限面收小 | 规划失控/无限循环/失败被静默吞 | 重复执行/契约不符/依赖错乱/孤儿子任务 | 半成品当完成/聚合污染主上下文/重试失控/失败被裁剪 | 交付不依赖图还活着 |
+| | 状态 | ✅ | ✅ | ✅ | ✅ / ⚠️critic stub | ✅（设计即空） |
+| | 叙事钩子 | 「收窄是声明任务域求交，不是预知任务内容」 | 「规划失败是一等公民，有专属 error 帧」 | 「重试不会变成重复扣款」 | 「质检刻意不用 LLM」 | 「执行与传输解耦的物理证据就是这个空格」 |
+| 能力 | 做什么（锚点） | baseline_filter 双裁剪 deny_high_risk+deny_write（baseline.py:50-63；判序 :36 永不豁免） | plan 只能引用收窄后的菜单 id（收窄沿链继承） | **七层闸链全链在工人内**（gateway.py:337-466）：验签🔴:347→lookup:351→enabled:363（disabled 报「未找到」同款文案）→**Policy 五闸**:380（policy.py:87-116；闸序=危险程度→副作用→危险形态→输入完整性：①high_risk 高危拒 ②write_not_confirmed 写闸——与 risk_level 独立，medium+write 也默认拒 ③sandbox 形态 ④cli 形态 ⑤tenant_scope_missing；放行键仅 env 全局/Host ctx 单次，HOST_ONLY :23-33 模型 plan 顶层写不生效）→熔断:405（先于配额）→kill/配额:422（默认 64 调用/8 写）→schema:444 | HITL 收口统一建单 _persist_hitl（:1810-1899，幂等键 run_id+subtask_id 以 store 为真相 :1825-1838）；decide 条件更新防双花（store.py:187-191） | 防重 store 🔴默认不启用（__init__.py:111-112）；审计走 logger+span 不落表 |
+| | 防什么错 | 幻觉 id——「只裁剪防不住幻觉 id，只拦截暴露写能力」（baseline.py:57-59） | 规划越权 | 越权/滥用/过载/参数畸形，层层递进各有拒绝码 | 并发审批双花/重复建单 | 重复提交防护留位待开 |
+| | 状态 | ✅ | ✅ | ✅ / 🔴委派验签默认 off（三档 :277-334） | ✅ | 🔴（doc 13 缺口条目） |
+| | 叙事钩子 | 「高危对模型恒不可见——连幻觉出它的机会都没有」 | 收窄不是一次性动作，沿链兑现 | 「七层是链路，五条是一层内部」；验签在 lookup 前——先验证身份再告诉你有没有这东西 | 「写入单点+store 为真相」 | — |
+| 模型 | 做什么（锚点） | **∅ 刻意不用 LLM** | 调用点①plan（nodes.py:1192）；全图 5 调用点同档 Qwen3.6-27B（lg_rag/nodes.py:35-40） | 调用点②rag 子图 fresh messages 隔离（:1461/:1423）③info_extract 失败→空结构+标记不中断（:1528-1549）；tool_exec **无 LLM**（:1603） | 调用点④observe 满足度闸🔴默认关（:1692-1740，只能触发 replan 不能放行 :1656-1660）⑤aggregator 综合（:2139/:2147-2152） | usage 末帧落 ops_llm_usage（base.py:177,211-258：无帧不落/不写 0 假账）；degraded 标记跟数据走（gateway.py:1001-1005）；预算检查点🔴（base.py:44-47 零直通） |
+| | 防什么错 | 收窄必须确定性——不能让被收窄的对象参与收窄 | 成本可预期 | 工人上下文互染/抽取失败拖垮整批 | A+B≠C；模型自评 | 成本无账/降级不可见/假账 |
+| | 状态 | ✅ | ✅ / 🔴无 per-node 分档（what-next） | ✅ | ✅ / 🔴模型闸 | ✅ / 🔴预算检查点 |
+| | 叙事钩子 | 「把关主力是确定性代码」第一例证 | — | 「工人是隔离的完整 agent，不是共享上下文的函数调用」 | 「默认开着等于让模型给自己打分」 | 「绝不静默退化，造成任务完成的假象」 |
+| 传输 | 做什么（锚点） | run.start 帧携 run_id（sse_stream.py:334-341） | plan 帧→用户实时看到计划 | subtask.* 帧工人**主动推**不轮询（progress_stream.py:78-158）；keepalive 不落盘（sse_stream.py:73-75） | hitl.waiting 帧（sse_stream.py:445-459）；answer delta（:361-363） | done 家族（:474-500）；error 帧**带 stage**（:524-557）；断连=退订；孤儿补偿 300s stale 补 done{disconnected}（run_worker.py:185-238）；resume 幂等 not_interrupted |
+| | 防什么错 | 从此刻起全程有帧可追 | 黑盒焦虑 | 前端盲等 | 用户不知道在等什么 | 断连丢任务/错误无定位/重入重复跑 |
+| | 状态 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| | 叙事钩子 | — | — | 「并行可以，乱序不行」——工人帧必须桥回主流拿全局 seq | — | 「断连只是观众离席，戏照演」 |
+| 数据 | 做什么（锚点） | **读**：turns 历史过 6+2 窗口（continuity.py:48-87）；跨轮只携带 query+最终 answer（sse_stream.py:505） | 帧落 run_events（sse_stream.py:306-317） | 帧逐帧落盘；能力回执 receipt_capture；HITL 挂起→checkpointer interrupt 快照（🔴PG saver 闸控 run_worker.py:138-142，默认 InMemorySaver 重启全丢） | HITL 单据表 ops_hitl_requests；resume 异步受理秒回 200（hitl/router.py:520-615） | **三表分工**（models.py:294/306/324）；run_id+seq 唯一 replay 不重跑 LLM；persist_thread_turns 在 done 后（sse_stream.py:503-507）；replay 在飞 409+Retry-After:2（router.py:372-428） |
+| | 防什么错 | 上下文不无限膨胀；结论可用、过程不污染 | 规划过程可回放取证 | 执行留证/挂起可恢复 | 审批状态有据可查 | 证据链断裂/回放变重放 |
+| | 状态 | ✅（真摘要/query rewrite/memory 注入三件🔴见 §4） | ✅ | ✅ / 🔴PG saver | ✅ | ✅ |
+| | 叙事钩子 | 「跨轮携带结论不携带过程」 | — | 「状态全在 PG 里，进程只是无状态执行器」（开关开时） | — | 「replay 是取证不是重跑」 |
+
+**附注 · 证据链三级关联键**（并行工人下不用线性 trace_id）：**run_id 定伞**（每帧必带 sse_stream.py:283，llm_usage/HITL/回执同键可 JOIN）｜**seq 定时序**（uq(run_id,seq) models.py:328；emit 闭包单点分配 sse_stream.py:279-280，工人帧经 progress_stream 桥回主流共享同一序号轴；cursor=make_cursor(rid,seq) :293）｜**subtask_id+agent_role 定并行分支**（payload 内 subtask_id progress_stream.py:95/133；agent_role 为代码固定字面量 nodes.py:1440/1521/1573，LLM 不参与）。Langfuse 侧同理：contextvars 树形嵌套（tracing.py:171-172/:187-194），并行工人=根 trace 下兄弟 span。
+
+**附注 · 闸链时序**（七层不全在派发=错觉澄清）：七层闸链本体全部在阶段③调用点（工人内 invoke 前）执行；两处「体外」配合——阶段①的 baseline_filter 可见集裁剪=事实上的**第零层**（先裁剪后拦截，baseline.py:57-59）；委派令牌的**签发**在 join 派发前（nodes.py:1339-1372 逐子任务重签发），**验签**才在七层①——签发与验签分离。
+
+**读法**：①竖着讲=选一阶段从上往下扫五层显分工（推荐阶段三信息密度最高）；②横着讲=选数据层从①扫到⑤，一条线讲完「可回放可审计」的物理形态；③空格先行=模型层①∅ 与编排层⑤∅ 是最锋利两句；④状态列防打脸=被问「都在跑吗」直接指 🔴/⚠️ 行主动分层，比被拆穿强十倍。
+
+---
+
 ## §2 逐阶段详表
 
 ### 阶段一 · 收窄（query → strategy_builder）
@@ -332,6 +369,7 @@ flowchart TD
 
 ---
 
+v1.4 · 2026-10-26 · 增 §1.6 时间×空间交叉矩阵转置详表（五层×五阶段×四子项：做什么锚点/防什么错/状态/叙事钩子）+ 证据链三级关联键附注 + 读法四条。
 v1.3 · 2026-10-21 · 增 §8 派发阶段案例集（A 无依赖并发 / B depends_on 两波 / C 写孪生步 guard-skip / D 契约拦截，帧序列+测试佐证）+ 统筹机制一句（声明式 Send+图屏障+工人推帧，主 agent 不轮询）。
 v1.2 · 2026-10-21 · 增 §7 阶段交付物落盘/观测映射（子代理只读核查 master@e952984：载体速记 8 类 + 主表 + 裸奔点 11 条 + 锚点勘误）；resume 锚点修正 :520-615。
 v1.1 · 2026-10-21 · 增 §1.5 执行者地图 mermaid；四类修正（observe 模型闸默认关/critic 只看 error/工人 LLM 分布/LLM 同档）+ 重规划前缀锁定 + 语义验收缺口（v1 · 2026-10-20 · 真源：09 篇 + master@31924af 子代理逐锚点抽查，原始 34KB 审核文已失，本表接替其证据链角色）
