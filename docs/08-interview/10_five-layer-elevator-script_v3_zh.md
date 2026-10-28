@@ -78,7 +78,7 @@
 | 5 | `tenant_scoped` 缺租户谓词 | ❌ blocked | 注入 `tenant_id`/`_host_tenant` |
 
 - **规则 2 与 risk_level 独立**：`medium + write`（普通提交）也默认拒——只看危险程度会漏掉"中危但会写"（policy.py:6-10 设计理由）。
-- **`allow_*` 键全部 Host-only**（`HOST_ONLY_POLICY_KEYS`，policy.py:23-33）：模型 plan 顶层写了不生效。这就是 HITL「批准只授权不代劳」的落点——人工批准 = Host 构造一次性 `allow_write`，只对这一次调用有效。
+- `allow_*` **键全部 Host-only**（`HOST_ONLY_POLICY_KEYS`，policy.py:23-33）：模型 plan 顶层写了不生效。这就是 HITL「批准只授权不代劳」的落点——人工批准 = Host 构造一次性 `allow_write`，只对这一次调用有效。
 - 加分点·闸链三个顺序注释（`gateway.py`）：验签先于 lookup（"无有效令牌连注册表都不查" :347）；熔断先于配额（"下游不健康，先谈别打了，再谈打几次" :406）；配额在 Policy 后（"被 Policy 拦的不计配额，否则反复被拒会打满配额误伤正常调用" :423）。
 
 ### 3.2 usage 落表（模型层深挖）
@@ -99,6 +99,7 @@ LLM 流式响应的**末帧 usage**（token 计数）→ `LlmUsage.from_provider
 **快照复现**：LangGraph 每个 super-step 按 `thread_id` 写全量 state 快照；`interrupt()` 保存「挂在哪个节点 + 当时 state」；恢复 = 同一 thread_id 重新进图从挂起点继续，批准决定作 resume 输入注入。
 
 **两种 saver（被追问"换进程怎么继续"的答案）**：
+
 - `InMemorySaver`（默认）：进程内存 dict，重启全丢，仅够同进程同 thread_id 续写；
 - `AsyncPostgresSaver`（`LG_RAG_HTTP_CHECKPOINTER=postgres` 闸开）：同库写 `checkpoints / checkpoint_writes` 等框架表（checkpointer.py:14）；supervisor 模式由 RunWorker 挂（run_worker.py:138-142）。**跨进程恢复 = 新进程同 DSN 建 saver、同 thread_id 取最新快照**。
 - 默认关的理由（checkpointer.py:33-36 注释原文精神）：每请求建 saver 有成本；内存 saver 下跨请求恢复根本不可能，**恢复入口把"没开开关"当显式失败报出，不假装恢复成功**——fail-closed 哲学的又一次复现，讲数据层时主动呼应。
