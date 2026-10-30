@@ -29,7 +29,28 @@
 `npx spec-wave task lint --file docs/tasks/active/task_stage_w_e2e_join_acceptance.md` → **PASS**（2026-10-30）
 
 ## 未决项
-- HG-TASK-DRAFT 待维护者签收（签收后才开 20-R1）
-- 20-R1 审查文未开（HG-TASK-DRAFT 阻塞）
-- HG-E2E-ENV 待维护者确认本地 Fixture 轨口径
+- HG-TASK-DRAFT 待维护者签收（签收后才开 20-R1）→ **2026-10-30 已签收（00 代录）**
+- 20-R1 审查文未开（HG-TASK-DRAFT 阻塞）→ 已开，结论驱动修订棒见下
+- HG-E2E-ENV 待维护者确认本地 Fixture 轨口径（仍 pending）
 - TC9 回填最终落在 web task 原文还是另开回填 task，执行期定（A5 已写两可口径）
+
+---
+
+## 20-R1 修订棒（2026-10-30 晚 · 00 派工）
+
+### B1（blocker · 已修）
+20-R1 指出 C6/A4 与 api 码面矛盾：decide 端点为 owner-only 闸（`app/ops/hitl/router.py:213-216`），hitl store 查询无 tenant 谓词（`store.py:171,184`），同一维护者切租户 decide 返 **200** 非 404；真 fail-closed 在消费侧（`app/ops/hitl/nodes.py:499-504` 租户不一致不消费维持拦截 · `tests/test_write_approval_gate.py:431-475` W2 语义）。10 按 00 裁定口径回填：
+1. **C6 主测改消费链 live 实测**：B 会话拦单 → A 会话（或 A 租户头）approve → 断言写不执行 + 拦单维持 + 台账不消费；decide 返 200 标注为 owner-only 闸预期；
+2. **F4 对外 404 移至资源命中面**演示（对 B 租户资源 id 的只读/写请求 404）；证据须如实标注「owner-404（hitl-browser-decide-v1）≠ F4 机制」；
+3. **A4 / failure_paths 行 3 同步改写**；failure_paths 新增「200 误判缺陷」行（40 自检纠回 · 不开空 fix task）；
+4. 背景节末追加「跨租户码面口径」引用块，钉死码面真值锚点。
+差异面：背景节 + 完成态④ + C6 + A4 + failure_paths（改 1 行增 1 行）+ 自检结论 + 修订表。
+
+### M1（minor · 已修）
+C7 / A5 / 非范围 澄清「TC9 回填限 web 仓**文档轨**（task 档勾选/状态行），不改 web 业务码」，消除与头部「只改本仓文档/证据」的表面张力。
+
+### M2（minor · 已修）
+头部状态行 / 10 注 / 自检结论同步 **HG-TASK-DRAFT approved（00 代录）**；修订表补 00 代录签收行（对齐 T 先例）。HG-AUDIT-R1 / HG-E2E-ENV 仍 pending，闸表 status 未碰。
+
+### lint 复跑
+`npx spec-wave task lint --file docs/tasks/active/task_stage_w_e2e_join_acceptance.md` → **PASS**（2026-10-30 · 修订棒）
