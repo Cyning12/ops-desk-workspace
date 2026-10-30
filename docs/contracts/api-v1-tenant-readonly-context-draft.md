@@ -45,9 +45,9 @@
 | RAG ANN / chunk | 检索前 metadata 过滤语料集/租户 |
 | SSE lg-rag | **默认不改 event_type**；租户仅 session + header，须另开联调闸才动 freeze |
 
-## 4. 第二租户试点（数据前置 · 仍阻塞 30）
+## 4. 第二租户试点（数据前置 · Fixture 轨已齐 · 生产 P 轨仍阻塞 30）
 
-见：`docs/05-plan/06_stage_t_second_tenant_prep_v0_zh.md`（D1 ✅ · D2/D3 ⏳ · D5 ✅）
+见：`docs/05-plan/06_stage_t_second_tenant_prep_v0_zh.md`（D1 ✅ · D2/D3 ✅ **Fixture 轨**（api `f048c57` 入 master · 迁移 + 双租户 fixture）· 生产 P 轨真种子 ⏳ 仍 NO-GO · D4/D5 ✅）
 
 ## 5. 字段决议总表（freeze）
 
@@ -77,3 +77,5 @@
 | 2026-09-18 | §5 展开 F1 三方案对照 · F5/F6 维护者拍板 · 推荐 F1=C |
 | 2026-09-18 | 维护者同意 C · 钉 F1=C / F2 / F3；F4 仍欠 |
 | 2026-09-18 | 维护者接受 F4 建议 · **F1–F6 齐 · 本文件升 freeze** · `HG-CONTRACT-FREEZE` 00 代签 |
+| 2026-10-30 | 10 复核：F1–F6 与磁盘实态一致（api 实现 `f048c57` 已入 master · web PR #76 CLOSE）· 无待钉死项 · freeze 维持 |
+| 2026-10-30 | 20-R1 minor：§4 数据前置状态行纠偏——D2/D3 Fixture 轨已完成（api `f048c57` 入 master）· 生产 P 轨真种子仍 NO-GO；freeze 语义不变 |
