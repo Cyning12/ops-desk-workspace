@@ -6,4 +6,4 @@
 
 | 文档 | 说明 |
 |------|------|
-| [`backlog_20261030_post_stage_w.md`](backlog_20261030_post_stage_w.md) | 阶段 W 后夜间 backlog（2026-10-30 · 8 项）：B1 阶段 W 联调执行棒（三闸已 approved · 挂起待真人 decide）· B2 N-R2-1 疑似 api resume 租户回落缺陷（待 C3 实测）· B3/B4 api 30 未决风险 #2/#3 · B5 阶段 P 平台项缓开 · B6 P 轨真种子（待维护者签 HG-STAGE-T-DATA P 轨）· B7 web main ahead 1 未 push · B8 web TC9 手测回填 |
+| [`backlog_20261030_post_stage_w.md`](backlog_20261030_post_stage_w.md) | 阶段 W 后夜间 backlog（2026-10-30 · 9 项）：B1 阶段 W 联调执行棒（三闸已 approved · 挂起待真人 decide）· B2 N-R2-1 疑似 api resume 租户回落缺陷（待 C3 实测）· B3/B4 api 30 未决风险 #2/#3 · B5 阶段 P 平台项缓开 · B6 P 轨真种子（待维护者签 HG-STAGE-T-DATA P 轨）· B7 web main ahead 1 未 push · B8 web TC9 手测回填 · B9 web 仓文档卫生 sweep（8 条 stale-minor · 0 blocker · 移交 web 仓窗口） |

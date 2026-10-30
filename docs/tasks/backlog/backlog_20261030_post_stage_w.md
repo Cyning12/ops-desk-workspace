@@ -1,4 +1,4 @@
-# 阶段 W 后夜间 backlog（2026-10-30 · 8 项）
+# 阶段 W 后夜间 backlog（2026-10-30 · 9 项）
 
 > **性质**：backlog 记录文档（非 task · 不派工 · 不改码）。每项含：背景 · 触发条件/进入条件 · 阻塞闸 · 建议帽链 · 证据锚。
 > **落盘背景**：阶段 W api/web 双轨 CLOSE、PR #14 合入 main 后，挂起棒与未决风险集中归档，防丢失、防空转。本档只登记；任何一项要启动均须按 Harness 流程另开 task（`10-task` 起草 → 20 审查 → 维护者签闸）。
@@ -77,6 +77,23 @@
 - **建议帽链**：真人手测 → 00 回填 web task TC9 勾注（文档轨）→ 证据截图落 web invokes/。
 - **证据锚**：`../ops-desk-web/docs/tasks/done/task_web_hitl_approval_page.md`（TC9 行 · 「TC9 待维护者手测回填 · 维护者定夺 2026-10-30」）
 
+## B9 · web 仓文档卫生 sweep（8 条 stale-minor · 0 blocker）
+
+- **背景**：2026-10-30 夜 00 只读巡检 web 仓文档面，发现 8 条 stale-minor（0 blocker），均不阻塞使用但持续腐蚀文档真值：
+  1. `volatile.md`「本波 active」滞留 ≥10 个已 CLOSE 条目；`:21` progressive-reveal 误写「30 实现中」；12 处 `active/` 断链指针（task 已迁 `done/`）；
+  2. `done/README.md` web 表缺最近 4 笔关账登记（hitl_approval_page / graph_anchor_profile_fix / hitl_approval_overlay_ux / hitl_resume_chase_ux）；
+  3. `_views/done.md:14`「进行中 → in_progress.md」断链；
+  4. `README.md:17` 页面清单缺 5 个已上线页（LC Evidence / LG RAG / Obs / Capability Catalog / HITL）；
+  5. `_tech_graph/l2/indexes/by_path.yaml` 缺 HitlApprovalView.vue / CapabilityCatalogView.vue 两条目；
+  6. `CHECKLIST_lg_rag_sse_joint_release_v1.md:5` 双 task 指针断链；
+  7. TC9 证据落点写「PR 描述」但 web 全程零 push 未开 PR，落点待重定义；
+  8. TC9「构造挂起 run」无配方（可引 web-hitl-decision-surface `invoke_20261017_40_live.md`）。
+- **处置口径（00 已定）**：**本仓（workspace）不动 web 文档**；移交 web 仓窗口处置——下一窗口开 `task_web_doc_health_sweep`（纯文档轨）一次性清理 ①–⑥；⑦⑧ 两处 TC9 瑕疵随 TC9 回填棒（B8）同改。
+- **触发条件/进入条件**：web 仓开下一文档窗口时立项；⑦⑧ 随 B8（维护者手测 TC9）一并处置。
+- **阻塞闸**：无现闸；立项时 web 仓自带闸链（纯文档轨 · 不越仓执行——本仓不改 web 文档）。
+- **建议帽链**：web 仓窗口 10 起草 `task_web_doc_health_sweep` → 20 审查 → 维护者签闸 → 30（纯文档）→ 40 核对；⑦⑧ 并入 B8 回填。
+- **证据锚**：巡检全证据在 00 侧会话（2026-10-30 夜 · 可索）；受影响文件路径均相对 `../ops-desk-web/`；TC9 配方候选：`../ops-desk-web/docs/harness/invokes/by-task/web-hitl-decision-surface/invoke_20261017_40_live.md`
+
 ---
 
 ## 修订
@@ -84,3 +101,4 @@
 | 日期 | 说明 |
 |------|------|
 | 2026-10-30 | 10 帽（文档）落盘：阶段 W 后 8 项 backlog 集中归档（B1 挂起棒 · B2 疑似缺陷待实测 · B3/B4 30 未决风险 · B5 阶段 P 缓开 · B6 P 轨真种子 · B7 web 本地零 push · B8 web TC9）· 每项证据锚亲核（api/web/workspace 三仓码面与文档面）· 纯文档零改码 |
+| 2026-10-30 | 10 帽追加 B9（00 移交）：web 仓文档卫生 sweep · 8 条 stale-minor（0 blocker）· 处置口径=本仓不动 web 文档 · 移交 web 仓窗口开 task_web_doc_health_sweep · TC9 两处瑕疵随 B8 同改 |
