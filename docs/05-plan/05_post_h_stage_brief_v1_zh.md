@@ -18,9 +18,11 @@
 | H α 合入 | **已合入 `master`**：PR [#138](https://github.com/Cyning12/ops-desk-api/pull/138) · merge `48f0ac2`（含 `schema_validate.py`）· 本机 `master` ≡ `origin/master` |
 | 阶段 H · 波次 β | **CLOSE + MERGED（2026-09-18）** · task → `ops-desk-api/docs/tasks/done/task_supervisor_budget_h_beta.md` · PR [#141](https://github.com/Cyning12/ops-desk-api/pull/141) |
 | web 冒烟 | **PASS**（含维护者生产 Chat 无问题） |
-| 阶段 T / W / P | T：**条件核对 + 数据前置 + task 壳已落**（NO-GO 30）；W/P **未开** |
+| 阶段 T / W / P | ~~T：条件核对 + 数据前置 + task 壳已落（NO-GO 30）；W/P 未开~~ **2026-10-30 实态**：T 已 **CLOSE**（契约 F1–F6 freeze 2026-09-18 · api PR [#142](https://github.com/Cyning12/ops-desk-api/pull/142) · workspace PR [#13](https://github.com/Cyning12/ops-desk-workspace/pull/13) · Fixture 轨）；W 双轨单轨验收均 **CLOSE**（api 受控写 PR [#303](https://github.com/Cyning12/ops-desk-api/pull/303) merge `09f97f4` 2026-10-30 · web HITL 审批页已合 main · TC9 待维护者手测）；双轨端到端联调验收 task 在途（`docs/tasks/active/task_stage_w_e2e_join_acceptance.md` · PR #14 · HG-TASK-DRAFT approved）；P 未开（进入条件未达） |
 | T 进入条件抽查 | H 契约测绿 ✓ · 冒烟 ✓ · **H β MERGED ✓**；**第二租户试点数据 ✗** → 见 `06_stage_t_second_tenant_prep_v0_zh.md` |
 | T task 壳 | workspace `task_stage_t_tenant_contract` · api `task_tenant_readonly_predicate` · web `task_web_tenant_context_chat` |
+
+> 修订注记（2026-10-30 · 文档健康巡检 night-1030）：本表「T 进入条件抽查 / T task 壳」两行、§3「下一候选」表、§4「推荐下一刀：web 冒烟」均为 2026-09-17/18 时点快照，已被后续阶段推进超越——当前实态以上表「阶段 T / W / P」更正行与文末修订表为准；§3 阶段序代码块（H→T→W→P）本身仍有效，不改。
 
 ---
 
@@ -102,3 +104,4 @@ H α CLOSE ✓
 | 2026-09-17 | H β 全链 CLOSE（10→40·00）· 待维护者 commit/PR |
 | 2026-09-18 | H β commit/PR [#141](https://github.com/Cyning12/ops-desk-api/pull/141) · CLOSE 补完（KPI/Hub） |
 | 2026-09-18 | #141 MERGED 纠偏 · 阶段 T 三仓 task 壳落盘 · 下一刀改为 D1–D3 数据前置 |
+| 2026-10-30 | §1 水位行更正：T 已 CLOSE（api PR #142 · workspace PR #13 · Fixture 轨 · F1–F6 freeze）· W 双轨单轨验收 CLOSE（api PR #303 merge `09f97f4` · web HITL 审批页合 main · TC9 待手测）· 双轨联调 task 在途（PR #14 · HG-TASK-DRAFT approved）· P 未开；§1 余行/§3/§4 时点快照加注（文档健康巡检 night-1030） |
