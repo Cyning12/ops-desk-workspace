@@ -55,7 +55,7 @@
 
 单轨各自过闸 ≠ 双轨咬合过闸：api 侧验收基于单测与负样本，web 侧 TC9 明确挂起，**真人全链从未跑过一遍**。本 task 补这一环：本地起双栈，真人从 web 发起 echo 写 → 编排层拦单挂起 → `/hitl` 页审批（approve 与 reject 各至少一遍）→ resume 单路径恢复 → echo 真执行 → span `approval_id` 审计链核对；并实测跨租户负样本（**消费链 fail-closed** + F4 资源命中面 404），承接 web TC9 手测回填。
 
-> **跨租户码面口径（20-R1 B1 修订 · 10 亲核 api 码面）**：api decide 端点为 **owner-only 闸**（`app/ops/hitl/router.py:213-216`），hitl store 查询**无 tenant 谓词**（`store.py:171,184`）——同一维护者切租户 decide **返 200 属预期行为**，非缺陷、非 F4 违例。真 fail-closed 在**消费侧**：编排层消费台账时租户不一致不消费、维持拦截（`app/ops/hitl/nodes.py:499-504` · 对应 `tests/test_write_approval_gate.py:431-475` W2 语义）。故本 task 跨租户主测 = **消费链 live 实测**；`hitl-browser-decide-v1` 的 owner-404（未知/跨用户单据 404）≠ F4 机制，证据记录须如实区分；F4 对外 404 保留在**资源命中面**演示。
+> **跨租户码面口径（20-R1 B1 修订 · 10 亲核 api 码面）**：api decide 端点为 **owner-only 闸**（`app/ops/hitl/router.py:213-216`），hitl store 查询**无 tenant 谓词**（`store.py:171,184`）——同一维护者切租户 decide **返 200 属预期行为**，非缺陷、非 F4 违例。真 fail-closed 在**消费侧**：编排层消费台账时租户不一致不消费、维持拦截（`app/ops/lg_rag/multi/nodes.py:499-504` · 对应 `tests/test_write_approval_gate.py:431-475` W2 语义）。故本 task 跨租户主测 = **消费链 live 实测**；`hitl-browser-decide-v1` 的 owner-404（未知/跨用户单据 404）≠ F4 机制，证据记录须如实区分；F4 对外 404 保留在**资源命中面**演示。
 
 ### 完成态
 
@@ -75,7 +75,7 @@
 - [ ] **C3 · approve 全链**：`/hitl` 页真人 decide=approve（含二次确认 / resume_mode 选择与显式续跑两步链）→ resume 单路径恢复 → echo 真执行，结果回到会话；证据 = 决策确认截屏 + 执行结果截屏 + resume 日志摘录  
 - [ ] **C4 · reject 路径**：再发起一遍 echo 写 → decide=reject → 断言写**未**执行、单据终态正确、会话侧可见驳回结果；证据 = 截屏 + 单据状态摘录  
 - [ ] **C5 · 审计链核对**：以 C3 单据的 `approval_id` 串链核对 span / 日志（审批决策 → resume → 写执行结果）；证据 = 日志/观测摘录（含 `approval_id` 字段值）  
-- [ ] **C6 · 跨租户负样本（消费链 fail-closed 主测）**：租户 B 会话发起 echo 写产生拦单 → 切租户 A 会话（或带 A 租户头）对该单据 decide=approve → 断言**写不执行 · 拦单维持挂起 · 台账不被消费**（api `app/ops/hitl/nodes.py:499-504` 消费侧语义 · W2 单测 `tests/test_write_approval_gate.py:431-475` 的 live 对应）；**注意**：decide 返 200 属预期（owner-only 闸 `router.py:213-216` · store 无 tenant 谓词 `store.py:171,184`），owner-404（`hitl-browser-decide-v1`）≠ F4 机制，证据须如实区分——另演示 **F4 资源命中面**：以 A 会话对 B 租户资源 id 发只读/写请求 → 对外 **404**；租户头与 session 不一致 → **403**（F1=C 抽测一次）；证据 = 各响应码与编排行为截屏/日志摘录  
+- [ ] **C6 · 跨租户负样本（消费链 fail-closed 主测）**：租户 B 会话发起 echo 写产生拦单 → 切租户 A 会话（或带 A 租户头）对该单据 decide=approve → 断言**写不执行 · 拦单维持挂起 · 台账不被消费**（api `app/ops/lg_rag/multi/nodes.py:499-504` 消费侧语义 · W2 单测 `tests/test_write_approval_gate.py:431-475` 的 live 对应）；**注意**：decide 返 200 属预期（owner-only 闸 `router.py:213-216` · store 无 tenant 谓词 `store.py:171,184`），owner-404（`hitl-browser-decide-v1`）≠ F4 机制，证据须如实区分——另演示 **F4 资源命中面**：以 A 会话对 B 租户资源 id 发只读/写请求 → 对外 **404**；租户头与 session 不一致 → **403**（F1=C 抽测一次）；证据 = 各响应码与编排行为截屏/日志摘录  
 - [ ] **C7 · TC9 承接**：web TC9 手测项在本联调中完成（批准 → 显式续跑 → 「回到会话查看」链路 + 四态截图 / 语义对照表 / 闸表截图），证据落盘并回填 web task **文档轨**（task 档勾选/状态行 · **不改 web 业务码**；或另开回填 task，指针互链）  
 - [ ] **C8 · 证据归档与勾选**：全部证据落 `docs/harness/invokes/by-task/stage-w-e2e-join-acceptance/`；40 自检核对验收逐条勾选；缺陷另开 fix task 互链（无则记零发现）
 
@@ -203,3 +203,4 @@ S1 环境 → S2 拦单挂起 → S3 approve 全链 → S4 reject → S5 审计�
 | 2026-10-30 | 10 起草：过程轨验收壳 · 三闸（HG-TASK-DRAFT / HG-AUDIT-R1 / HG-E2E-ENV）· 范围 C1–C8 · 验收 A1–A8 带证据形式 · failure_paths 九条（含 freeze 拒改 / 真人 decide 红线 / F4 实测）· R0–R5 齐（early_stop at R3）· lint PASS |
 | 2026-10-30 | 00 代录：维护者签收 **HG-TASK-DRAFT → approved**（对齐阶段 T 先例 · 解锁 20-R1；联调执行仍须 HG-AUDIT-R1 + HG-E2E-ENV）；闸表 status 其余未动 |
 | 2026-10-30 | 10 承接 **20-R1 修订**：**B1** 跨租户负样本口径纠偏——decide 端点为 owner-only 闸（api `router.py:213-216` · store 无 tenant 谓词 `store.py:171,184`），切租户 decide 返 200 属预期；C6/完成态④/A4 主测改为**消费链 fail-closed** live 实测（写不执行 · 拦单维持 · 台账不消费 · `nodes.py:499-504`），F4 对外 404 移至资源命中面演示，并钉死「owner-404 ≠ F4 机制」区分；failure_paths 第 3 行同步改写并新增「200 误判缺陷」行。**M1** C7/A5/非范围澄清「TC9 回填限 web 仓文档轨，不改 web 业务码」。**M2** 头部状态行/10 注/自检结论同步 HG-TASK-DRAFT approved · lint 复跑 PASS |
+| 2026-10-30 | 10 承接 **20-R2**（B1/M1/M2 闭环）：**M3** 机械订正——消费侧守卫路径两处引用 `app/ops/hitl/nodes.py:499-504` → 真实路径 **`app/ops/lg_rag/multi/nodes.py:499-504`**（行号内容经亲核一致，仅目录段 `hitl/` → `lg_rag/multi/`）；闸表 status 未动 · lint 复跑 PASS。20-R2 观察点 N-R2-1（resume 入口租户 ContextVar 回落 · `tenant_context.py:24-26`）已知悉，不改本 task——执行期实测若成立按 A7 另开 fix task |

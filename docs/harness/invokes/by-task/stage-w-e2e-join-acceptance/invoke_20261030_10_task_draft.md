@@ -54,3 +54,11 @@ C7 / A5 / 非范围 澄清「TC9 回填限 web 仓**文档轨**（task 档勾选
 
 ### lint 复跑
 `npx spec-wave task lint --file docs/tasks/active/task_stage_w_e2e_join_acceptance.md` → **PASS**（2026-10-30 · 修订棒）
+
+---
+
+## 20-R2 机械订正棒（2026-10-30 深夜 · 00 派工）
+
+- **M3**：task :58 与 :78 两处 `app/ops/hitl/nodes.py:499-504` → 真实路径 `app/ops/lg_rag/multi/nodes.py:499-504`（已亲核磁盘：行号内容一致——W2 写闸类单据租户守卫，仅目录段错 `hitl/` → `lg_rag/multi/`）；修订表 +1 行；闸表 status 未动。
+- 20-R2 观察点 **N-R2-1**（resume 入口不设租户 ContextVar · `tenant_context.py:24-26` 回落默认 TENANT_A → B 自己 approve+resume 疑似也不消费）已知悉，**不改 task**；执行期实测若成立按 A7 另开 fix task。
+- lint 复跑 **PASS**。
