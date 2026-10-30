@@ -51,3 +51,10 @@
 - `docs/contracts/api-v1-tenant-readonly-context-draft.md` §4（L48/L50）：「仍阻塞 30 · D2/D3 ⏳」→「Fixture 轨已齐 · 生产 P 轨仍阻塞 30 · D2/D3 ✅ Fixture 轨（api `f048c57` 入 master）· P 轨真种子 ⏳ NO-GO」+ 修订行。
 - `docs/tasks/active/task_stage_t_tenant_contract.md` failure_paths 第 1 条：括注「（生产 P 轨真种子口径；Fixture 轨已 CLOSE）」+ 修订行。
 - lint 复跑 **PASS**；闸表 status 未动；未 commit。暂存定稿：`/tmp/stage-t-handoff/`（v2 同源已并入正式名）。
+
+## CLOSE 棒（2026-10-30 · 维护者拍板归档 done/）
+
+- `docs/tasks/done/task_stage_t_tenant_contract.md`：git mv 自 active/ · 头部状态 → `done`（commit e651dfc）· 验收六框全勾带证据括注 · 完成态复核注更新为 CLOSE 实态 · 自检结论 lint 行改指 done/ 路径 · 修订行 +1（双闸 approved · 20-R1 审查文 · e651dfc）。闸表 status 未动（终态）。
+- 引用随迁：`docs/05-plan/06_stage_t_second_tenant_prep_v0_zh.md` §3/§5 两处 active→done（+修订行）；`docs/tasks/active/README.md` 清空 active 表并留 done/ 指针。
+- 历史记录不改：invoke 内文 · 20-R1 审查文 · specwave 升级审查文中的 active/ 路径保持原样。
+- lint 复跑 **PASS**；未 commit（00 收口）。

@@ -1,6 +1,6 @@
 # Task：阶段 T · 只读多租户契约定稿 + 第二租户数据前置
 
-> **状态**：`active` · **过程轨** · **不授权子仓 30**  
+> **状态**：`done`（2026-10-30 CLOSE · commit e651dfc）· **过程轨** · **不授权子仓 30**  
 > **类型**：契约 / 数据前置 / 跨仓编排  
 > **上游**：`docs/05-plan/06_stage_t_second_tenant_prep_v0_zh.md` · `docs/05-plan/05_post_h_stage_brief_v1_zh.md` · api `docs/discussions/2026-09-17_interview_gaps_adoption_and_landing_v0.md` §8  
 > **分支**：`task/stage-t-tenant-contract`（建议；base：`main`）  
@@ -58,7 +58,7 @@
 3. 子仓 task 壳已落盘且互链：api `tenant-readonly-predicate` · web `tenant-context-chat`。（2026-10-30 注：已被磁盘实态超越——壳不仅落盘且已 30 完成 CLOSE，分别迁 api/web `done/`。）  
 4. **HG-STAGE-T-DATA** 未批前：任何子仓 30 **拒开工**（写进本 task 与 06）。
 
-> **2026-10-30 复核**：完成态 1–4 磁盘面已齐；**HG-TASK-DRAFT 已 approved（2026-10-30 维护者签收）**；下一棒 20-R1；CLOSE 决策归维护者。
+> **2026-10-30 CLOSE**：完成态 1–4 磁盘面已齐；双闸 approved（HG-TASK-DRAFT 维护者签收 · HG-AUDIT-R1 00 代签）；20-R1 PASS（`docs/harness/reviews/review_20261030_stage_t_tenant_contract_r1.md`）；维护者拍板 CLOSE，归档 `done/`（commit e651dfc）。
 
 ---
 
@@ -87,12 +87,12 @@
 
 ## 验收标准
 
-- [ ] 06 进入条件表：H β = CLOSE+MERGED；第二租户数据 = 否（或已齐则改是并签 HG-STAGE-T-DATA）  
-- [ ] 契约文档含可勾选「待钉死」清单；未 freeze 前标题/状态仍标明 draft  
-- [ ] api/web task 壳路径写入 §依赖；slug 与 06 §3 一致  
-- [ ] `npx spec-wave task lint --file docs/tasks/active/task_stage_t_tenant_contract.md` PASS  
-- [ ] 人工闸表：`HG-STAGE-T-DATA` / `HG-CONTRACT-FREEZE` 语义写清 blocks  
-- [ ] CLOSE 时：若数据仍未齐，task 可转 `blocked` 或保持 active，但 **不得** 伪称已授权子仓 30
+- [x] 06 进入条件表：H β = CLOSE+MERGED（merge `4896701` · 2026-10-30 复核）；第二租户数据 Fixture 轨已齐并签 HG-STAGE-T-DATA（2026-09-18）  
+- [x] 契约文档含可勾选「待钉死」清单；已升 freeze（2026-09-18 · HG-CONTRACT-FREEZE approved · F1–F6 ✅ · 无遗留待钉死项）  
+- [x] api/web task 壳路径写入 §依赖；slug 与 06 §3 一致（壳已 CLOSE 迁 `done/`，指针随迁）  
+- [x] `npx spec-wave task lint --file docs/tasks/done/task_stage_t_tenant_contract.md` PASS（2026-10-30 CLOSE 棒复跑）  
+- [x] 人工闸表：`HG-STAGE-T-DATA` / `HG-CONTRACT-FREEZE` 语义写清 blocks（均 approved）  
+- [x] CLOSE 合规：Fixture 轨 api/web 30 已双双 CLOSE（api 09-21 归档 · web 10-17 PR #76），无伪称授权；生产 P 轨 NO-GO 语义保留于 06/07
 
 ---
 
@@ -178,8 +178,8 @@ T 不改 SSE freeze；租户只进 body/header/session。停轮把字段钉死�
 
 | 检查 | 结果 |
 |------|------|
-| `npx spec-wave task lint --file docs/tasks/active/task_stage_t_tenant_contract.md` | **PASS**（2026-10-30 · 10 帽对定稿复跑） |
-| 结论 | **完成态 1–4 磁盘面已齐 · HG-TASK-DRAFT approved（2026-10-30 维护者签收）· 待 20-R1 · 生产 P 轨真种子未授权** |
+| `npx spec-wave task lint --file docs/tasks/done/task_stage_t_tenant_contract.md` | **PASS**（2026-10-30 · CLOSE 棒对归档稿复跑） |
+| 结论 | **CLOSE · 完成态 1–4 已齐 · 双闸 approved · 20-R1 PASS · 生产 P 轨真种子未授权（另轨）** |
 
 ---
 
@@ -192,3 +192,4 @@ T 不改 SSE freeze；租户只进 body/header/session。停轮把字段钉死�
 | 2026-10-30 | 00 记录：维护者签收 **HG-TASK-DRAFT → approved**（解锁 20-R1 · 不因本闸开子仓 30）；其余闸 status 未动 |
 | 2026-10-30 | 20-R1 minor：failure_paths 第 1 条括注「生产 P 轨真种子口径；Fixture 轨已 CLOSE」，消除表观冲突 |
 | 2026-10-30 | 20-R1 审查 PASS（无 blocker · minor×1 已修）· 00 代签 **HG-AUDIT-R1 → approved**（维护者授权）；HG-GRAPH-MODULES 图谱零 diff 跳过 |
+| 2026-10-30 | **CLOSE**：维护者拍板归档 `done/` · 双闸 approved（HG-TASK-DRAFT 维护者签收 · HG-AUDIT-R1 00 代签）· 20-R1 审查文 `docs/harness/reviews/review_20261030_stage_t_tenant_contract_r1.md` · commit e651dfc · 验收六框全勾 · 06/active README 指针随迁 |

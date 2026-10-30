@@ -54,7 +54,7 @@
 
 | 仓 | task 文件 · slug | 依赖 | 30 |
 |----|------------------|------|-----|
-| workspace | [`docs/tasks/active/task_stage_t_tenant_contract.md`](../tasks/active/task_stage_t_tenant_contract.md) · `stage-t-tenant-contract` | D1 命名 · 契约定稿 | 过程轨（无业务 30） |
+| workspace | [`docs/tasks/done/task_stage_t_tenant_contract.md`](../tasks/done/task_stage_t_tenant_contract.md) · `stage-t-tenant-contract` | D1 命名 · 契约定稿 | **CLOSE**（过程轨 · 2026-10-30 归档 `done/` · commit e651dfc） |
 | api | [`../ops-desk-api/docs/tasks/done/task_tenant_readonly_predicate.md`](../../ops-desk-api/docs/tasks/done/task_tenant_readonly_predicate.md) · `tenant-readonly-predicate` | 契约 freeze ✅ · Fixture 轨 F-SIGN ✅ | **CLOSE**（Fixture 轨 30 完成 · `f048c57` 入 master · 2026-09-21 归档 `done/`） |
 | web | [`../ops-desk-web/docs/tasks/done/task_web_tenant_context_chat.md`](../../ops-desk-web/docs/tasks/done/task_web_tenant_context_chat.md) · `web-tenant-context-chat` | 同上 · D5 含切换 UI | **CLOSE**（2026-10-17 · PR #76 · hat40 跨租户负样本联调 PASS） |
 | ios | 非本波 | — | — |
@@ -78,7 +78,7 @@
 |------|------|
 | **数据前置 Runbook** | `docs/05-plan/07_stage_t_data_prep_runbook_v0_zh.md` |
 | 契约 freeze | `docs/contracts/api-v1-tenant-readonly-context-draft.md` |
-| workspace 过程 task | `docs/tasks/active/task_stage_t_tenant_contract.md` |
+| workspace 过程 task | `docs/tasks/done/task_stage_t_tenant_contract.md`（已 CLOSE） |
 | api / web task 壳 | 见 §3（已迁 `done/`） |
 | 简报 | `docs/05-plan/05_post_h_stage_brief_v1_zh.md` |
 | 决议 §8 | `../ops-desk-api/docs/discussions/2026-09-17_interview_gaps_adoption_and_landing_v0.md` |
@@ -95,3 +95,4 @@
 | 2026-09-18 | 维护者接受 F4 · 契约 freeze · `HG-CONTRACT-FREEZE` 代签；30 仍等 D2–D3 |
 | 2026-09-18 | 实扫无 tenant 列 · 增 `07` 双轨 · 开工闸改为 Fixture F-SIGN |
 | 2026-10-30 | 10 复核纠偏至磁盘实态：D2–D4 Fixture 轨勾选（api `f048c57` 入 master · web PR #76 CLOSE）· §3 壳指针迁 `done/` · 生产 P 轨 NO-GO 语义保留 |
+| 2026-10-30 | workspace 过程 task CLOSE 归档 `done/`（commit e651dfc）· §3/§5 指针随迁 · active README 清空 |
