@@ -1,6 +1,6 @@
 # Task：阶段 W · 双轨端到端联调验收（api 受控写 + web 审批页 · 真人全链 · TC9 回填）
 
-> **状态**：`draft`（2026-10-30 · 10 起草落壳 · **HG-TASK-DRAFT approved**（00 代录）· HG-AUDIT-R1 / HG-E2E-ENV `pending` · 20-R1 修订棒已回填 B1/M1/M2）· **过程轨 / 验收轨** · **不授权任何 30 改码**  
+> **状态**：`active`（2026-10-30 · **三闸全 approved**（HG-TASK-DRAFT 维护者签收 · HG-AUDIT-R1 / HG-E2E-ENV 维护者授权 00 代录）· 20-R1/R2 闭环 · **执行棒挂起：真人 decide 待维护者到场**）· **过程轨 / 验收轨** · **不授权任何 30 改码**  
 > **类型**：跨仓联调验收 / 证据归档（只产文档与证据，不改业务码）  
 > **上游**：api `docs/discussions/2026-09-17_interview_gaps_adoption_and_landing_v0.md` §8（阶段序 H→T→W→P）· `docs/05-plan/05_post_h_stage_brief_v1_zh.md`（阶段 W 行：受控写 + HITL「要确认单/HITL」）  
 > **分支**：`task/stage-w-e2e-join`（base：`main`）  
@@ -40,8 +40,8 @@
 | human_gate_id | status | blocks_hats | 说明 |
 |---------------|--------|-------------|------|
 | HG-TASK-DRAFT | **approved** | 20-R1, 联调执行 | 2026-10-30 维护者签收（00 代录）· 解锁 20-R1；联调执行仍须 HG-AUDIT-R1 + HG-E2E-ENV 齐 |
-| HG-AUDIT-R1 | pending | 联调执行 | 20-R1 审查文 PASS 后签收（过程轨先例：阶段 T 走 20-R1 · `docs/harness/reviews/review_20261030_stage_t_tenant_contract_r1.md`）；本闸**不**授权任何 30 改码 |
-| HG-E2E-ENV | pending | 联调执行 | **执行环境确认**：本地起 api + web 双栈 · 数据限 Fixture 轨（双租户 fixture · api `f048c57` ∈ master）· **不触生产**（P 轨生产数据另轨另签）；维护者签收后方可开跑 |
+| HG-AUDIT-R1 | **approved** | 联调执行 | 2026-10-30 维护者授权 00 代录（授权锚：invoke_20261030_00_orchestration.md）· 依据：20-R1 B1→10 修订闭环 · 20-R2 复审 B1/M1/M2 闭环 · M3 路径订正落盘（审查文 `docs/harness/reviews/task_stage_w_e2e_join_acceptance_audit_R1_20261030.md` + `_R2_20261030.md`）；本闸**不**授权任何 30 改码 |
+| HG-E2E-ENV | **approved** | 联调执行 | 2026-10-30 维护者授权 00 代录（同上授权锚）· 口径钉死：本地起 api + web 双栈 · 数据限 Fixture 轨（双租户 fixture · api `f048c57` ∈ master）· **不触生产**（P 轨另轨另签）· 真人 decide 不可代理（A6 红线）→ 执行棒挂起待维护者到场 |
 
 ---
 
