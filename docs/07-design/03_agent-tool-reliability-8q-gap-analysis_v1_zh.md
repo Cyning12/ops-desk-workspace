@@ -12,6 +12,31 @@
 
 判据：只认**在调用路径上**的机制。声明了但没被调用 = 死代码（V7 教训）。
 
+## 落地状态（2026-09-20 更新）
+
+两项 P0 已落地，验收进了六层一键脚本（含真桩服务联调）：
+
+| 项 | 对应缺口 | 实现 | 红线 | 验收层 |
+|---|---|---|---|---|
+| **P0-1 输出契约** `output_schema` | Q2 / Q4 —— 唯一"错了还报成功"的口子 | `app/ops/capability/result_contract.py`（校验）+ `manifest.py` V10（加载期形状）+ `gateway` 成功路径 | **R10** | 单测 / 题集（+3 用例）/ 红线 |
+| **P0-2 会话配额 + kill switch** | Q6 —— 已有预算管步数，管不了"打了多少次写" | `app/ops/capability/budget.py` + `gateway` 准入 | **R11** | 红线 / **失控兜底（配置级）** |
+
+两条约束在落地时被显式守住了：
+
+- **错误码词表七个、不增**：契约不符落 `upstream_error`（detail `result_contract: …`）；
+  kill switch 落 `disabled`；配额耗尽落 `policy_blocked`。用 detail 区分，不新造码。
+- **契约是显式声明出来的**：`output_schema` 未声明 → **不校验、不拦截**。
+  系统不替你猜契约，否则"能用"会变成"随机不可用"。
+
+落地过程中**顺带挖出的三个更危险的既有问题**（都不是新功能，是修洞）：
+
+1. **假门**：配额原按 `subtask_id` 分桶，而子任务是 `run_id:seq`、一个子任务基本只打一次
+   工具 ⇒ 每个桶最多 1 次，配额**永远打不满**。改为按 `run_id`（`tool_exec_node` 已补传）。
+2. **跨用例状态泄漏**：配额是进程内全局，不传 ctx 的调用全落匿名桶 `""`，跑满 64 次后
+   后续全部被拦。conftest 加了 autouse reset，题集 runner 按 case reset。
+3. **无界字典**：`_SESSIONS` 按 run_id 无限累积 = 内存泄漏。加了 512 上界 + FIFO 淘汰，
+   并在 `/runtime` 的 `budget` 里把 `evicted_sessions` 报出来，不假装没发生。
+
 ---
 
 ## 0. 总纲：八问其实是四类错误，不能指望一种机制

@@ -29,6 +29,7 @@ docs/
 │   ├── 02-epic6-implementation-plan.md
 │   ├── 03-post-go-live-hygiene-orchestration.md
 │   ├── 04-agent-completion-roadmap_v1_zh.md   # 线 A · 应用 Agent（总册见 Desktop/cyning-ai-program）
+│   └── 08_collab_agent_graph_capability_draft_v0_zh.md  # 设想 · 图谱能力化 / 协同 Agent（非现网）
 │   ├── 05-rag-pipeline-walkthrough_v1_zh.md
 │   └── 06-rag-week-checkin_2026W33_zh.md
 ├── contracts/                # 跨仓接口契约

@@ -18,8 +18,8 @@ Vanor 的工具注册机制极为简陋：`ToolRegistry.register()` 只做一次
 核心发现三条：
 
 1. **注册期零校验** —— `register({name:"no_handler"})` 可通过，`schemas()` 照常把它发给模型
-2. **`validateSchema` 不支持 `pattern` / `maxLength`** —— 参数约束写了也不生效（实测错误数=0）
-3. **MCP 工具的 `autoApprove` 可一键把整个服务器判为 `safe`** —— 第三方进程能力绕过审批
+2. `validateSchema` **不支持** `pattern` **/** `maxLength` —— 参数约束写了也不生效（实测错误数=0）
+3. **MCP 工具的** `autoApprove` **可一键把整个服务器判为** `safe` —— 第三方进程能力绕过审批
 
 ---
 
@@ -90,6 +90,7 @@ schemas() 正常
 ```
 
 **结论：**
+
 - 三个畸形工具**全部注册成功**
 - `schemas()` 正常返回 —— 也就是说**畸形工具会被原样发给 LLM**，模型看到的工具列表里有它
 - 错误直到**调用时**才暴露
@@ -127,7 +128,7 @@ base/transport/web/server.js:6
 
 调用点分散在两个宿主文件里，各自注册不同的工具集合：
 
-**`harness.js`（Agent 侧，每会话一个 registry）**
+`harness.js`**（Agent 侧，每会话一个 registry）**
 
 | 行号 | 注册内容 |
 |---|---|
@@ -150,7 +151,7 @@ base/transport/web/server.js:6
 | 318 | `subagent`（受 `subagentCapable()`） |
 | 322-325 | `extraTools`（**最后注册，同名覆盖前面所有**） |
 
-**`server.js`（应用直调侧，全进程共享一个 registry）**
+`server.js`**（应用直调侧，全进程共享一个 registry）**
 
 | 行号 | 注册内容 |
 |---|---|
@@ -206,7 +207,7 @@ Agent 侧则是每 `runTurn` 新建 `toolCtx`（`harness.js:822`），**无此�
 
 ### 3.1 问题定性
 
-工具注册是「声明能力存在」的动作。按最小权限原则，**能力必须先被声明、被校验、被审计，才能存在**。Vanor 现在是反过来的：**任何对象只要带个 `name` 就能成为工具**。
+工具注册是「声明能力存在」的动作。按最小权限原则，**能力必须先被声明、被校验、被审计，才能存在**。Vanor 现在是反过来的：**任何对象只要带个** `name` **就能成为工具**。
 
 ### 3.2 为什么这是问题（四个具体后果）
 
@@ -362,9 +363,9 @@ export function validateSchema(schema, value, p = "", t = defaultT) {
 }
 ```
 
-**支持的校验项：`type` / `enum` / `required` / `properties` / `items`**
+**支持的校验项：**`type` **/** `enum` **/** `required` **/** `properties` **/** `items`
 
-**不支持的校验项：`pattern` / `maxLength` / `minLength` / `minimum` / `maximum` / `format` / `additionalProperties`**
+**不支持的校验项：**`pattern` **/** `maxLength` **/** `minLength` **/** `minimum` **/** `maximum` **/** `format` **/** `additionalProperties`
 
 ### 4.2 实测验证
 
@@ -387,13 +388,13 @@ enum 违规         → 错误数=1   schema.enumValue{...}
 类型错             → 错误数=1   schema.expectedType{...}
 ```
 
-**`pattern: "^[a-z]+$"` 对 `"ABC123"` 返回零错误。** 声明了约束、写了 schema，但**运行时完全不检查**。
+`pattern: "^[a-z]+$"` **对** `"ABC123"` **返回零错误。** 声明了约束、写了 schema，但**运行时完全不检查**。
 
 ### 4.3 影响面
 
 这不是「少一个校验项」的问题，而是**schema 的自我描述能力残缺**：
 
-1. **工具定义里写 `pattern` 是误导性的** —— 读者以为有约束，实际没有
+1. **工具定义里写** `pattern` **是误导性的** —— 读者以为有约束，实际没有
 2. **无法用 schema 表达路径白名单、ID 格式、长度上限** —— 这些是最常见的参数约束
 3. **与其他实现对接时语义不对齐** —— 外部令牌层用 `pattern` 约束参数值，Vanor 只在 schema 里写同样的 `pattern`，两边行为不一致
 
@@ -437,7 +438,7 @@ pattern='^[\w./-]+$' value='../../etc/passwd' → True    ← 路径穿越未挡
 pattern='^[a-z]+$'   value='abc\n'   → re.match=True    ← $ 不锚定换行
 ```
 
-**结论：实现时必须用完整匹配（`m[0] === value`），不能依赖作者写 `^...$`。** JavaScript 的 `$` 与 Python 一样不锚定末尾换行。
+**结论：实现时必须用完整匹配（**`m[0] === value`**），不能依赖作者写** `^...$`**。** JavaScript 的 `$` 与 Python 一样不锚定末尾换行。
 
 **风险：无。** 纯增量，现有 schema 不含这些字段则行为完全不变。
 
@@ -498,7 +499,7 @@ if (danger === "safe") return { allowed: true, danger: "safe" };
 danger: (args) => (!args.action || args.action === "run" ? "confirm" : "safe"),
 ```
 
-**内置工具默认 `confirm` 且需按参数判断，外部工具却能一键免审。** 这个不一致值得明确：是有意为之（信任 MCP 配置）还是历史遗留。
+**内置工具默认** `confirm` **且需按参数判断，外部工具却能一键免审。** 这个不一致值得明确：是有意为之（信任 MCP 配置）还是历史遗留。
 
 ### 5.4 建议
 
@@ -718,12 +719,13 @@ import("/opt/vanor/base/tools/index.js").then(async({defaultRegistry})=>{
 见第四节。`pattern` / `maxLength` 应能在工具定义里声明并生效，而不是散落在 `handler` 内部的 `if` 判断中。
 
 好处：
+
 - 约束对模型可见（schema 会发给 LLM），模型能自我纠正
 - 约束对审计可见（读 schema 就知边界）
 
 ### 9.3 写操作默认拒绝 + 显式声明
 
-Vanor 现状是 `danger` 缺失时兜底 `confirm`（`tools/index.js:191`），这已经不错。但可以更进一步：**要求工具必须声明 `sideEffect`**，写操作不得声明为 `safe`。
+Vanor 现状是 `danger` 缺失时兜底 `confirm`（`tools/index.js:191`），这已经不错。但可以更进一步：**要求工具必须声明** `sideEffect`，写操作不得声明为 `safe`。
 
 ### 9.4 拒绝码携带可重试性
 
@@ -808,9 +810,9 @@ function parallelSafe(call, registry, ctx) {
 
 ### 10.3 立即可做的三件事
 
-1. **补 `pattern` / `maxLength` 到 `validateSchema`**（约 20 行，零风险，当天可完成）
-2. **给 `register` 加形状校验 + 拒绝码**（约 60 行，需兼容 `extraTools`）
-3. **审查现有 MCP 配置里是否有 `autoApprove: true`**（`grep -r autoApprove ~/.vanor/config.json`）
+1. **补** `pattern` **/** `maxLength` **到** `validateSchema`（约 20 行，零风险，当天可完成）
+2. **给** `register` **加形状校验 + 拒绝码**（约 60 行，需兼容 `extraTools`）
+3. **审查现有 MCP 配置里是否有** `autoApprove: true`（`grep -r autoApprove ~/.vanor/config.json`）
 
 第 1 项可立即验证效果，第 2 项需先确认 `extraTools` 的使用情况，第 3 项是一次配置审计。
 
