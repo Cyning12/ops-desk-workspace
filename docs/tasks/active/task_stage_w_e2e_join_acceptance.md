@@ -39,7 +39,7 @@
 
 | human_gate_id | status | blocks_hats | 说明 |
 |---------------|--------|-------------|------|
-| HG-TASK-DRAFT | pending | 20-R1, 联调执行 | 维护者签收草稿；签收前 20-R1 不开、联调执行不派 |
+| HG-TASK-DRAFT | **approved** | 20-R1, 联调执行 | 2026-10-30 维护者签收（00 代录）· 解锁 20-R1；联调执行仍须 HG-AUDIT-R1 + HG-E2E-ENV 齐 |
 | HG-AUDIT-R1 | pending | 联调执行 | 20-R1 审查文 PASS 后签收（过程轨先例：阶段 T 走 20-R1 · `docs/harness/reviews/review_20261030_stage_t_tenant_contract_r1.md`）；本闸**不**授权任何 30 改码 |
 | HG-E2E-ENV | pending | 联调执行 | **执行环境确认**：本地起 api + web 双栈 · 数据限 Fixture 轨（双租户 fixture · api `f048c57` ∈ master）· **不触生产**（P 轨生产数据另轨另签）；维护者签收后方可开跑 |
 
