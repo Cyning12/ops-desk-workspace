@@ -1,6 +1,6 @@
 # Task：阶段 T · 只读多租户契约定稿 + 第二租户数据前置
 
-> **状态**：`active` · **过程轨** · **不授权子仓 30**  
+> **状态**：`done`（2026-10-30 CLOSE · commit e651dfc）· **过程轨** · **不授权子仓 30**  
 > **类型**：契约 / 数据前置 / 跨仓编排  
 > **上游**：`docs/05-plan/06_stage_t_second_tenant_prep_v0_zh.md` · `docs/05-plan/05_post_h_stage_brief_v1_zh.md` · api `docs/discussions/2026-09-17_interview_gaps_adoption_and_landing_v0.md` §8  
 > **分支**：`task/stage-t-tenant-contract`（建议；base：`main`）  
@@ -37,8 +37,8 @@
 
 | human_gate_id | status | blocks_hats | 说明 |
 |---------------|--------|-------------|------|
-| HG-TASK-DRAFT | pending | 20-R1, 派子仓 30 | 本壳签收后才可 20；**不**因签收本闸而开子仓 30 |
-| HG-AUDIT-R1 | pending | 本仓若有图谱大改 | 过程轨薄改可 00 代签；默认无应用 30 |
+| HG-TASK-DRAFT | **approved** | 20-R1, 派子仓 30 | 2026-10-30 维护者签收；解锁 20-R1；**不**因签收本闸而开子仓 30 |
+| HG-AUDIT-R1 | **approved** | 本仓若有图谱大改 | 2026-10-30 · 20-R1 审查文 PASS 无 blocker（`docs/harness/reviews/review_20261030_stage_t_tenant_contract_r1.md`）· 过程轨薄改 **00 代签**（维护者 2026-10-30 授权「00签收后续文档」）|
 | HG-GRAPH-MODULES | pending | 改总图时 | 默认零 diff 可跳；若改 `00_main` 须签 |
 | **HG-STAGE-T-DATA** | **approved** | **派 api/web 30** | 2026-09-18 维护者同意 Fixture 轨 · **本波只跑本地** · 生产 P 轨另做 |
 | **HG-CONTRACT-FREEZE** | **approved** | api/web 30 联调语义 | 2026-09-18 · F1–F6 齐 · 契约升 freeze · 00 代签（维护者接受 F4） |
@@ -55,15 +55,17 @@
 
 1. `06_stage_t_*.md` 进入条件表与 H β 状态与磁盘一致；D1–D5 状态可维护。  
 2. `api-v1-tenant-readonly-context-draft.md` 升级路径清晰：至少钉死 §2 请求上下文字段策略（头 vs session）与跨租户失败码口径草案。  
-3. 子仓 task 壳已落盘且互链：api `tenant-readonly-predicate` · web `tenant-context-chat`。  
+3. 子仓 task 壳已落盘且互链：api `tenant-readonly-predicate` · web `tenant-context-chat`。（2026-10-30 注：已被磁盘实态超越——壳不仅落盘且已 30 完成 CLOSE，分别迁 api/web `done/`。）  
 4. **HG-STAGE-T-DATA** 未批前：任何子仓 30 **拒开工**（写进本 task 与 06）。
+
+> **2026-10-30 CLOSE**：完成态 1–4 磁盘面已齐；双闸 approved（HG-TASK-DRAFT 维护者签收 · HG-AUDIT-R1 00 代签）；20-R1 PASS（`docs/harness/reviews/review_20261030_stage_t_tenant_contract_r1.md`）；维护者拍板 CLOSE，归档 `done/`（commit e651dfc）。
 
 ---
 
 ## 范围
 
-- [ ] **C1 · 进入条件纠偏**：06 表 H β → **CLOSE + PR #141 MERGED**；保持 **NO-GO 30**（缺第二租户数据）。  
-- [ ] **C2 · 数据前置跟踪**：D1–D5 勾选表；最小开工条 = D1+D2+D3。  
+- [x] **C1 · 进入条件纠偏**：06 表 H β → **CLOSE + PR #141 MERGED**（2026-10-30 复核与磁盘一致 · merge commit `4896701`）；**NO-GO 30** 语义保留于生产 P 轨（Fixture 轨 30 已 CLOSE）。  
+- [x] **C2 · 数据前置跟踪**：D1–D5 勾选表已刷新（2026-10-30：Fixture 轨全 ✅ · 证据入 06 §2）；最小开工条 = D1+D2+D3（对生产 P 轨真种子仍生效）。  
 - [x] **C3 · 契约定稿推进** → **freeze**：  
   - [x] `tenant_id`：**F1=C**（session 真源 + 头须一致）· 2026-09-18  
   - [x] 头名：`X-Ops-Tenant-Id`（F2）  
@@ -71,8 +73,8 @@
   - [x] 跨租户：**对外 404** · 对内/日志 `tenant_scope_denied`（F4）  
   - [x] **显式**：默认不改 lg-rag SSE `event_type`  
   - [x] `HG-CONTRACT-FREEZE` approved · 2026-09-18 |  
-- [ ] **C4 · 跨仓指针**：确认 api/web active task 壳存在且依赖本闸。  
-- [ ] **C5 ·（可选）** 总图一句备注；非硬门。
+- [x] **C4 · 跨仓指针**：壳已随子仓 30 CLOSE 迁 `done/`（api 09-21 归档 · web 10-17 CLOSE · PR #76），互链已更新（§依赖改指 `done/`）。  
+- [ ] **C5 ·（可选）** 总图一句备注；非硬门。（2026-10-30：按默认零 diff 跳过）
 
 ### 非范围
 
@@ -85,12 +87,12 @@
 
 ## 验收标准
 
-- [ ] 06 进入条件表：H β = CLOSE+MERGED；第二租户数据 = 否（或已齐则改是并签 HG-STAGE-T-DATA）  
-- [ ] 契约文档含可勾选「待钉死」清单；未 freeze 前标题/状态仍标明 draft  
-- [ ] api/web task 壳路径写入 §依赖；slug 与 06 §3 一致  
-- [ ] `npx spec-wave task lint --file docs/tasks/active/task_stage_t_tenant_contract.md` PASS  
-- [ ] 人工闸表：`HG-STAGE-T-DATA` / `HG-CONTRACT-FREEZE` 语义写清 blocks  
-- [ ] CLOSE 时：若数据仍未齐，task 可转 `blocked` 或保持 active，但 **不得** 伪称已授权子仓 30
+- [x] 06 进入条件表：H β = CLOSE+MERGED（merge `4896701` · 2026-10-30 复核）；第二租户数据 Fixture 轨已齐并签 HG-STAGE-T-DATA（2026-09-18）  
+- [x] 契约文档含可勾选「待钉死」清单；已升 freeze（2026-09-18 · HG-CONTRACT-FREEZE approved · F1–F6 ✅ · 无遗留待钉死项）  
+- [x] api/web task 壳路径写入 §依赖；slug 与 06 §3 一致（壳已 CLOSE 迁 `done/`，指针随迁）  
+- [x] `npx spec-wave task lint --file docs/tasks/done/task_stage_t_tenant_contract.md` PASS（2026-10-30 CLOSE 棒复跑）  
+- [x] 人工闸表：`HG-STAGE-T-DATA` / `HG-CONTRACT-FREEZE` 语义写清 blocks（均 approved）  
+- [x] CLOSE 合规：Fixture 轨 api/web 30 已双双 CLOSE（api 09-21 归档 · web 10-17 PR #76），无伪称授权；生产 P 轨 NO-GO 语义保留于 06/07
 
 ---
 
@@ -98,7 +100,7 @@
 
 | 触发 | 系统行为 | 可重试 | 用户可见 |
 |------|----------|--------|----------|
-| D1–D3 未齐却派 api/web 30 | 00/verify **拒开工** | 是（先数据） | 是 |
+| D1–D3 未齐却派 api/web 30（生产 P 轨真种子口径；Fixture 轨已 CLOSE） | 00/verify **拒开工** | 是（先数据） | 是 |
 | 契约未 freeze 子仓静默改字段义 | 20/40 拒收 | 是 | 否（内部） |
 | 跳过 T 直接开 W task | 总 00 拒收 | 是 | 是 |
 | 为 T 改 SSE event_type 无联调闸 | 拒收 | 是 | 是 |
@@ -115,8 +117,8 @@
 | 契约草稿 | `docs/contracts/api-v1-tenant-readonly-context-draft.md` |
 | post-H 简报 | `docs/05-plan/05_post_h_stage_brief_v1_zh.md` |
 | 决议 §8 | `../ops-desk-api/docs/discussions/2026-09-17_interview_gaps_adoption_and_landing_v0.md` |
-| api 子壳 | `../ops-desk-api/docs/tasks/active/task_tenant_readonly_predicate.md` |
-| web 子壳 | `../ops-desk-web/docs/tasks/active/task_web_tenant_context_chat.md` |
+| api 子壳（已 CLOSE） | `../ops-desk-api/docs/tasks/done/task_tenant_readonly_predicate.md` |
+| web 子壳（已 CLOSE） | `../ops-desk-web/docs/tasks/done/task_web_tenant_context_chat.md` |
 | H α done | `../ops-desk-api/docs/tasks/done/task_capability_contract_hardening.md` |
 | H β done | `../ops-desk-api/docs/tasks/done/task_supervisor_budget_h_beta.md` |
 
@@ -176,8 +178,8 @@ T 不改 SSE freeze；租户只进 body/header/session。停轮把字段钉死�
 
 | 检查 | 结果 |
 |------|------|
-| `npx spec-wave task lint --file docs/tasks/active/task_stage_t_tenant_contract.md` | **待跑**（draft 占位 · close 前须回填） |
-| 结论 | **10 壳已落 · 未授权子仓 30** |
+| `npx spec-wave task lint --file docs/tasks/done/task_stage_t_tenant_contract.md` | **PASS**（2026-10-30 · CLOSE 棒对归档稿复跑） |
+| 结论 | **CLOSE · 完成态 1–4 已齐 · 双闸 approved · 20-R1 PASS · 生产 P 轨真种子未授权（另轨）** |
 
 ---
 
@@ -186,3 +188,8 @@ T 不改 SSE freeze；租户只进 body/header/session。停轮把字段钉死�
 | 日期 | 说明 |
 |------|------|
 | 2026-09-18 | 10 起草：过程轨壳 · 双阻塞闸 · 互链 api/web |
+| 2026-10-30 | 10 完成态①②：06 纠偏至磁盘实态（H β merge `4896701` 复核 · D2–D4 Fixture 轨完成 · §3/§依赖 指针迁 `done/`）· 契约 freeze 复核维持 · C1/C2/C4 勾选 · lint PASS；闸表 status 未动 |
+| 2026-10-30 | 00 记录：维护者签收 **HG-TASK-DRAFT → approved**（解锁 20-R1 · 不因本闸开子仓 30）；其余闸 status 未动 |
+| 2026-10-30 | 20-R1 minor：failure_paths 第 1 条括注「生产 P 轨真种子口径；Fixture 轨已 CLOSE」，消除表观冲突 |
+| 2026-10-30 | 20-R1 审查 PASS（无 blocker · minor×1 已修）· 00 代签 **HG-AUDIT-R1 → approved**（维护者授权）；HG-GRAPH-MODULES 图谱零 diff 跳过 |
+| 2026-10-30 | **CLOSE**：维护者拍板归档 `done/` · 双闸 approved（HG-TASK-DRAFT 维护者签收 · HG-AUDIT-R1 00 代签）· 20-R1 审查文 `docs/harness/reviews/review_20261030_stage_t_tenant_contract_r1.md` · commit e651dfc · 验收六框全勾 · 06/active README 指针随迁 |
