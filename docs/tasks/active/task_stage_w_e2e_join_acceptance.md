@@ -70,14 +70,14 @@
 
 ## 范围
 
-- [ ] **C1 · 环境就绪**：本地起 api + web 双栈（Fixture 数据 · 双租户 fixture 可用）；确认 `OPS_HITL_AUTO_RESUME` 口径（默认 manual = 显式续跑链）并记录实际 env；证据 = 起栈方式记录 + 健康检查摘录  
-- [ ] **C2 · 发起 echo 写 → 拦单挂起**：真人从 web Chat 发起触发 `testing.write.echo` 的请求；断言编排层拦单、HITL 待审批帧可见（`/hitl` 列表出现该单据）；**未审批前无任何写执行**；证据 = Chat 帧截屏 + `/hitl` 列表截屏  
-- [ ] **C3 · approve 全链**：`/hitl` 页真人 decide=approve（含二次确认 / resume_mode 选择与显式续跑两步链）→ resume 单路径恢复 → echo 真执行，结果回到会话；证据 = 决策确认截屏 + 执行结果截屏 + resume 日志摘录  
-- [ ] **C4 · reject 路径**：再发起一遍 echo 写 → decide=reject → 断言写**未**执行、单据终态正确、会话侧可见驳回结果；证据 = 截屏 + 单据状态摘录  
-- [ ] **C5 · 审计链核对**：以 C3 单据的 `approval_id` 串链核对 span / 日志（审批决策 → resume → 写执行结果）；证据 = 日志/观测摘录（含 `approval_id` 字段值）  
-- [ ] **C6 · 跨租户负样本（消费链 fail-closed 主测）**：租户 B 会话发起 echo 写产生拦单 → 切租户 A 会话（或带 A 租户头）对该单据 decide=approve → 断言**写不执行 · 拦单维持挂起 · 台账不被消费**（api `app/ops/lg_rag/multi/nodes.py:499-504` 消费侧语义 · W2 单测 `tests/test_write_approval_gate.py:431-475` 的 live 对应）；**注意**：decide 返 200 属预期（owner-only 闸 `router.py:213-216` · store 无 tenant 谓词 `store.py:171,184`），owner-404（`hitl-browser-decide-v1`）≠ F4 机制，证据须如实区分——另演示 **F4 资源命中面**：以 A 会话对 B 租户资源 id 发只读/写请求 → 对外 **404**；租户头与 session 不一致 → **403**（F1=C 抽测一次）；证据 = 各响应码与编排行为截屏/日志摘录  
-- [ ] **C7 · TC9 承接**：web TC9 手测项在本联调中完成（批准 → 显式续跑 → 「回到会话查看」链路 + 四态截图 / 语义对照表 / 闸表截图），证据落盘并回填 web task **文档轨**（task 档勾选/状态行 · **不改 web 业务码**；或另开回填 task，指针互链）  
-- [ ] **C8 · 证据归档与勾选**：全部证据落 `docs/harness/invokes/by-task/stage-w-e2e-join-acceptance/`；40 自检核对验收逐条勾选；缺陷另开 fix task 互链（无则记零发现）
+- [x] **C1 · 环境就绪**（2026-11-02 实证 ✅ · 证据 `invoke_20261102_10_c8_evidence_archive.md` §C1：双栈起栈方式 + `/health` 200 · `OPS_HITL_AUTO_RESUME` 未设=manual 已记录）：本地起 api + web 双栈（Fixture 数据 · 双租户 fixture 可用）；确认 `OPS_HITL_AUTO_RESUME` 口径（默认 manual = 显式续跑链）并记录实际 env；证据 = 起栈方式记录 + 健康检查摘录  
+- [x] **C2 · 发起 echo 写 → 拦单挂起**（✅ · invoke §C2：run `f9453b7f1c9a4dc79aa469773931e7c6` · 单据 `hitl_ef414f4a2b464bd69bbb` 09:22:00 落库 · events 止 seq14 waiting_approval 零写）：真人从 web Chat 发起触发 `testing.write.echo` 的请求；断言编排层拦单、HITL 待审批帧可见（`/hitl` 列表出现该单据）；**未审批前无任何写执行**；证据 = Chat 帧截屏 + `/hitl` 列表截屏  
+- [x] **C3 · approve 全链**（✅ · invoke §C3：真人 decide 09:24:27 admin · resume 09:43:04（00 curl 补位 · UI 无入口见 F1 · A6 合规 §6）· seq15-25 全链 · 回执 `98d28309f55f4f58`）：`/hitl` 页真人 decide=approve（含二次确认 / resume_mode 选择与显式续跑两步链）→ resume 单路径恢复 → echo 真执行，结果回到会话；证据 = 决策确认截屏 + 执行结果截屏 + resume 日志摘录  
+- [x] **C4 · reject 路径**（✅ · invoke §C4：run `03d500d21bd74eb7936ed032a5ca7f8d` · 三单全 rejected（`hitl_c84b69d633db4de9bc5c`/`hitl_4392b09f12d2401190f9`/`hitl_50e1f310da7640d4862b`）· 零回执 fail-closed · 驳回答复落帧）：再发起一遍 echo 写 → decide=reject → 断言写**未**执行、单据终态正确、会话侧可见驳回结果；证据 = 截屏 + 单据状态摘录  
+- [x] **C5 · 审计链核对**（✅ · invoke §C5：`approval_id=hitl_ef414f4a2b464bd69bbb` 串 decide→resume→`capability_write_approval_consumed`→回执 `98d28309f55f4f58`；反链驳回 run 零回执；span 级因 langfuse OTLP 403 不可验如实标注 F5）：以 C3 单据的 `approval_id` 串链核对 span / 日志（审批决策 → resume → 写执行结果）；证据 = 日志/观测摘录（含 `approval_id` 字段值）  
+- [x] **C6 · 跨租户负样本（消费链 fail-closed 主测）**（⚠️ 实测完成但**结果超预期——守卫真空坐实** · invoke §C6：B 租户拦单 `hitl_b4c35664bc10412fa561` → B 身份真人 approve+续跑 → **写执行了且租户错标**（消费日志 tenant=ops-desk-pilot 应 -b · 回执 `d6bd262904544232` 错标）→ **N-R2-1 缺陷坐实** + delegation 守卫真空（F3）；owner-404≠F4 已如实区分；**A4 补测（16:2x · 00 curl · 纯只读探测）**：③ 头/session 403 ✅ PASS（`tenant_header_mismatch` · `router.py:376-384`）· ② F4-404 ❌ **FAIL=新发现 F13**（issues/pulls/overview 只读面跨租户泄漏 · `issues.py:29` 无 tenant 谓词 · 未覆盖非回归 · P 轨前置，见 invoke §2 F13））：租户 B 会话发起 echo 写产生拦单 → 切租户 A 会话（或带 A 租户头）对该单据 decide=approve → 断言**写不执行 · 拦单维持挂起 · 台账不被消费**（api `app/ops/lg_rag/multi/nodes.py:499-504` 消费侧语义 · W2 单测 `tests/test_write_approval_gate.py:431-475` 的 live 对应）；**注意**：decide 返 200 属预期（owner-only 闸 `router.py:213-216` · store 无 tenant 谓词 `store.py:171,184`），owner-404（`hitl-browser-decide-v1`）≠ F4 机制，证据须如实区分——另演示 **F4 资源命中面**：以 A 会话对 B 租户资源 id 发只读/写请求 → 对外 **404**；租户头与 session 不一致 → **403**（F1=C 抽测一次）；证据 = 各响应码与编排行为截屏/日志摘录  
+- [x] **C7 · TC9 承接**（✅ 过期态除外如实标注 · invoke §C7：全链跑通 · 四态截图列表/空/403 已拍（api 仓 `docs/harness/invokes/by-task/stage-w-e2e-join-acceptance/screenshots/` 8 张）· 过期态**不可达**（F12 · invoke §5 维护者定夺项）· 语义对照表 §4 · 闸表截图 gate-table.jpg · web task 文档轨回填见 web 仓 PR）：web TC9 手测项在本联调中完成（批准 → 显式续跑 → 「回到会话查看」链路 + 四态截图 / 语义对照表 / 闸表截图），证据落盘并回填 web task **文档轨**（task 档勾选/状态行 · **不改 web 业务码**；或另开回填 task，指针互链）  
+- [x] **C8 · 证据归档与勾选**（✅ 本棒 · invoke `invoke_20261102_10_c8_evidence_archive.md`：C1–C7 证据 + 发现清单 F1–F13 + N-R2-1 + 守卫真空 · fix task 建议清单 ×10（§7 仅清单不起草正文）· **40 自检棒待派**（required_invoke_hats=10,00,40 · 本棒为 10 归档）· **CLOSE 归维护者**）：全部证据落 `docs/harness/invokes/by-task/stage-w-e2e-join-acceptance/`；40 自检核对验收逐条勾选；缺陷另开 fix task 互链（无则记零发现）
 
 ### 非范围
 
@@ -94,14 +94,14 @@
 
 ## 验收标准
 
-- [ ] **A1 · approve 全链跑通**：C1–C3 完成且勾选；证据含 `/hitl` 决策截屏 + echo 执行结果截屏 + resume 日志摘录（invoke 记录可索引到三份证据文件）  
-- [ ] **A2 · reject 路径跑通**：C4 完成；证据含驳回截屏 + 单据终态摘录 + 「无 echo 执行结果」断言记录  
-- [ ] **A3 · 审计链可串**：C5 完成；日志/观测摘录中同一 `approval_id` 串起审批决策、resume、写执行三段（摘录原文贴 invoke）  
-- [ ] **A4 · 跨租户负样本实测**：C6 完成；证据含 ① 消费链 fail-closed 摘录（跨租户 decide 后**写不执行 · 拦单维持 · 台账不消费**——decide 返 200 属 owner-only 闸预期，须在证据中如实标注「owner-404（`hitl-browser-decide-v1`）≠ F4 机制」）② F4 资源命中面 **404** 摘录 ③ 头/session 不一致 **403** 摘录；**不接受**「单测已覆盖」代替 live 实测  
-- [ ] **A5 · TC9 回填**：web TC9 证据（四态截图 / 语义对照表 / 闸表截图）落盘并回填 web task **文档轨**（不改 web 业务码）或另开回填 task 互链  
-- [ ] **A6 · 真人 decide 声明**：invoke 记录明确载明 decide 均为真人手操（无脚本 / 无 auto-approve）；若有任何自动化代 decide，本验收整体无效  
-- [ ] **A7 · 缺陷处置合规**：联调发现的缺陷均以独立 fix task 落盘并互链（或明确记录零发现）；本 task diff 中**无** api/web/ios 业务码改动（机断：`git diff --name-only main...HEAD` 仅含 workspace 文档/证据路径）  
-- [ ] **A8 · 闸与 lint**：HG-TASK-DRAFT / HG-AUDIT-R1 / HG-E2E-ENV 三闸 approved；`npx spec-wave task lint --file docs/tasks/active/task_stage_w_e2e_join_acceptance.md` PASS
+- [x] **A1 · approve 全链跑通**（✅ · C1–C3 已勾 · invoke §C1–§C3 + api 仓 screenshots `c7-resumed.jpg`/`tc9-list-approved.jpg`）：C1–C3 完成且勾选；证据含 `/hitl` 决策截屏 + echo 执行结果截屏 + resume 日志摘录（invoke 记录可索引到三份证据文件）  
+- [x] **A2 · reject 路径跑通**（✅ · invoke §C4：三单 rejected 时间戳 · 零回执断言 · 驳回答复落帧）：C4 完成；证据含驳回截屏 + 单据终态摘录 + 「无 echo 执行结果」断言记录  
+- [x] **A3 · 审计链可串**（✅ 有限制 · invoke §C5：`approval_id=hitl_ef414f4a2b464bd69bbb` 三段原文摘录 · span 级不可验（F5 langfuse 403）如实标注）：C5 完成；日志/观测摘录中同一 `approval_id` 串起审批决策、resume、写执行三段（摘录原文贴 invoke）  
+- [ ] **A4 · 跨租户负样本实测**（⚠️ **已测 · 契约未达 · 待 F13 修复后复测** · invoke §C6/§2-F13/§8：①消费链 live 实测已执行，**结果为守卫真空坐实**——B 单被 A 上下文消费、写执行、回执错标（N-R2-1 + F3），fail-closed 未按预期拦下（非步骤漏跑，系码面缺口，已列 fix task 建议）；②F4 资源命中面 404 **已测 FAIL=新发现 F13**（B session 下 issues/pulls/overview 泄漏 A 数据 · api `issues.py:29` 无 tenant 谓词）；③头/session 403 **已测 PASS**（`tenant_header_mismatch` · `router.py:376-384`）——② 未达 404 契约，虚勾即验收无效，故不勾，待 F13 修复（fix task 建议 #10）后复测 ②）：C6 完成；证据含 ① 消费链 fail-closed 摘录（跨租户 decide 后**写不执行 · 拦单维持 · 台账不消费**——decide 返 200 属 owner-only 闸预期，须在证据中如实标注「owner-404（`hitl-browser-decide-v1`）≠ F4 机制」）② F4 资源命中面 **404** 摘录 ③ 头/session 不一致 **403** 摘录；**不接受**「单测已覆盖」代替 live 实测  
+- [ ] **A5 · TC9 回填**（⚠️ **部分 · 待维护者定夺** · invoke §C7/§5：列表/空/403 三态截图 + 语义对照表 §4 + 闸表截图已落盘并回填 web task 文档轨（web 仓 PR 互链）；**过期态截图缺**——api 面无过期错误出口（F12 不可达 · failure_paths 明文「缺四态任一项 → A5 不勾」）· 待维护者定夺以 F12 记录替代或补 api 过期出口后重拍）：web TC9 证据（四态截图 / 语义对照表 / 闸表截图）落盘并回填 web task **文档轨**（不改 web 业务码）或另开回填 task 互链  
+- [x] **A6 · 真人 decide 声明**（✅ · invoke §6：decide ×7 全维护者真人（时间戳列明）· resume 非 decide · 00 curl 补位一次已备案 · auto_resume 未触发）：invoke 记录明确载明 decide 均为真人手操（无脚本 / 无 auto-approve）；若有任何自动化代 decide，本验收整体无效  
+- [x] **A7 · 缺陷处置合规**（✅ · 发现 F1–F12 + N-R2-1 + 守卫真空全数落 invoke §2 清单 · fix task 建议 ×9（§7 · 独立 task 起草属后续棒）· 本 task diff 仅 workspace 文档/证据路径 · api 仓 PR 纯截图资产 · web 仓 PR 纯 task 文档轨，零业务码）：联调发现的缺陷均以独立 fix task 落盘并互链（或明确记录零发现）；本 task diff 中**无** api/web/ios 业务码改动（机断：`git diff --name-only main...HEAD` 仅含 workspace 文档/证据路径）  
+- [x] **A8 · 闸与 lint**（✅ · 三闸 approved（本档人工闸表 · 2026-10-30 维护者签收/授权 00 代录）· 本棒修订后 lint 复跑 PASS 见 invoke §8 与修订行）：HG-TASK-DRAFT / HG-AUDIT-R1 / HG-E2E-ENV 三闸 approved；`npx spec-wave task lint --file docs/tasks/active/task_stage_w_e2e_join_acceptance.md` PASS
 
 ---
 
@@ -191,8 +191,8 @@ S1 环境 → S2 拦单挂起 → S3 approve 全链 → S4 reject → S5 审计�
 
 | 检查 | 结果 |
 |------|------|
-| `npx spec-wave task lint --file docs/tasks/active/task_stage_w_e2e_join_acceptance.md` | **PASS**（2026-10-30 · 10 起草棒；20-R1 修订棒复跑 PASS） |
-| 结论 | **draft · HG-TASK-DRAFT approved（00 代录）· HG-AUDIT-R1 / HG-E2E-ENV pending · 20-R1 B1/M1/M2 已回填** |
+| `npx spec-wave task lint --file docs/tasks/active/task_stage_w_e2e_join_acceptance.md` | **PASS**（2026-10-30 · 10 起草棒；20-R1 修订棒复跑 PASS；2026-11-02 · 10 C8 归档棒修订后复跑 PASS） |
+| 结论 | **执行完成 · 三闸 approved（闸表为准）· C1–C8 全勾 · 验收 A1/A2/A3/A6/A7/A8 ✅ · A4/A5 ⚠️ 挂账（A4：②③ 已补测——③ 403 PASS · ② 404 FAIL=**F13 只读面跨租户泄漏**待修复复测；A5：过期态 F12 不可达）· 发现 F1–F13 + N-R2-1 · fix task 建议 ×10 · 40 自检棒待派 · CLOSE 归维护者**（证据 `docs/harness/invokes/by-task/stage-w-e2e-join-acceptance/invoke_20261102_10_c8_evidence_archive.md`） |
 
 ---
 
@@ -204,3 +204,5 @@ S1 环境 → S2 拦单挂起 → S3 approve 全链 → S4 reject → S5 审计�
 | 2026-10-30 | 00 代录：维护者签收 **HG-TASK-DRAFT → approved**（对齐阶段 T 先例 · 解锁 20-R1；联调执行仍须 HG-AUDIT-R1 + HG-E2E-ENV）；闸表 status 其余未动 |
 | 2026-10-30 | 10 承接 **20-R1 修订**：**B1** 跨租户负样本口径纠偏——decide 端点为 owner-only 闸（api `router.py:213-216` · store 无 tenant 谓词 `store.py:171,184`），切租户 decide 返 200 属预期；C6/完成态④/A4 主测改为**消费链 fail-closed** live 实测（写不执行 · 拦单维持 · 台账不消费 · `nodes.py:499-504`），F4 对外 404 移至资源命中面演示，并钉死「owner-404 ≠ F4 机制」区分；failure_paths 第 3 行同步改写并新增「200 误判缺陷」行。**M1** C7/A5/非范围澄清「TC9 回填限 web 仓文档轨，不改 web 业务码」。**M2** 头部状态行/10 注/自检结论同步 HG-TASK-DRAFT approved · lint 复跑 PASS |
 | 2026-10-30 | 10 承接 **20-R2**（B1/M1/M2 闭环）：**M3** 机械订正——消费侧守卫路径两处引用 `app/ops/hitl/nodes.py:499-504` → 真实路径 **`app/ops/lg_rag/multi/nodes.py:499-504`**（行号内容经亲核一致，仅目录段 `hitl/` → `lg_rag/multi/`）；闸表 status 未动 · lint 复跑 PASS。20-R2 观察点 N-R2-1（resume 入口租户 ContextVar 回落 · `tenant_context.py:24-26`）已知悉，不改本 task——执行期实测若成立按 A7 另开 fix task |
+| 2026-11-02 | 10 承接 **C8 证据归档棒**：联调实测（09:00–16:00 · 本地双栈 · Fixture 双租户）全证据落 `docs/harness/invokes/by-task/stage-w-e2e-join-acceptance/invoke_20261102_10_c8_evidence_archive.md`——C1–C8 勾选带锚（C6 ⚠️ 守卫真空坐实 · C7 过期态不可达 F12）· 验收 A1/A2/A3/A6/A7/A8 勾销 · **A4/A5 不勾挂账**（A4：F4-404/403 未抽测且消费链实测结果=缺口发现；A5：过期态截图缺按 failure_paths 明文不勾）· 发现清单 F1–F12 + **N-R2-1 坐实**（20-R2 观察点兑现：B 租户单被 A 上下文消费 · 回执 `d6bd262904544232` 错标 `ops-desk-pilot`）· fix task 建议清单 ×9 · 40 自检棒待派 · 闸表 status / task status 字段未动 · lint 复跑 PASS |
+| 2026-11-02 | 10 承接 **C8 补丁棒**（A4 补测并入 · 00 执行 10 落字 · 纯只读探测）：③ 头/session 不一致 **403 PASS**（`tenant_header_mismatch` · api `app/ops/lg_rag/router.py:376-384`）；② F4 资源命中面 404 **FAIL → 新发现 F13**（B session 下 `GET /api/ops/issues`/`pulls`/`overview` 泄漏 A 数据 · api `app/ops/issues.py:29` 无 tenant 谓词 · 租户谓词 task `task_tenant_readonly_predicate.md:156` 范围未覆盖=非回归 · **P 轨 canary 前置**）；发现清单 F1–F12→**F1–F13** · fix task 建议 ×9→**×10** · **A4 仍不勾**（② 契约未达 · 待 F13 修复复测）· C6/自检结论/invoke §C6/§2/§7/§8 同步 · lint 复跑 PASS |
