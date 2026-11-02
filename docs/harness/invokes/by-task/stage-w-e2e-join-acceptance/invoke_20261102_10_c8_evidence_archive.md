@@ -59,7 +59,9 @@
 - **守卫真空坐实**：delegation 类单据 `tenant_id=''` 且消费守卫仅对 `capability_write` 类生效（`nodes.py:499-504` 注释「委派类单据不进入本守卫」）→ task C6 原断言「写不执行 · 拦单维持」在该路径**无法触发**（非步骤错，码面缺口）
 - decide 返 200 属 owner-only 闸预期（api `app/ops/hitl/router.py:213-216` · store 无 tenant 谓词 `store.py:171,184`）——证据如实区分：**owner-404（`hitl-browser-decide-v1`）≠ F4 机制**
 - run 终态：answer seq15（10:20:35）· done seq17 ✅
-- **未执行子项（如实挂账）**：F4 资源命中面 404（对 B 租户资源 id 只读/写请求）与 F1=C 头/session 不一致 403 **未抽测** → 见 §A4 挂账
+- **A4 补测（2026-11-02 16:2x · 00 以 admin 会话 curl 执行 · 纯只读探测 · decide 不涉及）**：
+  - ③ **头/session 不一致 403 ✅ PASS**：`POST /api/ops/lg-rag/invoke` + 头 `X-Ops-Tenant-Id: ops-desk-pilot-b`（session=A）→ `403 {"detail":"tenant_header_mismatch"}`；码面锚 api `app/ops/lg_rag/router.py:376-384`（`_resolve_request_tenant` · F1=C session 真源 · mismatch→403 · 未知租户→422；守卫仅接 `:394` invoke 与 `:463` stream 两路由）
+  - ② **F4 资源命中面 404 ❌ FAIL → 新发现 F13**：session 切 B（`POST /api/ops/auth/tenant` 200）后 `GET /api/ops/issues` / `pulls` / `overview` **均泄漏 A 数据**（如 issue `cc227ab1-9117-4631-abad-68e902bb21d6` · DB 实证全表 881 行均 `tenant_id=ops-desk-pilot`）；码面 `app/ops/issues.py` 全文零 tenant 引用（`:29 list_issues` 无 tenant 谓词）· pulls.py/overview.py 同；范围实锤：`docs/tasks/done/task_tenant_readonly_predicate.md:156` 只圈 capability/lg_rag/lookup-RAG——**未覆盖非回归**（详见 §2 F13）
 
 ### C7 · TC9 承接 ✅（过期态除外 · 如实标注）
 
@@ -75,7 +77,7 @@
 
 ---
 
-## §2 · 发现清单 F1–F12 + N-R2-1 + 守卫真空
+## §2 · 发现清单 F1–F13 + N-R2-1 + 守卫真空
 
 | # | 现象 | 码面定位 | 严重度 | 去向 |
 |---|------|----------|--------|------|
@@ -91,6 +93,7 @@
 | F10 | 陈旧可点卡片：聊天底部卡片聚合历史 `hitl.waiting` 帧，列出已驳回旧单（c84b+50e1）仍示「待审批」可点 | web Chat 浮层渲染逻辑 | ux | web fix task（与 F1 合并） |
 | F11 | 手动 resume 链零 TTL 闸：过期批准（实验 178s > 90s TTL）仍可解锁重跑；自动扫描路径有 TTL 闸（不对称） | api `router.py:520 resume_request` → `:473 _preflight_decided_resume`（全文无 ttl/过期引用）vs `store.py:116-117 aclaim_approved_for_resume` | **defect** | api fix task |
 | F12 | api hitl 面无「过期」出口 → web FP-5「审批已过期」态不可达 | api `store.py:22 STATUS_EXPIRED` 无人赋值 · decide/resume 无过期分支 · freeze `task_hitl_browser_decide` 无 TTL 条 | **gap（契约）** | **维护者定夺**：api 补 TTL 分支 or freeze/web 摘态（见 §5） |
+| F13 | 只读资源面跨租户泄漏：B session 下 `GET /api/ops/issues`/`pulls`/`overview` 返回 A 租户数据（应 404/空集 · A4 补测② FAIL） | api `app/ops/issues.py:29`（`list_issues` 无 tenant 谓词 · 全文零 tenant 引用）· pulls.py/overview.py 同；范围锚 `docs/tasks/done/task_tenant_readonly_predicate.md:156`（只圈 capability/lg_rag/lookup-RAG · **未覆盖非回归**） | **defect（高 · 跨租户只读泄漏面）** | api fix task（§7 #10）；**连带：P 轨 canary 手测（07 runbook §4 P2 期望 404）当前必失败 → F13 修复是 P 轨前置** |
 | N-R2-1 | resume 链租户上下文丢失：B 租户单批准续跑后消费以默认租户 A 执行且回执错标 `ops-desk-pilot` | api `app/ops/hitl/resume.py` 零 tenant 引用 · `app/ops/tenant_context.py:24-26` 回落 `TENANT_A` | **defect（高优先 · 审计失真）** | api fix task |
 | 守卫真空 | C6 消费链 fail-closed 在 delegation 路径无法触发（F3+N-R2-1 叠加） | 同 F3 / N-R2-1 | **gap** | 并入上述 fix task 设计 |
 
@@ -151,10 +154,11 @@
 7. **web · F6**：两入口 decide 行为统一（或文档明示差异）
 8. **web · F8**：replay 409 写窗中性提示 + 沉降后自动重试
 9. **freeze/api · F12**：过期态出口定夺（§5）
+10. **api · F13（高优先 · P 轨前置）**：只读资源面（`app/ops/issues.py` / `pulls.py` / `overview.py`）接租户谓词 F4-404——list 查询加 `tenant_id == current_tenant_or_default()` 谓词（对齐 `task_tenant_readonly_predicate.md` 既有模式），修复后补测 A4②（B session 应得 404/空集）；P 轨 canary 手测（07 runbook §4 P2）依赖本项
 
 ## §8 · 遗留与后续
 
-- **A4 挂账**：F4 资源命中面 404 / F1=C 头-session 403 未抽测（§C6）→ 待维护者补测或定夺降级
+- **A4 挂账**：②③ 已补测（2026-11-02 16:2x · 00 curl · §C6）——③ PASS（403 `tenant_header_mismatch`）· ② **FAIL=F13 泄漏**（契约未达）→ **A4 仍不勾**，待 F13 修复（§7 #10）后复测 ②
 - **A5 挂账**：过期态截图缺（F12 不可达）→ 待维护者定夺是否以 §5 记录替代
 - **40 自检棒未跑**：`required_invoke_hats=10,00,40`；本棒为 10 归档，40 证据自检与验收勾选核对按 orchestration 链待派
 - **CLOSE 归维护者**：本棒不动 task status 字段、不做 done/ 归档
@@ -167,3 +171,4 @@
 | 日期 | 说明 |
 |------|------|
 | 2026-11-02 | 10 帽 C8 棒：C1–C7 证据归档（7 单 2 回执全实证）· F1–F12 + N-R2-1 + 守卫真空清单 · 语义对照表 · 过期态不可达标注 · A6 合规声明 · fix task 建议清单 ×9 |
+| 2026-11-02 | 10 帽 C8 补丁棒（A4 补测并入 · 00 执行 10 落字）：③ 头/session 403 PASS（`tenant_header_mismatch` · `router.py:376-384`）· ② F4-404 **FAIL → 新发现 F13**（只读资源面 issues/pulls/overview 跨租户泄漏 · `issues.py:29` 无 tenant 谓词 · 未覆盖非回归 · P 轨前置）· 发现清单 F1–F12→**F1–F13** · fix task 建议 ×9→**×10** · A4 仍不勾（待 F13 修复复测） |
