@@ -45,7 +45,7 @@
 
 ### C5 · 审计链核对 ✅（span 级受限如实标注）
 
-- 正链可串（同一 `approval_id=hitl_ef414f4a2b464bd69bbb`）：审批决策（decide 日志 `HITL 浏览器决策 … decision=approved by=admin`）→ resume（`hitl.resumed` 载荷含 `decided_by=admin`）→ 消费（`capability_write_approval_consumed {"approval_id":"hitl_ef414f4a2b464bd69bbb", …}`）→ 写执行回执 `98d28309f55f4f58`
+- 正链可串（同一 `approval_id=hitl_ef414f4a2b464bd69bbb`）：审批决策（decide 日志 `HITL 浏览器决策 … decision=approved by=admin`）→ resume（`hitl.resumed` 载荷含 `decided_by=admin`）→ 消费（`capability_write_approval_consumed {"approval_id":"hitl_ef414f4a2b464bd69bbb", …}`）→ 写执行回执 `98d28309f55f4f58`（与 C6 回执 `d6bd262904544232` 同为 `ops_capability_receipts.receipt_id` 列值 · varchar32 · 非 uuid 主键）
 - 反链：run `03d500d2` 三驳回零回执（fail-closed 铁证）
 - **限制**：span `approval_id` 观测依赖 langfuse 导出，本地 OTLP 持续 403/timeout（`jp.cloud.langfuse.com`）→ **span 级审计本环境不可验**（F5）；以上以本地日志 + DB 回执为据
 - 幂等表 `ops_capability_idempotency` 当日零行（echo mock 不走幂等键 · 非缺陷）
@@ -73,6 +73,7 @@
   - **过期态**：**不可达**（F12 · 详见 §5）
 - 闸表截图：`gate-table.jpg`（联调 task 人工闸表三闸 approved）
 - 过程补充：`c6-final-answer.jpg`（C6 B 租户最终答复）
+- 截图资产位置：截图资产位于 api 仓分支 `docs/e2e-screenshots-c8`（PR #306 · 未合入 master 前按分支路径访问）
 - 语义对照表：§4
 
 ---
@@ -88,7 +89,7 @@
 | F5 | SiliconFlow 网络抖动（embed/LLM 超时 · circuit open · supervisor 输出非法 `{"subtasks":[]}` 降级单 rag）· langfuse OTLP 403/timeout | 环境 | noise | C5 span 审计不可验的根因；记录 |
 | F6 | 两入口 decide 行为不一致：Chat 浮层卡片 decide 成功自动链调 resume vs /hitl 页严格两步显式续跑 | web `src/stores/chat.ts:1300`（`decideHitl` 链式两调用）vs `HitlApprovalView.vue` | ux | web/freeze 评议（统一或文档明示） |
 | F7 | 驳回/过期后 supervisor 重规划重新尝试同一写能力 → 新拦单（c84b 驳回→50e1 · 297b 过期→b28a）· fail-closed 未破但审批轰炸 | api supervisor 重规划无「已驳回/已过期」约束 | **defect** | api fix task |
-| F8 | replay 409 写窗被 web 当原始英文错误弹窗「Resume is writing new events; retry after it settles.」 | api `router.py:512`（Retry-After 设计语义）· web 错误呈现层 | ux | web fix task（中性提示+沉降自动重试） |
+| F8 | replay 409 写窗被 web 当原始英文错误弹窗「Resume is writing new events; retry after it settles.」 | api `router.py:512` 注释（设计语义）· `:542` 409 响应（Retry-After）· web 错误呈现层 | ux | web fix task（中性提示+沉降自动重试） |
 | F9 | 孤儿单 `hitl_4392b09f`：resume 瞬间（09:47:59.545）为刚被驳回的 `:1` 又建 pending 单 | api `_persist_hitl` 去重只按 `status=pending` 拉取，已 rejected 不在 already 集 | **defect** | api fix task（去重纳入已决态） |
 | F10 | 陈旧可点卡片：聊天底部卡片聚合历史 `hitl.waiting` 帧，列出已驳回旧单（c84b+50e1）仍示「待审批」可点 | web Chat 浮层渲染逻辑 | ux | web fix task（与 F1 合并） |
 | F11 | 手动 resume 链零 TTL 闸：过期批准（实验 178s > 90s TTL）仍可解锁重跑；自动扫描路径有 TTL 闸（不对称） | api `router.py:520 resume_request` → `:473 _preflight_decided_resume`（全文无 ttl/过期引用）vs `store.py:116-117 aclaim_approved_for_resume` | **defect** | api fix task |
@@ -172,3 +173,4 @@
 |------|------|
 | 2026-11-02 | 10 帽 C8 棒：C1–C7 证据归档（7 单 2 回执全实证）· F1–F12 + N-R2-1 + 守卫真空清单 · 语义对照表 · 过期态不可达标注 · A6 合规声明 · fix task 建议清单 ×9 |
 | 2026-11-02 | 10 帽 C8 补丁棒（A4 补测并入 · 00 执行 10 落字）：③ 头/session 403 PASS（`tenant_header_mismatch` · `router.py:376-384`）· ② F4-404 **FAIL → 新发现 F13**（只读资源面 issues/pulls/overview 跨租户泄漏 · `issues.py:29` 无 tenant 谓词 · 未覆盖非回归 · P 轨前置）· 发现清单 F1–F12→**F1–F13** · fix task 建议 ×9→**×10** · A4 仍不勾（待 F13 修复复测） |
+| 2026-11-02 | NIT 微修 ×3（40 自检意见落实）：§C7 补截图资产分支说明（`docs/e2e-screenshots-c8` · PR #306）· §C5 回执号点明为 `receipt_id`（varchar32 · 非 uuid 主键）· F8 锚点修正为 `:512` 注释（设计语义）/`:542` 409 响应 |
