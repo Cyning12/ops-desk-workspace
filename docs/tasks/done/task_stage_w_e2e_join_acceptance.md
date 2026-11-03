@@ -1,6 +1,6 @@
 # Task：阶段 W · 双轨端到端联调验收（api 受控写 + web 审批页 · 真人全链 · TC9 回填）
 
-> **状态**：`active`（2026-10-30 · **三闸全 approved**（HG-TASK-DRAFT 维护者签收 · HG-AUDIT-R1 / HG-E2E-ENV 维护者授权 00 代录）· 20-R1/R2 闭环 · **联调执行与修复复测已完成**（PR [#307](https://github.com/Cyning12/ops-desk-api/pull/307) api / PR [#85](https://github.com/Cyning12/ops-desk-web/pull/85) web 合入后实证 · 2026-11-03）· **验收 A1–A8 全勾 · 待维护者 CLOSE**）· **过程轨 / 验收轨** · **不授权任何 30 改码**  
+> **状态**：`done`（**CLOSED 2026-11-03 维护者拍板** · 三闸 approved（HG-TASK-DRAFT 维护者签收 · HG-AUDIT-R1 / HG-E2E-ENV 维护者授权 00 代录）· 20-R1/R2 闭环 · **验收 A1–A8 全勾** · 证据 `invoke_20261102_10_c8_evidence_archive` + `invoke_20261103_10_final_acceptance`）· **过程轨 / 验收轨** · **不授权任何 30 改码**  
 > **类型**：跨仓联调验收 / 证据归档（只产文档与证据，不改业务码）  
 > **上游**：api `docs/discussions/2026-09-17_interview_gaps_adoption_and_landing_v0.md` §8（阶段序 H→T→W→P）· `docs/05-plan/05_post_h_stage_brief_v1_zh.md`（阶段 W 行：受控写 + HITL「要确认单/HITL」）  
 > **分支**：`task/stage-w-e2e-join`（base：`main`）  
@@ -101,7 +101,7 @@
 - [x] **A5 · TC9 回填**（✅ · 2026-11-03 复测勾销 · 证据 `invoke_20261103_10_final_acceptance.md` §A5：**F12 已由 api `task_api_w_join_gap_fix`（PR [#307](https://github.com/Cyning12/ops-desk-api/pull/307) · W-fix-1 TTL 过期出口）修复后可达**——api 以 `OPS_HITL_APPROVAL_CONSUMPTION_TTL_SECONDS=90` 运行，单据 `hitl_a285ff2ff195429ea8ab`（run `ab48acb3fa88…` · thread `7bf4896417f6` · `blocked_by=delegation_issue_hitl_required`）2026-11-03 06:51:59Z 创建 · 06:52:36Z 批准（admin · 真人 decide · 手动续跑链）· 约 5 分钟后用户点「续跑」→ api **409** detail「approval_expired：批准已超执行权 TTL（90s）过期，单据已置 expired 终态；请重新发起审批」· DB 实证 `status approved→expired`（updated 06:57:21Z）· **web 行级红字「审批已过期，请刷新列表」渲染成功**（截图 `a5-expired-row-prompt.jpg` · api 仓 screenshots/ · web 侧渲染经 web PR [#85](https://github.com/Cyning12/ops-desk-web/pull/85) 合入后实证）；前序实证 `hitl_990479d004ad4b7a99fa` 经 curl resume 同样 409→expired（06:47:52Z）——过期态四态齐，A5 勾销）：web TC9 证据（四态截图 / 语义对照表 / 闸表截图）落盘并回填 web task **文档轨**（不改 web 业务码）或另开回填 task 互链  
 - [x] **A6 · 真人 decide 声明**（✅ · invoke §6：decide ×7 全维护者真人（时间戳列明）· resume 非 decide · 00 curl 补位一次已备案 · auto_resume 未触发）：invoke 记录明确载明 decide 均为真人手操（无脚本 / 无 auto-approve）；若有任何自动化代 decide，本验收整体无效  
 - [x] **A7 · 缺陷处置合规**（✅ · 发现 F1–F12 + N-R2-1 + 守卫真空全数落 invoke §2 清单 · fix task 建议 ×9（§7 · 独立 task 起草属后续棒）· 本 task diff 仅 workspace 文档/证据路径 · api 仓 PR 纯截图资产 · web 仓 PR 纯 task 文档轨，零业务码）：联调发现的缺陷均以独立 fix task 落盘并互链（或明确记录零发现）；本 task diff 中**无** api/web/ios 业务码改动（机断：`git diff --name-only main...HEAD` 仅含 workspace 文档/证据路径）  
-- [x] **A8 · 闸与 lint**（✅ · 三闸 approved（本档人工闸表 · 2026-10-30 维护者签收/授权 00 代录）· 本棒修订后 lint 复跑 PASS 见 invoke §8 与修订行）：HG-TASK-DRAFT / HG-AUDIT-R1 / HG-E2E-ENV 三闸 approved；`npx spec-wave task lint --file docs/tasks/active/task_stage_w_e2e_join_acceptance.md` PASS
+- [x] **A8 · 闸与 lint**（✅ · 三闸 approved（本档人工闸表 · 2026-10-30 维护者签收/授权 00 代录）· 本棒修订后 lint 复跑 PASS 见 invoke §8 与修订行）：HG-TASK-DRAFT / HG-AUDIT-R1 / HG-E2E-ENV 三闸 approved；`npx spec-wave task lint --file docs/tasks/done/task_stage_w_e2e_join_acceptance.md` PASS（2026-11-03 CLOSE 归档棒路径随迁复跑）
 
 ---
 
@@ -191,8 +191,8 @@ S1 环境 → S2 拦单挂起 → S3 approve 全链 → S4 reject → S5 审计�
 
 | 检查 | 结果 |
 |------|------|
-| `npx spec-wave task lint --file docs/tasks/active/task_stage_w_e2e_join_acceptance.md` | **PASS**（2026-10-30 · 10 起草棒；20-R1 修订棒复跑 PASS；2026-11-02 · 10 C8 归档棒修订后复跑 PASS；2026-11-03 · 10 验收收尾棒修订后复跑 PASS） |
-| 结论 | **执行完成 · 三闸 approved（闸表为准）· C1–C8 全勾 · 验收 A1–A8 全勾**（A4② F4 只读面空集复测 PASS · A5 过期态四态齐——F13/F12 由 api `task_api_w_join_gap_fix` PR #307（W-fix-1/W-fix-2）修复后实证，web 侧 PR #85）· 发现 F1–F15 + N-R2-1（F14/F15 为 2026-11-03 复测期新发现 · 已追加 backlog）· fix task 建议 ×10 · 40 自检棒待派 · **验收全勾 · 待维护者 CLOSE**（证据 `docs/harness/invokes/by-task/stage-w-e2e-join-acceptance/invoke_20261102_10_c8_evidence_archive.md` + `invoke_20261103_10_final_acceptance.md`） |
+| `npx spec-wave task lint --file docs/tasks/done/task_stage_w_e2e_join_acceptance.md` | **PASS**（2026-10-30 · 10 起草棒；20-R1 修订棒复跑 PASS；2026-11-02 · 10 C8 归档棒修订后复跑 PASS；2026-11-03 · 10 验收收尾棒修订后复跑 PASS；2026-11-03 · **CLOSE 归档棒路径随迁 done/ 复跑 PASS**） |
+| 结论 | **CLOSED 2026-11-03 维护者拍板 · 归档 `done/`** · 三闸 approved（闸表为准 · 终态）· C1–C8 全勾 · 验收 A1–A8 全勾（A4② F4 只读面空集复测 PASS · A5 过期态四态齐——F13/F12 由 api `task_api_w_join_gap_fix` PR #307（W-fix-1/W-fix-2）修复后实证，web 侧 PR #85）· 发现 F1–F15 + N-R2-1（F14/F15 为 2026-11-03 复测期新发现 · 已追加 backlog）· fix task 建议 ×10 · 40 自检 PASS-WITH-NITS **NIT-1 闭环**（证据 `docs/harness/invokes/by-task/stage-w-e2e-join-acceptance/invoke_20261102_10_c8_evidence_archive.md` + `invoke_20261103_10_final_acceptance.md`） |
 
 ### CLOSE 阻塞注记（2026-11-02 · 维护者裁决）
 
@@ -224,3 +224,4 @@ S1 环境 → S2 拦单挂起 → S3 approve 全链 → S4 reject → S5 审计�
 | 2026-11-02 | 10 承接 **CLOSE 阻塞注记**（维护者裁决：F12 补 api TTL 过期出口 · F13 只读资源面接租户谓词 · **本 task 暂不 CLOSE**）：自检结论后新增「CLOSE 阻塞注记」节——阻塞项 = api `task_api_w_join_gap_fix`（W-fix-1 TTL 语义补全 → A5 复现过期态 · W-fix-2 只读面谓词 → A4② 复测）；闸表 status / task status 字段未动 · lint 复跑 PASS |
 | 2026-11-03 | 00 承接 **解阻进展回执**（issue #308 分析批 · 维护者过目后执行）：「CLOSE 阻塞注记」节补 PR #307 MERGED 回执（`3168b3b` · 2026-11-03 01:08 UTC）——W-fix-1/W-fix-2 已合 api master，A4②/A5 复测前置就绪；闸表 status / task status 字段未动 · lint 复跑 PASS |
 | 2026-11-03 | 10 承接 **验收收尾棒**（修复合并后复测 · PR #307 api / PR #85 web 合入后实证）：**A4② 勾销**（F13 已修 · 租户切 `ops-desk-pilot-b` → Pulls 空集 · 截图 `a4-2-cross-tenant-pulls-empty.jpg`）· **A5 勾销**（F12 已修可达 · TTL 90s 短窗复现 · `hitl_a285ff2ff195429ea8ab` 409 `approval_expired` → DB `approved→expired`（06:57:21Z）· web 行级红字「审批已过期，请刷新列表」· 截图 `a5-expired-row-prompt.jpg`；前序实证 `hitl_990479d004ad4b7a99fa` curl resume 409→expired 06:47:52Z）——**A1–A8 全勾**；新发现 **F14**（审批页批准后 chat 浮层卡片仍示「待审批」不联动 · F1/F10 同族 UI 状态同步缺口 · run `af3fcf63832c4d6dae4a1ecc5065a4e3`）/ **F15**（审批卡片创建时间 UTC 未本地化 · UX minor）如实记录进 `invoke_20261103_10_final_acceptance.md` 并追加 backlog；头部状态行/自检结论/CLOSE 注记同步「验收全勾 · 待维护者 CLOSE」；闸表 status / task status 字段未动 · lint 复跑 PASS |
+| 2026-11-03 | 10 承接 **CLOSE 归档棒**（维护者 2026-11-03 拍板 CLOSE · 授权在案）：`git mv` `active/`→`done/` · 状态字段 active→done · 头部状态行改「CLOSED 2026-11-03 维护者拍板 · 验收 A1–A8 全勾 · 证据 invoke_20261102_10_c8_evidence_archive + invoke_20261103_10_final_acceptance」· 自检结论改 CLOSE 终态 · A8/自检结论 lint 路径随迁 done/（复跑 PASS）· **40 自检 PASS-WITH-NITS NIT-1 闭环**（C7 过期态括注纠偏 · 合入回执 workspace PR [#21](https://github.com/Cyning12/ops-desk-workspace/pull/21) / api PR [#310](https://github.com/Cyning12/ops-desk-api/pull/310) 终验截图资产 MERGED 2026-11-03 07:23 UTC）· 活指针随迁（active/README · 05 简报）· 历史 invoke/审查文不动 · 闸表 status 未动 |
