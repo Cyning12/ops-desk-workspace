@@ -194,6 +194,19 @@ S1 环境 → S2 拦单挂起 → S3 approve 全链 → S4 reject → S5 审计�
 | `npx spec-wave task lint --file docs/tasks/active/task_stage_w_e2e_join_acceptance.md` | **PASS**（2026-10-30 · 10 起草棒；20-R1 修订棒复跑 PASS；2026-11-02 · 10 C8 归档棒修订后复跑 PASS） |
 | 结论 | **执行完成 · 三闸 approved（闸表为准）· C1–C8 全勾 · 验收 A1/A2/A3/A6/A7/A8 ✅ · A4/A5 ⚠️ 挂账（A4：②③ 已补测——③ 403 PASS · ② 404 FAIL=**F13 只读面跨租户泄漏**待修复复测；A5：过期态 F12 不可达）· 发现 F1–F13 + N-R2-1 · fix task 建议 ×10 · 40 自检棒待派 · CLOSE 归维护者**（证据 `docs/harness/invokes/by-task/stage-w-e2e-join-acceptance/invoke_20261102_10_c8_evidence_archive.md`） |
 
+### CLOSE 阻塞注记（2026-11-02 · 维护者裁决）
+
+**本 task 暂不 CLOSE**，阻塞项 = api 仓 `task_api_w_join_gap_fix`（`../ops-desk-api/docs/tasks/active/task_api_w_join_gap_fix.md`）：
+
+| 挂账验收 | 阻塞内容 | 解阻条件 |
+|----------|----------|----------|
+| A4②（F4 资源命中面 404） | F13 只读资源面跨租户泄漏（issues/pulls/overview 无 tenant 谓词） | api task **W-fix-2** 修复合入 → 复测 B 身份 `GET /issues` 得空集 |
+| A5（TC9 过期态截图） | F12 api 无过期错误出口（web FP-5 不可达） | api task **W-fix-1** 修复合入 → TTL 短窗（`OPS_HITL_APPROVAL_CONSUMPTION_TTL_SECONDS=90`）复现过期态 → 补拍截图 |
+
+修复 task 合入且两项复测证据回填 invoke 后，由维护者拍板 CLOSE。在此期间本 task 保持 `active`，闸表 status 不变。
+
+**2026-11-03 解阻进展回执**（issue #308 分析批 · 00 代录）：阻塞项 api task `api-w-join-gap-fix` 已合入 api 仓 master——**PR [#307](https://github.com/Cyning12/ops-desk-api/pull/307) MERGED 2026-11-03 01:08 UTC · merge commit `3168b3b`**（W-fix-1 TTL 过期出口 + W-fix-2 只读资源面租户谓词；api 侧图谱回写见 `ops-desk-api/docs/_tech_graph/l1/01_modules.md` :136）。**解阻条件「修复合入」已达成**，A4② / A5 复测前置就绪：可按上表复测路径排期（A4②：B 身份 `GET /issues` 空集复测；A5：TTL 短窗 90s 复现过期态补拍）→ 复测证据回填 invoke → 维护者拍板 CLOSE。本 task 仍保持 `active` 至复测完成。
+
 ---
 
 ## 修订
@@ -206,3 +219,5 @@ S1 环境 → S2 拦单挂起 → S3 approve 全链 → S4 reject → S5 审计�
 | 2026-10-30 | 10 承接 **20-R2**（B1/M1/M2 闭环）：**M3** 机械订正——消费侧守卫路径两处引用 `app/ops/hitl/nodes.py:499-504` → 真实路径 **`app/ops/lg_rag/multi/nodes.py:499-504`**（行号内容经亲核一致，仅目录段 `hitl/` → `lg_rag/multi/`）；闸表 status 未动 · lint 复跑 PASS。20-R2 观察点 N-R2-1（resume 入口租户 ContextVar 回落 · `tenant_context.py:24-26`）已知悉，不改本 task——执行期实测若成立按 A7 另开 fix task |
 | 2026-11-02 | 10 承接 **C8 证据归档棒**：联调实测（09:00–16:00 · 本地双栈 · Fixture 双租户）全证据落 `docs/harness/invokes/by-task/stage-w-e2e-join-acceptance/invoke_20261102_10_c8_evidence_archive.md`——C1–C8 勾选带锚（C6 ⚠️ 守卫真空坐实 · C7 过期态不可达 F12）· 验收 A1/A2/A3/A6/A7/A8 勾销 · **A4/A5 不勾挂账**（A4：F4-404/403 未抽测且消费链实测结果=缺口发现；A5：过期态截图缺按 failure_paths 明文不勾）· 发现清单 F1–F12 + **N-R2-1 坐实**（20-R2 观察点兑现：B 租户单被 A 上下文消费 · 回执 `d6bd262904544232` 错标 `ops-desk-pilot`）· fix task 建议清单 ×9 · 40 自检棒待派 · 闸表 status / task status 字段未动 · lint 复跑 PASS |
 | 2026-11-02 | 10 承接 **C8 补丁棒**（A4 补测并入 · 00 执行 10 落字 · 纯只读探测）：③ 头/session 不一致 **403 PASS**（`tenant_header_mismatch` · api `app/ops/lg_rag/router.py:376-384`）；② F4 资源命中面 404 **FAIL → 新发现 F13**（B session 下 `GET /api/ops/issues`/`pulls`/`overview` 泄漏 A 数据 · api `app/ops/issues.py:29` 无 tenant 谓词 · 租户谓词 task `task_tenant_readonly_predicate.md:156` 范围未覆盖=非回归 · **P 轨 canary 前置**）；发现清单 F1–F12→**F1–F13** · fix task 建议 ×9→**×10** · **A4 仍不勾**（② 契约未达 · 待 F13 修复复测）· C6/自检结论/invoke §C6/§2/§7/§8 同步 · lint 复跑 PASS |
+| 2026-11-02 | 10 承接 **CLOSE 阻塞注记**（维护者裁决：F12 补 api TTL 过期出口 · F13 只读资源面接租户谓词 · **本 task 暂不 CLOSE**）：自检结论后新增「CLOSE 阻塞注记」节——阻塞项 = api `task_api_w_join_gap_fix`（W-fix-1 TTL 语义补全 → A5 复现过期态 · W-fix-2 只读面谓词 → A4② 复测）；闸表 status / task status 字段未动 · lint 复跑 PASS |
+| 2026-11-03 | 00 承接 **解阻进展回执**（issue #308 分析批 · 维护者过目后执行）：「CLOSE 阻塞注记」节补 PR #307 MERGED 回执（`3168b3b` · 2026-11-03 01:08 UTC）——W-fix-1/W-fix-2 已合 api master，A4②/A5 复测前置就绪；闸表 status / task status 字段未动 · lint 复跑 PASS |
