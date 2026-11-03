@@ -1,4 +1,4 @@
-# 阶段 W 后夜间 backlog（2026-10-30 · 9 项）
+# 阶段 W 后夜间 backlog（2026-10-30 · 11 项）
 
 > **性质**：backlog 记录文档（非 task · 不派工 · 不改码）。每项含：背景 · 触发条件/进入条件 · 阻塞闸 · 建议帽链 · 证据锚。
 > **落盘背景**：阶段 W api/web 双轨 CLOSE、PR #14 合入 main 后，挂起棒与未决风险集中归档，防丢失、防空转。本档只登记；任何一项要启动均须按 Harness 流程另开 task（`10-task` 起草 → 20 审查 → 维护者签闸）。
@@ -18,9 +18,10 @@
   - 00 授权锚 invoke：`docs/harness/invokes/by-task/stage-w-e2e-join-acceptance/invoke_20261030_00_orchestration.md`（代签授权记录）
   - api 侧已合入：PR [#303](https://github.com/Cyning12/ops-desk-api/pull/303) · merge `09f97f4` · feat `227a482` · CI 4/4 绿
 
-## B2 · N-R2-1 疑似 api 缺陷：resume 入口不设租户 ContextVar（待实测）
+## B2 · N-R2-1 api 缺陷：resume 入口不设租户 ContextVar（**联调已坐实 · 待立 fix task**）
 
-- **背景**：20-R2 审查发现（N-R2-1）：api `app/ops/hitl/resume.py` 全文无 tenant 引用，resume 入口不设置租户 ContextVar；`app/ops/tenant_context.py:24-26` `current_tenant_or_default()` 在 ContextVar 为 None 时回落默认 `TENANT_A`（`"ops-desk-pilot"`）。推论：B 租户自己 approve + resume 的链路，恢复执行时疑似也按 TENANT_A 消费（跨租户负样本外的**同租户**路径都可能被回落吞掉）。**注意**：该疑似尚未经 live 实测，勿先改码。
+- **状态更新（2026-11-03 · 10 验收收尾棒注记）**：**联调已坐实**——2026-11-02 C6 跨租户负样本实测：B 租户拦单 `hitl_b4c35664bc10412fa561` 经 B 身份真人 approve+续跑后，消费日志 `tenant_id=ops-desk-pilot`（应 `-b`）、回执 `d6bd262904544232` 错标，N-R2-1 由「疑似」转「坐实缺陷」（高优先 · 审计失真），证据见 `docs/harness/invokes/by-task/stage-w-e2e-join-acceptance/invoke_20261102_10_c8_evidence_archive.md` §C6/§2 · 已列 fix task 建议 #1（§7）。**待立 fix task**（走完整闸链：10 起草 → 20 审查 → HG-AUDIT-R1 → 30）。
+- **背景**：20-R2 审查发现（N-R2-1）：api `app/ops/hitl/resume.py` 全文无 tenant 引用，resume 入口不设置租户 ContextVar；`app/ops/tenant_context.py:24-26` `current_tenant_or_default()` 在 ContextVar 为 None 时回落默认 `TENANT_A`（`"ops-desk-pilot"`）。~~推论：B 租户自己 approve + resume 的链路，恢复执行时疑似也按 TENANT_A 消费。该疑似尚未经 live 实测，勿先改码。~~（**2026-11-02 联调实测已证实**，见上方状态更新）
 - **触发条件/进入条件**：B1 联调执行到 **C3（resume 单路径恢复实测）** 时用 B 租户账号跑 approve → resume 链，观察恢复后 tool_exec 实际消费租户；若证实回落 TENANT_A → 另开 api fix task（走完整闸链：10 起草 → 20 审查 → HG-AUDIT-R1 → 30 改码）。
 - **阻塞闸**：无（属实测观察项）；若实测成立则新 fix task 自带全套闸。
 - **建议帽链**：B1 联调中真人实测记录证据 → 00 汇总 →（若成立）10 起草 api fix task → 20-R1 审查 → 维护者签闸 → 30。
@@ -94,6 +95,22 @@
 - **建议帽链**：web 仓窗口 10 起草 `task_web_doc_health_sweep` → 20 审查 → 维护者签闸 → 30（纯文档）→ 40 核对；⑦⑧ 并入 B8 回填。
 - **证据锚**：巡检全证据在 00 侧会话（2026-10-30 夜 · 可索）；受影响文件路径均相对 `../ops-desk-web/`；TC9 配方候选：`../ops-desk-web/docs/harness/invokes/by-task/web-hitl-decision-surface/invoke_20261017_40_live.md`
 
+## B10 · F14：审批页批准后 chat 浮层卡片仍示「待审批」不联动（web UX 状态同步族）
+
+- **背景**：2026-11-03 联调验收收尾复测新发现 F14：审批页批准后，chat 页浮层卡片仍显示「待审批」不联动（渲染历史 `hitl.waiting` 帧快照）· 实证 run `af3fcf63832c4d6dae4a1ecc5065a4e3`。与 F1（已决单无续跑入口 / Chat 浮层渲染 `hitl.waiting` 历史帧快照仍示「待审批」）/ F10（陈旧可点卡片聚合历史帧）**同族 web UI 状态同步缺口**。**处置建议：与 F1/F10/B11（F15）合并立一个 web UX task**（Chat 浮层卡片与 `/hitl/pending` 对账 + 已决态联动 + 时区本地化一并设计），不越仓执行——本仓只登记，fix task 在 web 仓立。
+- **触发条件/进入条件**：web 仓开下一 UX 修复窗口时立项（可并入既有 F1/F10 fix 建议 · invoke_20261102 §7 #6）。
+- **阻塞闸**：无现闸；立项时 web 仓自带闸链（本仓不改 web 业务码）。
+- **建议帽链**：web 仓窗口 10 起草 web UX task（合并 F1/F10/F14/F15）→ 20 审查 → 维护者签闸 → 30（web）→ 40 核对。
+- **证据锚**：`docs/harness/invokes/by-task/stage-w-e2e-join-acceptance/invoke_20261103_10_final_acceptance.md` §2 F14（run `af3fcf63832c4d6dae4a1ecc5065a4e3`）· 同族 F1/F10：`invoke_20261102_10_c8_evidence_archive.md` §2（web `src/views/HitlApprovalView.vue:61-85` · Chat 浮层渲染逻辑）
+
+## B11 · F15：审批卡片「创建时间」UTC 未本地化（时区本地化 · UX minor）
+
+- **背景**：2026-11-03 联调验收收尾复测新发现 F15：审批卡片「创建时间」显示 UTC（`2026-11-03T06:51:59+00:00`）未本地化为北京时间 · UX minor。**处置建议：并入 B10 的 web UX task**（时区本地化与浮层状态同步一并在 web 仓设计），不越仓执行——本仓只登记。
+- **触发条件/进入条件**：随 B10（web UX task）一并处置；若单独动则为 web 仓纯前端小改。
+- **阻塞闸**：无现闸；立项时 web 仓自带闸链（本仓不改 web 业务码）。
+- **建议帽链**：并入 B10 帽链（web 仓 10 起草 → 20 审查 → 维护者签闸 → 30 → 40）。
+- **证据锚**：`docs/harness/invokes/by-task/stage-w-e2e-join-acceptance/invoke_20261103_10_final_acceptance.md` §2 F15（截图 `a5-expired-row-prompt.jpg` 卡片时间字段可见 UTC 原文）
+
 ---
 
 ## 修订
@@ -102,3 +119,4 @@
 |------|------|
 | 2026-10-30 | 10 帽（文档）落盘：阶段 W 后 8 项 backlog 集中归档（B1 挂起棒 · B2 疑似缺陷待实测 · B3/B4 30 未决风险 · B5 阶段 P 缓开 · B6 P 轨真种子 · B7 web 本地零 push · B8 web TC9）· 每项证据锚亲核（api/web/workspace 三仓码面与文档面）· 纯文档零改码 |
 | 2026-10-30 | 10 帽追加 B9（00 移交）：web 仓文档卫生 sweep · 8 条 stale-minor（0 blocker）· 处置口径=本仓不动 web 文档 · 移交 web 仓窗口开 task_web_doc_health_sweep · TC9 两处瑕疵随 B8 同改 |
+| 2026-11-03 | 10 帽验收收尾棒追加：**B10（F14 web UX 状态同步族 · 审批后 chat 浮层不联动 · 建议与 F1/F10/F15 合并立 web UX task）**· **B11（F15 审批卡片创建时间 UTC 未本地化 · 建议并入 B10）**；**B2 标注「联调已坐实 · 待立 fix task」**（2026-11-02 C6 实测 N-R2-1 兑现 · 回执 `d6bd262904544232` 错标实证）；头部计数 9→11 项 · 纯文档零改码 |
