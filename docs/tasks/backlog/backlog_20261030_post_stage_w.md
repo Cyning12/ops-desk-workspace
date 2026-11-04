@@ -93,6 +93,7 @@
   6. `CHECKLIST_lg_rag_sse_joint_release_v1.md:5` 双 task 指针断链；
   7. TC9 证据落点写「PR 描述」但 web 全程零 push 未开 PR，落点待重定义；
   8. TC9「构造挂起 run」无配方（可引 web-hitl-decision-surface `invoke_20261017_40_live.md`）。
+- **状态更新（2026-11-04 · ①–⑥ 全清关账）**：web task_web_doc_health_sweep 全链闭环——10 起草（PR #90 三闸签收 GO 30）→ 30 交付 PR [#91](https://github.com/Cyning12/ops-desk-web/pull/91)（squash de3ed60 · ①volatile 全清+②Hub 补 6 笔 20→26+③_views/done.md 活指针+④README 补 5 页+⑤by_path 补 2 条 compile 绿+⑥CHECKLIST 双 done 指针）→ 40 验收 AC-1~7 全绿 → 关账 PR #92（active→done · main @ 1e079fd）。**B9 ①–⑥ 关账**；⑦⑧ 维持随 B8。
 - **处置口径（00 已定）**：**本仓（workspace）不动 web 文档**；移交 web 仓窗口处置——下一窗口开 `task_web_doc_health_sweep`（纯文档轨）一次性清理 ①–⑥；⑦⑧ 两处 TC9 瑕疵随 TC9 回填棒（B8）同改。
 - **触发条件/进入条件**：web 仓开下一文档窗口时立项；⑦⑧ 随 B8（维护者手测 TC9）一并处置。
 - **阻塞闸**：无现闸；立项时 web 仓自带闸链（纯文档轨 · 不越仓执行——本仓不改 web 文档）。
@@ -128,4 +129,5 @@
 | 2026-11-03 | 10 帽验收收尾棒追加：**B10（F14 web UX 状态同步族 · 审批后 chat 浮层不联动 · 建议与 F1/F10/F15 合并立 web UX task）**· **B11（F15 审批卡片创建时间 UTC 未本地化 · 建议并入 B10）**；**B2 标注「联调已坐实 · 待立 fix task」**（2026-11-02 C6 实测 N-R2-1 兑现 · 回执 `d6bd262904544232` 错标实证）；头部计数 9→11 项 · 纯文档零改码 |
 | 2026-11-04 | **B2 关账**：api fix task `api-w-hitl-tenant-fix` 修复（PR #313 `7800b2b`）+ 复测全绿（invoke_20261104_10_c6_retest · 消费日志/回执 tenant=B · 跨租户 403 · 空租户 409 · A 正样本零变化）→ task 关账迁 done/（api PR #314 回填 + #316 关账）；附带观察 O1（sync invoke 无事件帧致 decide 404）另立 api issue #315 · 纯文档零改码 |
 | 2026-11-04 | **B10/B11 关账**：web task `web-ux-state-sync` D1–D4 修复（F1/F10/F14 卡片对账与已决区 + F15 时区本地化）· PR #86 merge `36d42e1` · 40 验收 approved-with-comments → web 关账 PR #87；**active 板清零**——api `join_gap_fix`（PR #321）与 web `hitl_resume_expired_mapping`（PR #88）两滞留 task 一并关账迁 done/；**B2 附带 O1（issue #315）修复关账**——PR #317/#319/#320 + live 复测 404→200 → task 迁 done/（PR #322）· 纯文档零改码 |
+| 2026-11-04 | **B9 关账（①–⑥）**：web doc-health-sweep 全链 PR #90/#91/#92 闭环 · 40 AC-1~7 全绿 · ⑦⑧ 随 B8 暂挂 |
 | 2026-11-04 | **B1/B7/B8 注记 + B9 立项**：B1 联调 task 2026-11-03 已关账归档（f073a06 · C1-C8+A1-A8 全绿）→ B1 关账；B7 web main ahead 1 已消解（今日多棒推送后 main==origin/main）；B8 部分覆盖（A5 截图已覆盖列表/过期两态 · 空/403 两态+语义对照表+⑦⑧ 手测待维护者到场）；**B9 获维护者选为下一任务**——web task_web_doc_health_sweep 纯文档轨 · ①–⑥ 入范围 · ⑦⑧ 随 B8 暂挂 · 纯文档零改码 |
