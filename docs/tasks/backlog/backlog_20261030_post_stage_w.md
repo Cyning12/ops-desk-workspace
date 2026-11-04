@@ -6,8 +6,9 @@
 
 ---
 
-## B1 · 阶段 W 联调执行棒（挂起中）
+## B1 · 阶段 W 联调执行棒（挂起中 · **已关账 · 2026-11-04**）
 
+- **状态更新（2026-11-04 · 关账）**：联调 task `task_stage_w_e2e_join_acceptance` 已于 2026-11-03 关账归档（workspace `f073a06` · 档迁 `docs/tasks/done/`）；C1–C8 全链 + A1–A8 验收全绿（invoke_20261102/20261103 系列 + invoke_20261103_10_final_acceptance · 截图资产齐）。B8（TC9 手测）转独立登记（见 B8 · A5 已覆盖列表/过期两态 · 空/403 两态待维护者到场）。
 - **背景**：`docs/tasks/active/task_stage_w_e2e_join_acceptance.md` 三闸（HG-TASK-DRAFT / HG-AUDIT-R1 / HG-E2E-ENV）已于 2026-10-30 全 approved（维护者授权 00 代录 · 20-R1/R2 审查闭环）。范围 C1–C8（环境就绪 → approve/reject 全链 → 跨租户消费链 fail-closed 实测 → 证据归档），验收 A1–A8。同时承接 web TC9 手测（见 B8）。
 - **触发条件/进入条件**：维护者到场，真人执行 C1–C8（本地起 api + web 双栈 · Fixture 数据 · 不触生产）；真人 decide 不可代理（A6 红线 · 禁止脚本化 decide）。
 - **阻塞闸**：无新增闸——三闸已 approved；阻塞物是**真人在场**（decide 步骤不可代理）。
@@ -63,16 +64,18 @@
 - **建议帽链**：维护者定窗口 + 签闸 → 00 编排运维执行 → 证据落 invokes/。
 - **证据锚**：`docs/05-plan/07_stage_t_data_prep_runbook_v0_zh.md` §4（Pilot/Prod 种子轨清单 · 解联调）· §5（生产联调 CLOSE 另等 §4 P 轨）；Fixture 轨签记录：`docs/tasks/done/task_stage_t_tenant_contract.md` 人工闸表
 
-## B7 · web main ahead 1 未 push（CLOSE commit 200c447 仅本地）
+## B7 · web main ahead 1 未 push（CLOSE commit 200c447 仅本地 · **已消解 · 2026-11-04**）
 
+- **状态更新（2026-11-04 · 已消解）**：今日 web 仓多棒推送（PR #86/#87/#88 合入 + 分支推送）已使本地 main 与 origin/main 同步（`main...origin/main` 无 ahead）；`200c447` 历史留痕不再悬置。维持既有推送纪律无变更。
 - **背景**：web 仓 `task_web_hitl_approval_page` CLOSE commit `200c447` 仅存在于本地 main（`main...origin/main [ahead 1]`）；web 仓纪律为「全程本地零 push」，故 CLOSE 留痕未上远端。
 - **触发条件/进入条件**：维护者定夺是否推送（推则 web main 远端同步；不推则保持本地留痕纪律）。
 - **阻塞闸**：无 Harness 闸；决策权在维护者（纪律变更或一次性推送均须维护者拍板）。
 - **建议帽链**：维护者定夺 →（若推）00 执行 push 并记录 invoke。
 - **证据锚**：web 仓 `git log` 尖 = `200c447 docs(tasks): CLOSE web-hitl-approval-page（…全程本地零 push）`；`git status` = `main...origin/main [ahead 1]`
 
-## B8 · web TC9 手测（/hitl 四态截图 + 语义对照）
+## B8 · web TC9 手测（/hitl 四态截图 + 语义对照 · **部分覆盖 · 2026-11-04**）
 
+- **状态更新（2026-11-04 · 部分覆盖）**：联调终验 invoke_20261103_10_final_acceptance §A5 的截图证据已覆盖四态中的**列表态（带单）与过期态**（`a5-expired-row-prompt.jpg` 等 5 张资产齐）；**空态与 403 态截图、语义对照表、闸表截图、⑦⑧ 手测与 TC9 落点重定义回填**仍待维护者到场场次。B9 ⑦⑧（stale 清单尾部随 B8）暂挂本项。
 - **背景**：web `task_web_hitl_approval_page` 已 CLOSE，但 TC9（手测 + PR 材料）明确挂起：本地起 ops-desk-api + 构造挂起 run，手测 批准 →（required 时）显式续跑 → 「回到会话查看」链路；材料含 `/hitl` 四态截图（列表 / 空 / 403 / 过期错误）、与 HitlApprovalCard 的语义对照表、Harness 闸表截图。回填限 web 文档轨（task 状态不再改 · 补注即可）。
 - **触发条件/进入条件**：维护者到场手测（与 B1 联调同一场次可合并执行：B1 C1 起栈后即可顺手跑 TC9）。
 - **阻塞闸**：无闸；须真人手测。
@@ -125,3 +128,4 @@
 | 2026-11-03 | 10 帽验收收尾棒追加：**B10（F14 web UX 状态同步族 · 审批后 chat 浮层不联动 · 建议与 F1/F10/F15 合并立 web UX task）**· **B11（F15 审批卡片创建时间 UTC 未本地化 · 建议并入 B10）**；**B2 标注「联调已坐实 · 待立 fix task」**（2026-11-02 C6 实测 N-R2-1 兑现 · 回执 `d6bd262904544232` 错标实证）；头部计数 9→11 项 · 纯文档零改码 |
 | 2026-11-04 | **B2 关账**：api fix task `api-w-hitl-tenant-fix` 修复（PR #313 `7800b2b`）+ 复测全绿（invoke_20261104_10_c6_retest · 消费日志/回执 tenant=B · 跨租户 403 · 空租户 409 · A 正样本零变化）→ task 关账迁 done/（api PR #314 回填 + #316 关账）；附带观察 O1（sync invoke 无事件帧致 decide 404）另立 api issue #315 · 纯文档零改码 |
 | 2026-11-04 | **B10/B11 关账**：web task `web-ux-state-sync` D1–D4 修复（F1/F10/F14 卡片对账与已决区 + F15 时区本地化）· PR #86 merge `36d42e1` · 40 验收 approved-with-comments → web 关账 PR #87；**active 板清零**——api `join_gap_fix`（PR #321）与 web `hitl_resume_expired_mapping`（PR #88）两滞留 task 一并关账迁 done/；**B2 附带 O1（issue #315）修复关账**——PR #317/#319/#320 + live 复测 404→200 → task 迁 done/（PR #322）· 纯文档零改码 |
+| 2026-11-04 | **B1/B7/B8 注记 + B9 立项**：B1 联调 task 2026-11-03 已关账归档（f073a06 · C1-C8+A1-A8 全绿）→ B1 关账；B7 web main ahead 1 已消解（今日多棒推送后 main==origin/main）；B8 部分覆盖（A5 截图已覆盖列表/过期两态 · 空/403 两态+语义对照表+⑦⑧ 手测待维护者到场）；**B9 获维护者选为下一任务**——web task_web_doc_health_sweep 纯文档轨 · ①–⑥ 入范围 · ⑦⑧ 随 B8 暂挂 · 纯文档零改码 |
