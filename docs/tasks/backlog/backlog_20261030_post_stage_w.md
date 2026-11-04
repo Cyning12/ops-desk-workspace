@@ -96,16 +96,18 @@
 - **建议帽链**：web 仓窗口 10 起草 `task_web_doc_health_sweep` → 20 审查 → 维护者签闸 → 30（纯文档）→ 40 核对；⑦⑧ 并入 B8 回填。
 - **证据锚**：巡检全证据在 00 侧会话（2026-10-30 夜 · 可索）；受影响文件路径均相对 `../ops-desk-web/`；TC9 配方候选：`../ops-desk-web/docs/harness/invokes/by-task/web-hitl-decision-surface/invoke_20261017_40_live.md`
 
-## B10 · F14：审批页批准后 chat 浮层卡片仍示「待审批」不联动（web UX 状态同步族）
+## B10 · F14：审批页批准后 chat 浮层卡片仍示「待审批」不联动（web UX 状态同步族 · **已关账 · 2026-11-04**）
 
+- **状态更新（2026-11-04 · 关账）**：按处置建议合并立 web task `web-ux-state-sync`（web 仓）——D2 卡片对账转只读（F10/F14）+ D1 已决区会话保留（F1）修复 · PR #86 merge `36d42e1` · 40 验收 approved-with-comments 全绿 · task 关账迁 `docs/tasks/done/`（web PR #87）。
 - **背景**：2026-11-03 联调验收收尾复测新发现 F14：审批页批准后，chat 页浮层卡片仍显示「待审批」不联动（渲染历史 `hitl.waiting` 帧快照）· 实证 run `af3fcf63832c4d6dae4a1ecc5065a4e3`。与 F1（已决单无续跑入口 / Chat 浮层渲染 `hitl.waiting` 历史帧快照仍示「待审批」）/ F10（陈旧可点卡片聚合历史帧）**同族 web UI 状态同步缺口**。**处置建议：与 F1/F10/B11（F15）合并立一个 web UX task**（Chat 浮层卡片与 `/hitl/pending` 对账 + 已决态联动 + 时区本地化一并设计），不越仓执行——本仓只登记，fix task 在 web 仓立。
 - **触发条件/进入条件**：web 仓开下一 UX 修复窗口时立项（可并入既有 F1/F10 fix 建议 · invoke_20261102 §7 #6）。
 - **阻塞闸**：无现闸；立项时 web 仓自带闸链（本仓不改 web 业务码）。
 - **建议帽链**：web 仓窗口 10 起草 web UX task（合并 F1/F10/F14/F15）→ 20 审查 → 维护者签闸 → 30（web）→ 40 核对。
 - **证据锚**：`docs/harness/invokes/by-task/stage-w-e2e-join-acceptance/invoke_20261103_10_final_acceptance.md` §2 F14（run `af3fcf63832c4d6dae4a1ecc5065a4e3`）· 同族 F1/F10：`invoke_20261102_10_c8_evidence_archive.md` §2（web `src/views/HitlApprovalView.vue:61-85` · Chat 浮层渲染逻辑）
 
-## B11 · F15：审批卡片「创建时间」UTC 未本地化（时区本地化 · UX minor）
+## B11 · F15：审批卡片「创建时间」UTC 未本地化（时区本地化 · UX minor · **已关账 · 2026-11-04**）
 
+- **状态更新（2026-11-04 · 关账）**：并入 B10 的 web task `web-ux-state-sync` D3 时间本地化修复（Intl 本地时区 · UTC 原文入 title · FP-9 回退）· PR #86 merge `36d42e1` · 40 TC4 独立复验 PASS。
 - **背景**：2026-11-03 联调验收收尾复测新发现 F15：审批卡片「创建时间」显示 UTC（`2026-11-03T06:51:59+00:00`）未本地化为北京时间 · UX minor。**处置建议：并入 B10 的 web UX task**（时区本地化与浮层状态同步一并在 web 仓设计），不越仓执行——本仓只登记。
 - **触发条件/进入条件**：随 B10（web UX task）一并处置；若单独动则为 web 仓纯前端小改。
 - **阻塞闸**：无现闸；立项时 web 仓自带闸链（本仓不改 web 业务码）。
@@ -122,3 +124,4 @@
 | 2026-10-30 | 10 帽追加 B9（00 移交）：web 仓文档卫生 sweep · 8 条 stale-minor（0 blocker）· 处置口径=本仓不动 web 文档 · 移交 web 仓窗口开 task_web_doc_health_sweep · TC9 两处瑕疵随 B8 同改 |
 | 2026-11-03 | 10 帽验收收尾棒追加：**B10（F14 web UX 状态同步族 · 审批后 chat 浮层不联动 · 建议与 F1/F10/F15 合并立 web UX task）**· **B11（F15 审批卡片创建时间 UTC 未本地化 · 建议并入 B10）**；**B2 标注「联调已坐实 · 待立 fix task」**（2026-11-02 C6 实测 N-R2-1 兑现 · 回执 `d6bd262904544232` 错标实证）；头部计数 9→11 项 · 纯文档零改码 |
 | 2026-11-04 | **B2 关账**：api fix task `api-w-hitl-tenant-fix` 修复（PR #313 `7800b2b`）+ 复测全绿（invoke_20261104_10_c6_retest · 消费日志/回执 tenant=B · 跨租户 403 · 空租户 409 · A 正样本零变化）→ task 关账迁 done/（api PR #314 回填 + #316 关账）；附带观察 O1（sync invoke 无事件帧致 decide 404）另立 api issue #315 · 纯文档零改码 |
+| 2026-11-04 | **B10/B11 关账**：web task `web-ux-state-sync` D1–D4 修复（F1/F10/F14 卡片对账与已决区 + F15 时区本地化）· PR #86 merge `36d42e1` · 40 验收 approved-with-comments → web 关账 PR #87；**active 板清零**——api `join_gap_fix`（PR #321）与 web `hitl_resume_expired_mapping`（PR #88）两滞留 task 一并关账迁 done/ · 纯文档零改码 |
