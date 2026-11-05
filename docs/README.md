@@ -41,7 +41,8 @@ docs/
 │   ├── admin-sync-v1.md
 │   └── rag-knowledge-contract-v1.md
 ├── tasks/                    # workspace 侧 task（多为历史/卫生）
-└── harness/                  # harness invoke / review 样例
+├── harness/                  # harness invoke / review 样例
+└── dsh-superagent-series/    # 专项：dsh-superagent 个人实践系列（2026-11，含调研对照篇与公众号发布版）
 ```
 
 ## 快速链接
@@ -54,6 +55,7 @@ docs/
 - **三线总册（转行/HE 分仓）**：`/Users/cyning/Desktop/cyning-ai-program/PLAN_dual_track_v1_zh.md`
 - **本仓 Agent 完善**：[`05-plan/04-agent-completion-roadmap_v1_zh.md`](./05-plan/04-agent-completion-roadmap_v1_zh.md)
 - **后端现网快照（2026-09）**：[`02-backend-analysis/00-current-state.md`](./02-backend-analysis/00-current-state.md) §0
+- **dsh-superagent 实践系列**（2026-11：安装 → 配置 → 授权机制 → 三个实战判例 → 故障手册；另含调研对照篇与公众号发布版）：[`dsh-superagent-series/00-索引.md`](./dsh-superagent-series/00-索引.md)
 
 ## 状态
 
