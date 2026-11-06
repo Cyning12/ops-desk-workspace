@@ -4,8 +4,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-deploy() { # name port
-  local name="$1" port="$2" api="http://127.0.0.1:$2/orchestrator/api"
+deploy() { # name port repo
+  local name="$1" port="$2" repo="$3" api="http://127.0.0.1:$2/orchestrator/api"
   local H='-H x-orchestrator-request:1'
   echo "━━━ $name (127.0.0.1:$port) ━━━"
   if ! curl -sf -m 5 "$api/overview" $H > /tmp/bot-ov.json 2>/dev/null; then
@@ -19,6 +19,9 @@ deploy() { # name port
   echo
 }
 
-deploy "superagent (api)"  3082
-deploy "superagent-web"    3083
-echo "（面板: .artifacts 日志 grep token= 取带 token 的地址；本脚本只读，可在任意会话运行）"
+deploy "superagent (api)"  3082 Cyning12/ops-desk-api
+deploy "superagent-web"    3083 Cyning12/ops-desk-web
+echo "━━━ 待验收队列（open PR · 出货即审） ━━━"
+gh pr list --repo Cyning12/ops-desk-api --limit 5 --json number,title --jq '.[] | "  api  #\(.number) \(.title[0:52])"' 2>/dev/null || true
+gh pr list --repo Cyning12/ops-desk-web --limit 5 --json number,title --jq '.[] | "  web  #\(.number) \(.title[0:52])"' 2>/dev/null || true
+echo "（面板 token: .artifacts 日志 grep token=；本脚本只读，任意会话可跑）"
