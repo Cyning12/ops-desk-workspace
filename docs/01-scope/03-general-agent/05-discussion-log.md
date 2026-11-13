@@ -57,9 +57,44 @@
 - C2：主张 P2a 含最小加载器（少数意见，未被采纳）；接受"Skill 体系高级特性后置"。
 - C5：给出 agent_notes 单表双态设计与 propose_note 交互流。
 
+## Round 3 · 实地代码调研校验（2026-11-13，组织人发起）
+
+R1/R2 结论基于共享上下文推演，未核实代码。Round 3 派三路调研员（inv-api / inv-web / inv-docs）实地核码，**核心教训：代码现实显著领先于项目简报的 v1 画像，初稿近半"待办"实为已交付**。
+
+### 被证伪/修正的关键假设
+
+| 初稿假设 | 代码现实 | 证据 |
+|---|---|---|
+| v1 同步 SSE 绑死连接、"此路必废" | 执行与 HTTP 已解耦（进程内 RunWorker + 孤儿补偿） | `run_worker.py:93-238` |
+| P0' 新建 runs/run_events | 三表族 + Alembic 已存在，任务是收敛而非新建 | `models.py:291-343` |
+| 断线重连用 Last-Event-ID | 已冻结 cursor + `/lg-rag/replay`，手动续看 | `router.py:503-593` |
+| HITL 闸骨架 P1 待建 | 已交付并 freeze（decide→resume、TTL、四入口前端） | `app/ops/hitl/`、`HitlApprovalView.vue` |
+| ToolRegistry 新建、3-5 硬编码工具 | Capability 体系 27 文件已完整 | `app/ops/capability/` |
+| 权限自创三档 read/write/admin | 现有 side_effect 四档 + risk_level 双维度 | `types.py:7-24` |
+| L2 记忆 agent_notes 单表双态 | 已有 facts+episodes 双表、状态机、抽取管线默认关 | `models.py:520-648` |
+| L3 = pgvector 底座 | Qdrant 默认、pgvector 降级 | `00-current-state.md:18` |
+| 审计 = 单张 audit_log | 分域多表（receipts/llm_usage/hitl_requests） | inv-api §2.7 |
+| FC 兼容性冒烟为 P1 任务 | 主路径不经模型原生 tool_call，无的放矢 | inv-api §2.5 |
+| 面板已降级/可降级描述 | 四面板仍在主导航前五位；仅默认落地页改 `/chat` | `AppLayout.vue:38-47` |
+
+### 调研新发现（文档套已吸纳）
+
+- 多租户 freeze（F1–F6）：session.tenant_id 为真源，全部新 DDL 须含 tenant_id——初稿完全遗漏，已成贯穿约束。
+- 现存安全风险：`app/ops/chat/ws.py` 未鉴权 demo WS 仍在路由；旧 chat 图代码残留。
+- 已登记缺陷 N-R2-1（resume 链丢失）列入 P0'。
+- Web 页面版图含 Observability/LC Evidence/Capability 三额外页；iOS 有 323 行 WebSocket 实验资产待裁定去留。
+- `docs/README.md` 未索引本目录；`docs/_tech_graph/shared/graph.json` 残留与"废弃 graph.json"决策矛盾（卫生项）。
+
+### 组织人裁定（R3 新增）
+
+- L2 记忆："禁止自动写"软化为"默认关 + 人工可审"（对齐代码）；propose→confirm 交互降级为 P3 可选增强。
+- 审计：分域表 + 统一视图，不另建 audit_log 单表。
+- P0' 接受条件改为：不破 lg-rag-sse-v1 freeze、不触发 tenant freeze 闸。
+
 ## 遗留开放项
 
-1. P0' 的正式 task 单起草（落 ops-desk-api 仓，走 spec-wave 闸）。
-2. v1 项目简报中"多轮对话/ReAct 不在 v1"条款的正式修订（随 P1 启动一并改）。
-3. SiliconFlow/百炼 tool_call 冒烟测试集的具体用例清单（P1 第一个任务）。
+1. P0' 的正式 task 单起草（落 ops-desk-api 仓，走 spec-wave 闸）；内容按 v2 重定基线（收敛三表族 + checkpointer 默认开 + 旧遗产下线 + WS 端点处置 + N-R2-1）。
+2. v1 项目简报中"多轮对话/ReAct 不在 v1"条款的正式修订（现网 supervisor 图已越过该条款，简报画像整体过时，建议全面刷新）。
+3. ~~SiliconFlow/百炼 tool_call 冒烟测试集~~（R3 裁定：主路径不经 FC，无的放矢；降级为引入 FC 时的前置）。
 4. P4 通用化的检验标准（需要真实第二领域出现后再议）。
+5. （R3 新增）run 是否升为一等实体表的裁定；chat-stream-v1 等契约的修订清单（见 inv-docs 建议 8）；iOS AGENTS.md 过时端点修订；IMWebSocketClient 去留；docs/README.md 补索引与 graph.json 清理。
