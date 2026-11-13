@@ -14,7 +14,8 @@
 | [02-tools-skills-memory.md](02-tools-skills-memory.md) | ToolRegistry 与权限标注、FC/MCP/Skill 时机、三层记忆模型 |
 | [03-security-audit.md](03-security-audit.md) | 人工闸（interrupt + approval 资源）、审计表、保留策略 |
 | [04-roadmap.md](04-roadmap.md) | P0' → MVP-1/2/3 → P2b → P4 路线图、各阶段验收标准与依赖 |
-| [05-discussion-log.md](05-discussion-log.md) | 两轮讨论立场全录与 5 个冲突点的裁定表（可追溯） |
+| [05-discussion-log.md](05-discussion-log.md) | 四轮讨论立场全录、冲突点裁定表、R3 代码校验对照（可追溯） |
+| [06-kickoff-readiness.md](06-kickoff-readiness.md) | **开工就绪包**：R4 终局裁定、P0' 任务卡（T1–T7）、开工检查表 |
 
 ## 一页结论
 

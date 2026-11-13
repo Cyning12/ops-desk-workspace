@@ -91,10 +91,20 @@ R1/R2 结论基于共享上下文推演，未核实代码。Round 3 派三路调
 - 审计：分域表 + 统一视图，不另建 audit_log 单表。
 - P0' 接受条件改为：不破 lg-rag-sse-v1 freeze、不触发 tenant freeze 闸。
 
+## Round 4 · 终局裁定与开工评审（2026-11-13）
+
+三方对遗留开放项给出可执行终局裁定（明细与任务卡见 06-kickoff-readiness.md）：
+- architect：A1 run 实体化**新建** ops_lg_rag_runs（事件表不加 FK）；A2 Goal 图零改动落外状态 ops_goals；A3 下线顺序 摘WS路由→删旧码→归档drop表→410 墓碑；A4 进程化阈值量化（在飞>8 / P95>10min+月部署≥4 / 双副本需求）。**GO**，前置 C-1 先合并。
+- platform：P1 维持 plan-JSON 主路径（重估三触发条件）；P2 checkpointer 默认开 Go（灰度三步）；P3 审计合格线=单张 v_audit_unified view；P4 记忆灰度读→写→经验；P5 ws.py 直接下线。**条件 GO**（task 单过闸、T1 先于 T3、view 含 tenant_id、不破 freeze）。
+- product：D1 面板降级三步验收标准；D2 IMWebSocketClient 保留冻结（P3 复评）；D3 iOS 审批随主链路落地、task 排序 mainline→hitl→replay→history；D4 改写 project-brief 不新发版；D5 MVP-1 叙事定稿。**条件 GO**。
+- 唯一跨域冲突 C-R4-1（iOS WS 资产删 vs 冻结）：组织人裁定采纳 D2 冻结，architect 异议记录在案。
+- 三方条件全部折算进 P0' 任务卡 T1–T7，顺序关键链 T1→T3→T4。**结论：具备开工条件，待负责人拍板。**
+
 ## 遗留开放项
 
-1. P0' 的正式 task 单起草（落 ops-desk-api 仓，走 spec-wave 闸）；内容按 v2 重定基线（收敛三表族 + checkpointer 默认开 + 旧遗产下线 + WS 端点处置 + N-R2-1）。
-2. v1 项目简报中"多轮对话/ReAct 不在 v1"条款的正式修订（现网 supervisor 图已越过该条款，简报画像整体过时，建议全面刷新）。
-3. ~~SiliconFlow/百炼 tool_call 冒烟测试集~~（R3 裁定：主路径不经 FC，无的放矢；降级为引入 FC 时的前置）。
+1. ~~P0' task 单起草~~ → R4 已产出任务卡 T1–T7（06-kickoff-readiness.md §3）；**开工第一步**：正式落 ops-desk-api 仓过 spec-wave + HG-AUDIT-R1 闸。
+2. ~~简报修订~~ → R4-D4 裁定改写 00-project-brief.md，纳入 T7。
+3. ~~FC 冒烟~~ → R4-P1 裁定维持 plan-JSON 主路径，冒烟集降级为重估触发条件的前置。
 4. P4 通用化的检验标准（需要真实第二领域出现后再议）。
-5. （R3 新增）run 是否升为一等实体表的裁定；chat-stream-v1 等契约的修订清单（见 inv-docs 建议 8）；iOS AGENTS.md 过时端点修订；IMWebSocketClient 去留；docs/README.md 补索引与 graph.json 清理。
+5. ~~run 实体化 / IMWebSocketClient 去留~~ → R4-A1 裁定新建 ops_lg_rag_runs；R4-D2 裁定冻结（冲突 C-R4-1 组织人已裁定）。~~契约修订清单 / iOS AGENTS.md / 索引与 graph.json~~ → 全部纳入 T7。
+6. （R4 新增）P3 时点复评项：APNs 推送通道选型（联动 D2 复评）；管理端审计聚合页；agent_notes propose→confirm 交互增强。
