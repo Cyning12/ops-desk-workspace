@@ -108,3 +108,15 @@ R1/R2 结论基于共享上下文推演，未核实代码。Round 3 派三路调
 4. P4 通用化的检验标准（需要真实第二领域出现后再议）。
 5. ~~run 实体化 / IMWebSocketClient 去留~~ → R4-A1 裁定新建 ops_lg_rag_runs；R4-D2 裁定冻结（冲突 C-R4-1 组织人已裁定）。~~契约修订清单 / iOS AGENTS.md / 索引与 graph.json~~ → 全部纳入 T7。
 6. （R4 新增）P3 时点复评项：APNs 推送通道选型（联动 D2 复评）；管理端审计聚合页；agent_notes propose→confirm 交互增强。
+
+
+---
+
+## Round 5：P1 设计评审（2026-11-14 · architect 起草 / platform 安全 / product 端侧 / lead 整合）
+
+- **产出**：[07-p1-goal-design.md](07-p1-goal-design.md)（P1 设计终稿：Goal → supervisor 收敛 · 图零改动 · 装配层注入 · SSE 零新帧 · 唯一新 DDL=uq_ops_goals_active_thread 部分唯一索引 · 任务切分 T1–T5）。
+- **lead 事实复核两处**：① architect「runs 表无索引」证伪（迁移已建 idx(thread_id)/(status,created_at)，但派生发现 ORM 未声明 __table_args__ 的 autogenerate 漂移，并入 T4 修）；② 「待实证」graph.py:166/199 实证已实传 tenant_id/user_id/thread_id，接线零改动。
+- **platform 三修正采纳**：① 隔离槽位四件套（第四分支归因/per-slot guide 压信任级/[当前目标]+[相似经验] 进伪造转义表/objective 单行化截 200）；② 闸体例（懒创建同挂 GOAL_INJECT_ENABLED 实现 off 零触达 · goal fetch wait_for ≤300ms · 1:1 约束补部分唯一索引）；③ goal_store 分层纪律（装配链路吞错+span · REST 显式 503/409）。
+- **product 四裁定**：O-1 改判人工复活（否自动复活）；O-2 objective≠会话标题（两个实体）；O-3 接受 1:1；O-4 端侧最小面=常驻 goal chip+四动作，iOS 不晚于 hitl-approval task。
+- **O-1~O-5 / R-1~R-2 全部关闭**，见 07 §6 终裁登记。
+- **执行模式变更**：P0' 由 superagent 直推；自本论起实现段交付 bot（ops-desk-api issue #384 试单 · P1-T1 派单 #385）。

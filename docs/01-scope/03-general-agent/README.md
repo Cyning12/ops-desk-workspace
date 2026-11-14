@@ -16,6 +16,7 @@
 | [04-roadmap.md](04-roadmap.md) | P0' → MVP-1/2/3 → P2b → P4 路线图、各阶段验收标准与依赖 |
 | [05-discussion-log.md](05-discussion-log.md) | 四轮讨论立场全录、冲突点裁定表、R3 代码校验对照（可追溯） |
 | [06-kickoff-readiness.md](06-kickoff-readiness.md) | **开工就绪包**：R4 终局裁定、P0' 任务卡（T1–T7）、开工检查表 |
+| [07-p1-goal-design.md](07-p1-goal-design.md) | **P1 设计终稿**：Goal 状态机/装配层注入/唯一新 DDL/任务切分 T1–T5（R5 终裁） |
 
 ## 一页结论
 
