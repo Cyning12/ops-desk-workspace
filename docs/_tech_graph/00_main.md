@@ -1,7 +1,7 @@
 ---
 graph_id: 00_main
 version: 2026-10-22
-generated_at: sha256-1ad8b3ee5813a0ae
+generated_at: sha256-33e74500dc273411
 source: 00_main.graph.yaml
 ---
 
@@ -18,6 +18,7 @@ flowchart TB
     web["ops-desk-web"]
     ios["ops-desk-ios"]
     compose["docker-compose"]
+    pg["PostgreSQL 15+（腾讯云本地 · 含 runs/run_events/ops_goals/v_audit_unified）"]
 
     workspace -->|"契约 / 总 task"| api
     workspace -->|"契约 / 总 task"| web
@@ -25,12 +26,14 @@ flowchart TB
     workspace -->|"部署编排"| compose
     web -->|"HTTP / SSE"| api
     ios -->|"HTTP / SSE"| api
+    api -->|"runs/run_events 落库（lg-rag run 实体化 · P0' T4 · ops_lg_rag_runs）"| pg
+    compose -->|"编排承载（含 Qdrant）"| pg
 
     classDef phase fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     classDef doc fill:#fff8e1,stroke:#ff6f00,stroke-width:1px
     classDef infra fill:#e8f5e9,stroke:#2e7d32,stroke-width:1px
     class compose phase
-    class workspace,api,web,ios doc
+    class workspace,api,web,ios,pg doc
 ```
 
 ## Structured Data
@@ -44,6 +47,7 @@ flowchart TB
 | web | ops-desk-web | struct |
 | ios | ops-desk-ios | struct |
 | compose | docker-compose | flow |
+| pg | PostgreSQL 15+（腾讯云本地 · 含 runs/run_events/ops_goals/v_audit_unified） | struct |
 
 ### Edges
 
@@ -55,6 +59,8 @@ flowchart TB
 | workspace | compose | -> | depends_on | 部署编排 |  |
 | web | api | -> | depends_on | HTTP / SSE |  |
 | ios | api | -> | depends_on | HTTP / SSE |  |
+| api | pg | -> | depends_on | runs/run_events 落库（lg-rag run 实体化 · P0' T4 · ops_lg_rag_runs） |  |
+| compose | pg | -> | depends_on | 编排承载（含 Qdrant） |  |
 
 ## Sub-graph Links
 

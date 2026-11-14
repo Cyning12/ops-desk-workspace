@@ -11,3 +11,6 @@ node_modules/
 
 # SpecWave audit event trail (local)
 docs/harness/audit/
+
+# 生成产物（graph-compile.sh 每次重建 · 决策「废弃 graph.json 入库」2026-11-14 T7）
+docs/_tech_graph/shared/graph.json

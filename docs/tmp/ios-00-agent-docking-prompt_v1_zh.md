@@ -1,5 +1,7 @@
 # Prompt · iOS 00 · agent 交互对接总控（v1）
 
+> **状态（2026-11-14）：历史存档** —— T1 契约层已合入 ios master（PR #1：LgRagFrame/LgRagSseParser）；文中「旧契约考古」节描述的 `/api/ops/chat/stream` 已 **410 下线**、后端 `app/ops/chat/` 已清除（P0' T2a）。后续对接以 lg-rag 契约层代码与 [`01-scope/03-general-agent/`](../01-scope/03-general-agent/README.md) 为准。
+>
 > 交接对象：ops-desk-ios 仓的 **00 编排 agent**。本 Prompt 自包含。
 > 生成日期：2026-10-23 · 生成方：架构导师会话（doc 13 §7 iOS 恢复期总目标）。
 

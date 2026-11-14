@@ -29,6 +29,10 @@ nodes:
     label: "docker-compose"
     kind: flow
 
+  - id: "pg"
+    label: "PostgreSQL 15+（腾讯云本地 · 含 runs/run_events/ops_goals/v_audit_unified）"
+    kind: struct
+
 edges:
   - from: "workspace"
     to: "api"
@@ -53,3 +57,11 @@ edges:
   - from: "ios"
     to: "api"
     label: "HTTP / SSE"
+
+  - from: "api"
+    to: "pg"
+    label: "runs/run_events 落库（lg-rag run 实体化 · P0' T4 · ops_lg_rag_runs）"
+
+  - from: "compose"
+    to: "pg"
+    label: "编排承载（含 Qdrant）"

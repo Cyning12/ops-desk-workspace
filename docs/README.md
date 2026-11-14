@@ -9,7 +9,11 @@ docs/
 ├── 01-scope/                 # 项目范围与目标
 │   ├── 00-project-brief.md
 │   ├── 01-harness-tech-graph-strategy.md
-│   └── 02-cross-repo-communication.md
+│   ├── 02-cross-repo-communication.md
+│   └── 03-general-agent/       # 通用 Agent 演进（issue #23 · v2 代码校验稿）
+│       ├── README.md           # 一页结论 + 文档导航
+│       ├── 00-positioning.md ~ 05-discussion-log.md
+│       └── 06-kickoff-readiness.md  # R4 开工就绪包（P0' 任务卡 T1–T7）
 ├── 02-backend-analysis/      # 后端现状与改造方向
 │   ├── 00-current-state.md          # 文首含 2026-09 现状快照；§1 起为迁移前分析
 │   ├── 01-sse-chat-design.md

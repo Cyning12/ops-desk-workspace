@@ -1,5 +1,7 @@
 # Chat SSE API v1 契约
 
+> **状态（2026-11-14）：已被取代** —— 本契约为 v1 历史存档。现役对话主链路为 **lg-rag-sse-v1**（freeze）+ 通用 Agent 演进文档套 [`docs/01-scope/03-general-agent/`](../01-scope/03-general-agent/README.md)；旧 `/api/ops/chat/stream` 端点已 **410 下线**。整篇重写为 v2 另立 task。
+>
 > 更新日期：2026-07-15  
 > 范围：SSE 流式对话接口、事件格式、历史保存
 

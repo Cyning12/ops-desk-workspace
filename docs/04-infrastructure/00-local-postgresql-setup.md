@@ -201,13 +201,15 @@ ON CONFLICT DO NOTHING;
 
 ### 7.2 使用 curl 测试 SSE
 
+> **〔2026-11-14 注〕** 旧 `/api/ops/chat/stream` 已 **410 下线**；现网主路径为 lg-rag（freeze `lg-rag-sse-v1`，请求字段为 `query`）：
+
 ```bash
 curl -N \
   -H "Accept: text/event-stream" \
   -H "Content-Type: application/json" \
   -b "ops_session=your-session-cookie" \
-  -X POST http://localhost:8000/api/ops/chat/stream \
-  -d '{"message": "What is #1?"}'
+  -X POST http://localhost:8000/api/ops/lg-rag/stream \
+  -d '{"query": "What is #1?"}'
 ```
 
 预期输出类似：

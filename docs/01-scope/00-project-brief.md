@@ -37,7 +37,7 @@ Chat 交互：直接采用 **SSE 流式**，前端实时展示思考过程。
 ### 2.1 明确不在 v1
 
 - 用户注册（仅预置邀请密钥登录）
-- 多轮对话/ReAct 深度路径（Chat v1 先做单轮 + 上下文注入）
+- 多轮对话/ReAct 深度路径（Chat v1 先做单轮 + 上下文注入）——**2026-11-14 刷新：已随 lg-rag 上线**（多轮 run 化对话 + supervisor 编排 + HITL 审批均已交付生产，演进路线见 [`03-general-agent/`](./03-general-agent/README.md)），本条仅作 v1 历史范围存档
 - 文件上传/图片理解
 - Artifact 生成与下载
 - Session 的高级权限管理
@@ -78,6 +78,8 @@ Chat 交互：直接采用 **SSE 流式**，前端实时展示思考过程。
 8. **iOS v1 范围**：登录页 + Chat 页
 9. **部署编排**：`ops-desk-workspace` 维护总 `docker-compose.yml`
 10. **研发纪律**：接入 **SpecWave（`spec-wave`）**，技术图谱采用 **`.graph.yaml` + `.md` 双轨**，无 `.ai.md`；**废弃 `graph.json`**；人工闸采用轻量版
+11. **L3 记忆向量底座**（2026-11-14 刷新）：**Qdrant 默认**（`RAG_VECTOR_BACKEND=qdrant`，compose 已含 Qdrant），pgvector 降级为备选路径
+12. **Chat 主链路面板关系**（2026-11-14 刷新）：lg-rag SSE 已上线生产（cynaya.cn），旧 `/api/ops/chat/stream` 已 **410 下线**；web 默认落地页已切 `/chat`，四面板（Overview/Issues/PRs/Graph）导航降级为 **P3 路线项**（详见 03-general-agent/00-positioning）
 
 ## 6. 下一步待决策
 
