@@ -18,6 +18,7 @@
 | [06-kickoff-readiness.md](06-kickoff-readiness.md) | **开工就绪包**：R4 终局裁定、P0' 任务卡（T1–T7）、开工检查表 |
 | [07-p1-goal-design.md](07-p1-goal-design.md) | **P1 设计终稿**：Goal 状态机/装配层注入/唯一新 DDL/任务切分 T1–T5（R5 终裁） |
 | [08-p2a-tools-design.md](08-p2a-tools-design.md) | **P2a 设计终稿**：面板四视图→四枚只读 capability（query_issues/query_pull_requests/get_overview/graph_snapshot）· 租户口径 · 验证假设四样例 · 任务切分 T1–T4（R6 终裁） |
+| [09-p2a-capability-mcp-mapping.md](09-p2a-capability-mcp-mapping.md) | **P2a-T3 MCP 对齐评审**：CapabilitySpec 24 字段 ↔ MCP Tool 全对照 · 两处有损映射专行 · 差距 14 项三选一 · P2b 翻译器需求 7 条（字段族冻结 · 不回改 manifest） |
 
 ## 一页结论
 

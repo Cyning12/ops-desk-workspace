@@ -133,3 +133,4 @@ R1/R2 结论基于共享上下文推演，未核实代码。Round 3 派三路调
 - **改名裁定**：roadmap 名 get_pr_metrics → query_pull_requests（名实一致，与 query_issues 对仗）。
 - **non-blocking 采纳八项**：ci_status 词表 T1 先核 · 「长眼」叙事登记 · 用户视角截图+可读标签 backlog · 禁「实时」话术 · catalog ≤6000 字符断言 · fixture budget/circuit reset 补齐 · 两处有损映射专行（output_schema→outputSchema、side_effect→readOnlyHint）· page≤20×MAX_SUBTASKS=4 登记观察。
 - **执行模式**：沿用 P1 模式——本窗口（superagent）直推全链（m02028 裁定延续）。
+- **T3 完成登记（2026-11-16）**：[09-p2a-capability-mcp-mapping.md](09-p2a-capability-mcp-mapping.md) 落盘——CapabilitySpec 24 字段全对照（无损 1/有损 6/部分对应 1/MCP 无对应 16）· 两处有损映射专行（output_schema→outputSchema、side_effect→readOnlyHint，均不触发 08 §3(b) 重估）· 差距 14 项三选一（P2b 需求 7/不采纳 4/再议 3）· 字段族冻结、不回改 manifest。
