@@ -17,6 +17,7 @@
 | [05-discussion-log.md](05-discussion-log.md) | 四轮讨论立场全录、冲突点裁定表、R3 代码校验对照（可追溯） |
 | [06-kickoff-readiness.md](06-kickoff-readiness.md) | **开工就绪包**：R4 终局裁定、P0' 任务卡（T1–T7）、开工检查表 |
 | [07-p1-goal-design.md](07-p1-goal-design.md) | **P1 设计终稿**：Goal 状态机/装配层注入/唯一新 DDL/任务切分 T1–T5（R5 终裁） |
+| [08-p2a-tools-design.md](08-p2a-tools-design.md) | **P2a 设计终稿**：面板四视图→四枚只读 capability（query_issues/query_pull_requests/get_overview/graph_snapshot）· 租户口径 · 验证假设四样例 · 任务切分 T1–T4（R6 终裁） |
 
 ## 一页结论
 

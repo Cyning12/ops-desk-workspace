@@ -120,3 +120,16 @@ R1/R2 结论基于共享上下文推演，未核实代码。Round 3 派三路调
 - **product 四裁定**：O-1 改判人工复活（否自动复活）；O-2 objective≠会话标题（两个实体）；O-3 接受 1:1；O-4 端侧最小面=常驻 goal chip+四动作，iOS 不晚于 hitl-approval task。
 - **O-1~O-5 / R-1~R-2 全部关闭**，见 07 §6 终裁登记。
 - **执行模式变更**：P0' 由 superagent 直推；自本论起实现段交付 bot（ops-desk-api issue #384 试单 · P1-T1 派单 #385）。
+
+
+---
+
+## Round 6：P2a 设计评审（2026-11-16 · inv-p2a 勘察 / architect 起草 / platform+product 评审 / lead 整合）
+
+- **触发**：用户 m03064「进入夜晚自动执行任务模式，授权后续任务」→ 按 roadmap 04 §P2a(:41-46) 启动。
+- **勘察**（inv-p2a · /tmp/opsdesk-rfc/inv-p2a.md）：新只读 capability 五步新增法（adapter→manifest→默认面→allowlist→测试）；面板数据源全本地表（GHA 每日 sync，无实时 GitHub）；已有 get_issue_by_number/get_pr_by_number，Issues 列表/Overview 聚合/Graph 快照空白；Graph/sync/scan 无 tenant_id 列（全局态）；manifest 计数断言钉死 5。
+- **产出**：[08-p2a-tools-design.md](08-p2a-tools-design.md)（P2a 设计终稿 · 四枚只读工具 · 任务切分 T1–T4）。
+- **lead 整合七裁定**（双方条件 GO 的 7 项 blocking 全关闭）：R1 词表/边界强制落 adapter（schema_validate 不校验 enum/min/max）；R2 when_to_use/when_not_to_use 不进 prompt 是空调杆→引导全落 description；R3 span payload 补 tenant_id 一行（graph 全局放行签收条件，T1 先行）；R4 验收样例 3→4（补 query_issues）；R5 判据 (e) 归纳判断+三级裁定（成立/部分成立/不成立）；R6 对照协议（同租户/as_of 基准/≤1 sync 周期漂移容差）；R7 判据 (f) 未误选 mock_* + mock description 收窄（T1）。
+- **改名裁定**：roadmap 名 get_pr_metrics → query_pull_requests（名实一致，与 query_issues 对仗）。
+- **non-blocking 采纳八项**：ci_status 词表 T1 先核 · 「长眼」叙事登记 · 用户视角截图+可读标签 backlog · 禁「实时」话术 · catalog ≤6000 字符断言 · fixture budget/circuit reset 补齐 · 两处有损映射专行（output_schema→outputSchema、side_effect→readOnlyHint）· page≤20×MAX_SUBTASKS=4 登记观察。
+- **执行模式**：沿用 P1 模式——本窗口（superagent）直推全链（m02028 裁定延续）。
