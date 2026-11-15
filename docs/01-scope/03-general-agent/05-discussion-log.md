@@ -134,3 +134,15 @@ R1/R2 结论基于共享上下文推演，未核实代码。Round 3 派三路调
 - **non-blocking 采纳八项**：ci_status 词表 T1 先核 · 「长眼」叙事登记 · 用户视角截图+可读标签 backlog · 禁「实时」话术 · catalog ≤6000 字符断言 · fixture budget/circuit reset 补齐 · 两处有损映射专行（output_schema→outputSchema、side_effect→readOnlyHint）· page≤20×MAX_SUBTASKS=4 登记观察。
 - **执行模式**：沿用 P1 模式——本窗口（superagent）直推全链（m02028 裁定延续）。
 - **T3 完成登记（2026-11-16）**：[09-p2a-capability-mcp-mapping.md](09-p2a-capability-mcp-mapping.md) 落盘——CapabilitySpec 24 字段全对照（无损 1/有损 6/部分对应 1/MCP 无对应 16）· 两处有损映射专行（output_schema→outputSchema、side_effect→readOnlyHint，均不触发 08 §3(b) 重估）· 差距 14 项三选一（P2b 需求 7/不采纳 4/再议 3）· 字段族冻结、不回改 manifest。
+
+
+---
+
+## Round 7：P2b 设计评审（2026-11-16 · inv-p2b 勘察 / architect 起草 / platform+product 评审 / lead 整合）
+
+- **触发**：用户 m03216「P2b」→ 按 04-roadmap §P2b 启动（goal-2e3944ed）。
+- **勘察**（inv-p2b · /tmp/opsdesk-rfc/inv-p2b.md）：关键发现=旧 adapters/mcp_client.py 已存在但**绕过 manifest 硬编码单枚注册**（无 V1-V13/args_schema/tenant 语义）；kind 词表 ALLOWED_KINDS={local_fn,http} 无 mcp；闸链+W0 对 capability 内工具天然生效，仅补 ainvoke/连接生命周期/超时面；DSH skill 机制四包 2799 行解剖（可直搬=frontmatter 必填/两级加载/skill_content 包装，须裁=多 scope/chokidar 热更新/rank 合并）；官方 mcp PyPI 2.3.0 重依赖 vs mcp_client.py docstring 钉死「不引入重 SDK」vs 04-roadmap:50 langchain-mcp-adapters——**三方矛盾**；TPA 工具描述投毒平均成功率 36.5%（MCPTox）。
+- **产出**：[11-p2b-mcp-skill-design.md](11-p2b-mcp-skill-design.md)（P2b 设计终稿 · 零新外部依赖薄 transport · kind=mcp 翻译器 · skill_registry 真化+skill_ref 按需装配 · 任务切分 T1–T5b）。
+- **lead 整合十修订**（双方条件 GO 共 10 项 blocking 全关闭）：R1 write 缺省方向翻转为缺省拒载（platform M1：缺省 read 实为 write=绕 W0 fail-open）；R2 inputSchema 递归清洗（nodes.py:126 args_schema 全量 dump 进 prompt 是结构性缺口）；R3 catalog 节级不可信引导语；R4 同源校验落地钉死（_entry_from_raw 直调+_build_adapter mcp 分支+when_to_use 强制合成——P2a R1 同类错预防）；R5 shutdown 同步 unregister mcp 条目+import 零网络断言锚；R6 真社区 server 互操作进 T5b（R-A1 触发闸）；R7 验收补用户会话判据+选择质量+三级裁定；R8 T1 清理面补四处残留；R9 skill 全文 ≤20000+skill_ref 闸条件化；R10 T5 拆 T5a/T5b。
+- **依赖裁定 A**：薄 transport 扩写**零新外部依赖**（否官方 SDK 八枚级联+httpx2 冲突 · 否 langchain-mcp-adapters 形态错配）；04-roadmap:50 表述 T5b 回写。
+- **确认点关闭**：R-A1/R-D0/R-G1/R-G2/R-F1/R-F2（条件化）/R-F3/R-I1 全关，见 11 §13。
