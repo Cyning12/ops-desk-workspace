@@ -164,3 +164,4 @@ R1/R2 结论基于共享上下文推演，未核实代码。Round 3 派三路调
 - **明判关闭**：Q1 裁可+S-g 人类化文案 · Q2 内嵌折叠区裁可（附计数徽标+定时子区前提）· Q3 接受默认转 db 附四条件 · Q4 默认 off · Q5 裁可（人签不落→S2 改 web 单端如实登记）· Q6 有条件裁可（S-a 可操作化/S-d 钉 ops.write.run_note/PB1 回填三条件本稿全落实），见 14 §14。
 - **验证端声明**：P3 验证以 web 为主验证端；移动端「等交付」闭环以下波推送管线为前提；iOS 任务卡片/回放登记后续候选。
 - **T1 契约落盘（2026-11-16 · exec-p3-t1）**：[15-p3-contracts.md](15-p3-contracts.md)——Schedule REST 四端点 + 422 人类化文案词表 · create_schedule manifest 草案（W1 HITL）· runs/events 只读（event_type 白名单=freeze 词表核实成立）· fires 台账状态机+归因真源声明（SP2）· admin memory 三端点 · device_tokens 草案（顺移 Swift 推送波）· 总闸/幂等环境契约；同步：03-security-audit §4 增补第 6 条「运维面例外」（purge 同缺口 SP3 登记不收紧）、04-roadmap §P3 回写。
+- **T11 验收落盘（2026-11-17 凌晨 · exec-p3-t11）**：[16-p3-verification.md](16-p3-verification.md)——S1/S2/S3 三样例逐判据过 · 三级裁定**部分成立**（缺口限枚举内 (b)(d)(e) · worker-fired run 不建 thread 行致面板 404 待修）· 波内小修 PR #433 合 master 396f7fed · 治理放量 T5/T6/T7 终报汇总同录。
