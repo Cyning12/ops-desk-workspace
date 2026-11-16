@@ -48,6 +48,7 @@
 3. **已登记缺陷**：resume 链丢失（N-R2-1，`invoke_20261102_10_c8_evidence_archive.md:122`），P0' 跟进。
 4. **进程内状态是已登记最大工程债**：熔断/配额/幂等/nonce 全内存、capability persistence 默认 null 不可上生产（`09_general_agent_architecture_direction_v0_zh.md:19`）——多副本化（P3+）的前置。
 5. **iOS WebSocket 实验资产**（`IMWebSocketClient.swift` 323 行未接主链路）：裁定去留；若规划推送通道再议。
+6. **运维面例外（P3 登记 · 2026-11-16）**：`/api/ops/admin/*` 面（既有 admin-sync / purge，及 P3 新增 admin memory 端点）为**跨租户运维面**——鉴权 `AdminSyncAuth`（机器 Bearer `OPS_ADMIN_SYNC_TOKEN` 或 maintainer cookie），`maintainer` 为**全局角色、无租户绑定**，`tenant_id`/`user_id` 显式传入而非会话推导，与 §1 权限模型的租户隔离原则构成**刻意例外**。既有 purge 端点同缺口（SP3 登记）：**本波不收紧，仅登记**；是否加二次确认/双人复核另行评估。补偿控制：审计 `logger.info` 记动作（tenant/user/key/affected）不记内容、token 禁入日志、`secrets.compare_digest` 比较、`/admin/memory` 页 maintainer 可达而非租户管理员面。契约钉死见 [15-p3-contracts.md](15-p3-contracts.md) §5.1。
 
 ## 5. 可观测性（初稿遗漏，补记）
 

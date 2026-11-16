@@ -56,6 +56,7 @@ P0' 收敛与默认开启 → P1 会话深化（Goal）→ P2a 工具对齐 → 
 - 多副本前置：进程内状态外置（熔断/配额/幂等/nonce）、DB 租约 worker。
 - **验证假设**：「给目标、等交付」心智成立。
 - iOS：随 lg-rag 主链路落地 hitl 审批（active task 已立项），APNs 留接口。
+- **设计与契约已落盘（2026-11-16 · issue #23）**：[14-p3-schedule-taskcard-design.md](14-p3-schedule-taskcard-design.md)（R1-R23 全关闭 · 双泳道 T1–T11）→ [15-p3-contracts.md](15-p3-contracts.md)（T1 契约文档：Schedule REST / create_schedule capability / runs 只读 / fires 台账 / admin memory / device_tokens 草案 / 总闸环境）。
 
 ### P4 · 通用化（愿景，不设排期）
 
