@@ -150,3 +150,16 @@ R1/R2 结论基于共享上下文推演，未核实代码。Round 3 派三路调
 - **T5b 冒烟闭环（2026-11-16 · exec-p2b-t5b · 证据 [12-p2b-verification.md](12-p2b-verification.md)）**：真社区 server（@modelcontextprotocol/server-everything v2.3.0 · npx stdio）互操作**零失败**——建连协商钉版 2025-06-18、tools/list 翻译 12 注册/3 拒载/1 排除、tools/call 真子进程回真数据、identity_mismatch 负例拒连、SIGTERM 摘除 12/12。用户会话判据 3 命中（echo/get_sum/get_env）+ 4 不命中（P2a 四样例复跑零误选 mcp.*）全过。调用边界错参 → 稳定码 `args_schema_invalid` fail-visible。**三级裁定=成立（MCP 向）：R6 触发闸未命中，R-A1 重议不启动，裁定 A（薄 transport 自研零新依赖）维持，04-roadmap:50 已按此回写。** 遗留：Langfuse OTLP 403（dev 密钥失效 · 环境面）、planner 泛化问法选定率弱面 → 进 P2c 评估。
 
 - **T5a skill 冒烟闭环（2026-11-16 · exec-p2b-t5a · 证据 [13-p2b-skill-verification.md](13-p2b-skill-verification.md)）**：原样 catalog 命中 2/3 不达阈 → 按 §9.2 允许的 when_to_use 两轮调优（正向扩写→误触发 → 加负向条款「只取数不解读的纯查询不声明」）后**命中 3/3 · 不命中 2/2 · P2a 四样例复跑 4/4 零误选**；off/on 对照成立（OFF 无 skill_ref 键、泛建议）。裁定=成立（夜间小样本——新增 skill 须复跑本冒烟）。调优仅动 workspace skills/panel-data-guide/SKILL.md 一行（ac48ba5）。附带发现两条登记后续：plan 帧 >800 字符截断落库（观测性缺口）· 域外 query 偶发 supervisor 空 plan fail-closed（复跑正常）。
+
+
+---
+
+## Round 8：P3 设计评审（2026-11-16 · inv-p3 勘察 / architect 起草 / product+platform 双评审 / lead 整合）
+
+- **触发**：按 04-roadmap §P3(:53-58) 启动（任务化执行：Schedule · 任务卡片 · 轨迹回放 · L2 记忆产品化 · 多副本前置）。
+- **勘察**（inv-p3 · /tmp/opsdesk-rfc/inv-p3.md）：auto_resume 周期任务五件套先例（:275-297）· compose 全仓无 Redis 服务 · history_router 无 per-thread runs 端点 · iOS LgRagFrame.swift:87 未知帧抛错（SSE 零新帧硬约束）· iOS 零推送代码 · Langfuse OTLP 403 密钥债。
+- **产出**：[14-p3-schedule-taskcard-design.md](14-p3-schedule-taskcard-design.md)（P3 设计终稿 · 双泳道任务切分 T1–T11）。
+- **流程**：architect 初稿（/tmp/opsdesk-rfc/p3-design-architect.md · 345 行 · D-A~D-I · §14 Q1-Q6）→ **product 条件 GO**（B1-B3 + S-a~S-g + 盲点5 · /tmp/opsdesk-rfc/p3-review-product.md）→ **platform 条件 GO**（B1-B7 + N1-N6 + SP1-SP3 · 评审意见经 lead 逐条裁定转述）→ **lead 整合 23 条修订（R1-R23）全部关闭**，§14 Q1-Q6 明判落盘。
+- **关键裁定**：① **create_schedule 走既有 capability 闸链 + W1 HITL**（创建定时任务=承诺未来 LLM 花费 · HitlApprovalCard 复用 · web 零改动 · 新任务单 T2b · S1 创建主体=agent 对话化）；② **双上限 per-user 20/per-tenant 200 + interval ≥300s + 预算归因=creator 身份**（start_run_worker 请求上下文外显式传）；③ **只读端点 per-user 归属 404 + events 白名单过滤 event_type 至 freeze 词表**；④ **OPS_SCHEDULE_ENABLED 默认 off**（auto_resume 三件套 · TestClient 零 diff · 部署决策激活）；⑤ **fires 状态机 {claimed, fired, skipped, failed} · run_id 写回才算 fired · 启动补链 · ON CONFLICT DO NOTHING**；⑥ **ops_device_tokens 降 T1 契约草案**（token_hash 约定 · 实施顺移 Swift 推送波一个 PR 收口）；⑦ **admin 面=跨租户运维面钉死**（03-security-audit §4 运维面例外 · revoke 复用 revoke_by_key · 已撤销 200 affected=0 · purge 同缺口登记不收紧）；⑧ **幂等默认转 db 附 LB6 四条件**（docstring 改写/env 四分回归矩阵/fail-closed+显式 null 两回归/热路径 DB 写风险登记）；⑨ **双泳道切分**（证伪主线 T1→T2→T2b→T3→T4→T8→T11 · 并行治理线 T5/T6/T7/T9 · 砍单序 T9→T7→T5）。
+- **明判关闭**：Q1 裁可+S-g 人类化文案 · Q2 内嵌折叠区裁可（附计数徽标+定时子区前提）· Q3 接受默认转 db 附四条件 · Q4 默认 off · Q5 裁可（人签不落→S2 改 web 单端如实登记）· Q6 有条件裁可（S-a 可操作化/S-d 钉 ops.write.run_note/PB1 回填三条件本稿全落实），见 14 §14。
+- **验证端声明**：P3 验证以 web 为主验证端；移动端「等交付」闭环以下波推送管线为前提；iOS 任务卡片/回放登记后续候选。

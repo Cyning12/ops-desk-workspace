@@ -23,6 +23,7 @@
 | [11-p2b-mcp-skill-design.md](11-p2b-mcp-skill-design.md) | **P2b 设计终稿**：MCP client 桥接（零新依赖薄 transport · kind=mcp 翻译器 · 毒 description 三板斧）+ skill 加载器（DSH 裁剪移植 · skill_ref 按需装配）· 任务切分 T1–T5b（R7 终裁） |
 | [12-p2b-verification.md](12-p2b-verification.md) | **P2b 验收记录**：T5b 真社区 server 冒烟 3 命中+4 不命中 · 三级裁定成立（R-A1 未触发）· env 开启 runbook · P2c 评估建议 |
 | [13-p2b-skill-verification.md](13-p2b-skill-verification.md) | **P2b skill 验收记录**：T5a 选择质量冒烟——when_to_use 两轮调优后命中 3/3 · 不命中 2/2 · P2a 复跑 4/4 · 裁定成立（夜间小样本 · 新增 skill 须复跑） |
+| [14-p3-schedule-taskcard-design.md](14-p3-schedule-taskcard-design.md) | **P3 设计终稿**：Schedule（进程内 loop+DB 抢占 · 总闸默认 off · fires claimed 状态机+启动补链 · 双上限 20/200+interval≥300s）· create_schedule 走 W1 HITL 对话化创建 · 任务卡片=run 投影（web 内嵌面板+定时子区）· 回放 REST（归属 404+白名单过滤）· L2 admin 浏览/撤销（跨租户运维面钉死）· 幂等转正 DB 附四条件 · 双泳道任务切分 T1–T11（R8 终裁） |
 
 ## 一页结论
 
