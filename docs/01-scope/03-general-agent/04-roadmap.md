@@ -47,7 +47,7 @@ P0' 收敛与默认开启 → P1 会话深化（Goal）→ P2a 工具对齐 → 
 
 ### P2b · 生态（不变）
 
-- MCP client 适配器（`langchain-mcp-adapters`，远端工具→capability 条目翻译器）。
+- MCP client 适配器（**裁定 A · 薄 transport 自研零新外部依赖**——否官方 SDK 八枚级联+httpx2 冲突、否 `langchain-mcp-adapters` 形态错配；远端工具→capability 条目翻译器 kind=mcp，详见 [11-p2b-mcp-skill-design.md](11-p2b-mcp-skill-design.md) §1；2026-11-16 T5b 真社区 server 冒烟裁定维持，见 [12-p2b-verification.md](12-p2b-verification.md)）。
 - 最小 skill 加载器（workspace `skills/` 目录、启动加载、重启生效）。
 
 ### P3 · 任务化执行
