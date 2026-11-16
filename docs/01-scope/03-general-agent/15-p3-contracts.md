@@ -478,7 +478,7 @@ curl -X POST 'https://<host>/api/ops/devices/register' \
 
 ### 7.3 OPS_CAPABILITY_PERSISTENCE 默认 null → db（R9 · 部署面说明）
 
-> **装配是部署动作，非代码默认值 · 刻意不做自动探测数据库可用性。** P3 波起生产部署清单须显式 `OPS_CAPABILITY_PERSISTENCE=db`；代码默认仍是未设（null），不在代码里改默认值。
+> **代码默认已翻转：未设/空串 null → db（DbIdempotencyStore 现役转正，persistence.py:39 · P3-T6 已落地 · 承 14 终稿 §6.4/R9）。** 刻意不做自动探测数据库可用性；显式 `null` 仍保留为回退口（不防重+告警 · **不能上生产**）；装配是部署动作，生产部署清单须显式 `OPS_CAPABILITY_PERSISTENCE=db`。。
 
 | 取值 | 装配 | 语义 |
 |---|---|---|
@@ -487,7 +487,7 @@ curl -X POST 'https://<host>/api/ops/devices/register' \
 | 未设 / `null` | 不防重 + 告警 | **不能上生产** |
 | 未知值 | `logger.error` 按不防重处理 | 部署笔误不留静默 |
 
-T2b 附带条件（14 §10）：persistence.py docstring 改写「装配是部署动作」· env 四分回归矩阵测试（db / memory / null / 未设）· fail-closed + 显式 null 两回归 · 风险登记 R-P3-10（热路径 DB 写 + 可用性耦合）。
+R9 四条件（14 §6.4 · 已由 P3-T6 落地）：persistence.py docstring 改写「装配是部署动作」· env 四分回归矩阵测试（db / memory / null / 未设）· fail-closed + 显式 null 两回归 · 风险登记 R-P3-10（热路径 DB 写 + 可用性耦合）。
 
 ### 7.4 capability 放行环境（§2.2 汇总）
 
@@ -502,7 +502,7 @@ T2b 附带条件（14 §10）：persistence.py docstring 改写「装配是部�
 |---|---|---|---|
 | `OPS_SCHEDULE_ENABLED` | `off` | 功能上线时 `on` | T3 worker |
 | `OPS_SCHEDULE_TICK_SECONDS` | `30` | 按需 | T3 worker |
-| `OPS_CAPABILITY_PERSISTENCE` | 未设（null） | **`db`** | T2b capability |
+| `OPS_CAPABILITY_PERSISTENCE` | **`db`（T6 翻转）** | **`db`** | T2b capability |
 | `OPS_CAPABILITY_EXTRA_MANIFESTS` | 空 | 含 schedule manifest | T2b |
 | `OPS_CAPABILITY_ALLOW_WRITE_TAGS` | 空 | `schedule` | T2b |
 | `OPS_ADMIN_SYNC_TOKEN` | 空（Bearer 禁用） | 运维面按需 | T5 admin |
