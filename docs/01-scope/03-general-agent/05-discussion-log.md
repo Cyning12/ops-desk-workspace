@@ -148,3 +148,5 @@ R1/R2 结论基于共享上下文推演，未核实代码。Round 3 派三路调
 - **确认点关闭**：R-A1/R-D0/R-G1/R-G2/R-F1/R-F2（条件化）/R-F3/R-I1 全关，见 11 §13。
 
 - **T5b 冒烟闭环（2026-11-16 · exec-p2b-t5b · 证据 [12-p2b-verification.md](12-p2b-verification.md)）**：真社区 server（@modelcontextprotocol/server-everything v2.3.0 · npx stdio）互操作**零失败**——建连协商钉版 2025-06-18、tools/list 翻译 12 注册/3 拒载/1 排除、tools/call 真子进程回真数据、identity_mismatch 负例拒连、SIGTERM 摘除 12/12。用户会话判据 3 命中（echo/get_sum/get_env）+ 4 不命中（P2a 四样例复跑零误选 mcp.*）全过。调用边界错参 → 稳定码 `args_schema_invalid` fail-visible。**三级裁定=成立（MCP 向）：R6 触发闸未命中，R-A1 重议不启动，裁定 A（薄 transport 自研零新依赖）维持，04-roadmap:50 已按此回写。** 遗留：Langfuse OTLP 403（dev 密钥失效 · 环境面）、planner 泛化问法选定率弱面 → 进 P2c 评估。
+
+- **T5a skill 冒烟闭环（2026-11-16 · exec-p2b-t5a · 证据 [13-p2b-skill-verification.md](13-p2b-skill-verification.md)）**：原样 catalog 命中 2/3 不达阈 → 按 §9.2 允许的 when_to_use 两轮调优（正向扩写→误触发 → 加负向条款「只取数不解读的纯查询不声明」）后**命中 3/3 · 不命中 2/2 · P2a 四样例复跑 4/4 零误选**；off/on 对照成立（OFF 无 skill_ref 键、泛建议）。裁定=成立（夜间小样本——新增 skill 须复跑本冒烟）。调优仅动 workspace skills/panel-data-guide/SKILL.md 一行（ac48ba5）。附带发现两条登记后续：plan 帧 >800 字符截断落库（观测性缺口）· 域外 query 偶发 supervisor 空 plan fail-closed（复跑正常）。
