@@ -1,7 +1,7 @@
 ---
 name: panel-data-guide
 description: Ops Desk 面板数据解读指南——指标含义、读数口径与异常判读
-when_to_use: supervisor 拆解出需要解读面板指标（错误率/延迟/队列深度等）的子任务时声明 skill_ref=panel-data-guide
+when_to_use: supervisor 拆解出需要解读面板指标（错误率/延迟/队列深度等），或基于面板读数做项目健康度评估、异常判读、改进建议的子任务时声明 skill_ref=panel-data-guide；只取数不解读的纯查询/统计子任务不声明
 ---
 
 # 面板数据解读指南
