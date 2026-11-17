@@ -26,6 +26,7 @@
 | [14-p3-schedule-taskcard-design.md](14-p3-schedule-taskcard-design.md) | **P3 设计终稿**：Schedule（进程内 loop+DB 抢占 · 总闸默认 off · fires claimed 状态机+启动补链 · 双上限 20/200+interval≥300s）· create_schedule 走 W1 HITL 对话化创建 · 任务卡片=run 投影（web 内嵌面板+定时子区）· 回放 REST（归属 404+白名单过滤）· L2 admin 浏览/撤销（跨租户运维面钉死）· 幂等转正 DB 附四条件 · 双泳道任务切分 T1–T11（R8 终裁） |
 | [15-p3-contracts.md](15-p3-contracts.md) | **P3 契约文档**（T1）：Schedule REST 四端点 schema + 双上限/interval 人类化 422 文案词表 · create_schedule manifest 草案（W1 HITL「创建定时任务=承诺未来 LLM 花费」）· runs/events 只读（归属 404 · event_type 白名单=freeze 词表核实成立）· fires 台账状态机+「前缀非归因 · fires 台账唯一真源」声明 · admin memory 三端点（跨租户运维面钉死）· device_tokens 草案（顺移 Swift 推送波）· 总闸/幂等环境契约 |
 | [16-p3-verification.md](16-p3-verification.md) | **P3 验收记录**（T11）：S1 定时交付全链 / S2 定时 HITL 链（web 单端）/ S3 停跨时点补跑幂等 三样例逐判据过 · 三级裁定**部分成立**（缺口限枚举内 (b)(d)(e)）· 波内小修 PR #433（图 state user_id）· 分两表（验证假设裁定 + T5/T6/T7 治理放量）· 偏差 9 条 |
+| [17-p2c-planner-verification.md](17-p2c-planner-verification.md) | **P2c planner 验证**（T2 选定率真 LLM 冒烟）：T1 硬化验收——选定率组 5/5（hit-echo 泛化问法首跑命中 · 弱面改善实证）· P2a 回归 4/4 零劣化 · 域外负例纯 rag 正确 · skill H1 复跑命中 · 三级裁定**成立** · 新发现 F1-F4 |
 
 ## 一页结论
 
