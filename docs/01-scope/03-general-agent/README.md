@@ -27,6 +27,7 @@
 | [15-p3-contracts.md](15-p3-contracts.md) | **P3 契约文档**（T1）：Schedule REST 四端点 schema + 双上限/interval 人类化 422 文案词表 · create_schedule manifest 草案（W1 HITL「创建定时任务=承诺未来 LLM 花费」）· runs/events 只读（归属 404 · event_type 白名单=freeze 词表核实成立）· fires 台账状态机+「前缀非归因 · fires 台账唯一真源」声明 · admin memory 三端点（跨租户运维面钉死）· device_tokens 草案（顺移 Swift 推送波）· 总闸/幂等环境契约 |
 | [16-p3-verification.md](16-p3-verification.md) | **P3 验收记录**（T11）：S1 定时交付全链 / S2 定时 HITL 链（web 单端）/ S3 停跨时点补跑幂等 三样例逐判据过 · 三级裁定**部分成立**（缺口限枚举内 (b)(d)(e)）· 波内小修 PR #433（图 state user_id）· 分两表（验证假设裁定 + T5/T6/T7 治理放量）· 偏差 9 条 |
 | [17-p2c-planner-verification.md](17-p2c-planner-verification.md) | **P2c planner 验证**（T2 选定率真 LLM 冒烟）：T1 硬化验收——选定率组 5/5（hit-echo 泛化问法首跑命中 · 弱面改善实证）· P2a 回归 4/4 零劣化 · 域外负例纯 rag 正确 · skill H1 复跑命中 · 三级裁定**成立** · 新发现 F1-F4 |
+| [18-p4-generalization-design.md](18-p4-generalization-design.md) | **P4 设计终稿**：通用化两线最小切片——领域包三件套文件级覆盖（prompt 目录回退 · manifest domain→tags 注入 · RAG 按域 fail-closed · 多域不得共库 · 域=部署级 OPS_DOMAIN）+ Run 树（runs 三列+uq 委派 claim · 深度 1 结构性无环 · 总闸默认 off · 帧面零新增树只进 REST 投影 · 子 run HITL 退出-重跑-消费闸放行 · 令牌子侧签发+配额归并父桶）· 双泳道任务切分 T1–T9 · 砍单序 T4→T3→T8（R9 终裁 · R1-R25 全关闭 · Q1-Q7 明判） |
 
 ## 一页结论
 
