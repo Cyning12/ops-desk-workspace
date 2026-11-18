@@ -28,6 +28,7 @@
 | [16-p3-verification.md](16-p3-verification.md) | **P3 验收记录**（T11）：S1 定时交付全链 / S2 定时 HITL 链（web 单端）/ S3 停跨时点补跑幂等 三样例逐判据过 · 三级裁定**部分成立**（缺口限枚举内 (b)(d)(e)）· 波内小修 PR #433（图 state user_id）· 分两表（验证假设裁定 + T5/T6/T7 治理放量）· 偏差 9 条 |
 | [17-p2c-planner-verification.md](17-p2c-planner-verification.md) | **P2c planner 验证**（T2 选定率真 LLM 冒烟）：T1 硬化验收——选定率组 5/5（hit-echo 泛化问法首跑命中 · 弱面改善实证）· P2a 回归 4/4 零劣化 · 域外负例纯 rag 正确 · skill H1 复跑命中 · 三级裁定**成立** · 新发现 F1-F4 |
 | [18-p4-generalization-design.md](18-p4-generalization-design.md) | **P4 设计终稿**：通用化两线最小切片——领域包三件套文件级覆盖（prompt 目录回退 · manifest domain→tags 注入 · RAG 按域 fail-closed · 多域不得共库 · 域=部署级 OPS_DOMAIN）+ Run 树（runs 三列+uq 委派 claim · 深度 1 结构性无环 · 总闸默认 off · 帧面零新增树只进 REST 投影 · 子 run HITL 退出-重跑-消费闸放行 · 令牌子侧签发+配额归并父桶）· 双泳道任务切分 T1–T9 · 砍单序 T4→T3→T8（R9 终裁 · R1-R25 全关闭 · Q1-Q7 明判） |
+| [19-p4-contracts.md](19-p4-contracts.md) | **P4 契约文档**（T1）：domain-pack-v1（域 id 词表+保留字 · manifest domain→tags 并集注入+oa 手写防漂移 · prompt 目录回退+白名单 11 模板+不建 assets/ops/ · RAG collection fail-closed+glossary 回退 · 域=部署级 OPS_DOMAIN+多域不得共库 · skill/goal 部署级声明）· run-tree-v1（runs 三列+uq 委派 claim ON CONFLICT · 归属继承+run_owner 反查前提 · 令牌身份映射五行表+配额归并父桶 · 子 run HITL 退出-重跑-消费闸放行 · REST 投影加性变更+off 零 diff 精确措辞 · iOS 兼容三断言） |
 
 ## 一页结论
 

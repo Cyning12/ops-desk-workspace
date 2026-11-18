@@ -62,6 +62,7 @@ P0' 收敛与默认开启 → P1 会话深化（Goal）→ P2a 工具对齐 → 
 
 - 领域配置化、多 Agent（Run 树 / supervisor 的 Send 并行泛化）。
 - 纪律不变：ops 域内 P3 闭环之前不做空抽象。
+- **设计与契约已落盘（2026-11-18 · issue #23）**：[18-p4-generalization-design.md](18-p4-generalization-design.md)（R1-R25 全关闭 · 双泳道 T1–T9 · 两线各取最小可证切片）→ [19-p4-contracts.md](19-p4-contracts.md)（T1 契约文档：domain-pack-v1 / run-tree-v1）。
 
 ## 2. 阶段纪律汇总（更新）
 
